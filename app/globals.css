@@ -1,0 +1,477 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ */
+/*  THE LIVING BLUEPRINT — Design System                              */
+/*  Bright · Premium · Editorial · Blueprint-inspired                 */
+/* ------------------------------------------------------------------ */
+
+@theme {
+  /* Surfaces — desert-ops dark base */
+  --color-canvas: #14110c;
+  --color-surface: #1f1a12;
+  --color-surface-alt: #2a2318;
+  --color-surface-sunken: #0d0a06;
+
+  /* Text — warm sand on dark */
+  --color-ink: #ddd0b0;
+  --color-ink-soft: #b9ac8c;
+  --color-ink-muted: #a99f82;
+  --color-ink-faint: #6f6651;
+
+  /* Accents — desert-ops harmonised set (kept 5 distinct for differentiation) */
+  --color-blue: #d9a441; /* brass / HUD amber */
+  --color-indigo: #7d8c6a; /* sage drab */
+  --color-violet: #c2703f; /* clay */
+  --color-coral: #e25822; /* rust (signature) */
+  --color-emerald: #a3b18a; /* olive */
+  --color-pink: #c9a36b; /* khaki tan */
+
+  /* Blueprint -> recon lines (olive) */
+  --color-blueprint-line: rgba(163, 177, 138, 0.10);
+  --color-blueprint-line-strong: rgba(163, 177, 138, 0.22);
+  --color-hairline: rgba(221, 208, 176, 0.10);
+
+  /* Font stacks stay local so static builds do not fetch external font files. */
+  --font-display: "Courier New", "Lucida Console", ui-monospace, monospace;
+  --font-sans: "Courier New", "Lucida Console", ui-monospace, monospace;
+  --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Code", "Liberation Mono", monospace;
+
+  /* Editorial type scale */
+  --text-display: clamp(2.75rem, 6vw, 5.5rem);
+  --text-display--line-height: 0.98;
+  --text-display--letter-spacing: -0.03em;
+
+  /* Radii */
+  --radius-card: 1.25rem;
+  --radius-panel: 1.75rem;
+
+  /* Shadows — soft, premium, layered */
+  --shadow-soft: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.05);
+  --shadow-panel: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 32px -8px rgba(15, 23, 42, 0.10);
+  --shadow-float: 0 24px 60px -20px rgba(226, 88, 34, 0.22), 0 8px 24px -12px rgba(0, 0, 0, 0.45);
+
+  /* Magic UI / motion keyframe hooks */
+  --animate-marquee: marquee var(--duration, 40s) linear infinite;
+  --animate-marquee-vertical: marquee-vertical var(--duration, 40s) linear infinite;
+  --animate-orbit: orbit calc(var(--duration, 20) * 1s) linear infinite;
+  --animate-shimmer-slide: shimmer-slide var(--speed, 3s) ease-in-out infinite alternate;
+  --animate-spin-around: spin-around calc(var(--speed, 6s) * 2) infinite linear;
+  --animate-shine: shine var(--duration, 14s) infinite linear;
+  --animate-aurora: aurora 8s ease-in-out infinite alternate;
+  --animate-border-beam: border-beam calc(var(--duration, 15) * 1s) infinite linear;
+  --animate-gradient: gradient 8s linear infinite;
+  --animate-grid: grid 15s linear infinite;
+  --animate-meteor: meteor 5s linear infinite;
+  --animate-ripple: ripple var(--duration, 2s) ease calc(var(--i, 0) * 0.2s) infinite;
+  --animate-line-shadow: line-shadow 15s linear infinite;
+  --animate-rainbow: rainbow var(--speed, 2s) infinite linear;
+  --animate-sprite-flicker: sprite-flicker 0.45s steps(3, end) infinite;
+  --animate-ship-bob: ship-bob 4.5s ease-in-out infinite;
+  --animate-route-march: route-march 0.9s linear infinite;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Base                                                              */
+/* ------------------------------------------------------------------ */
+
+@layer base {
+  * {
+    border-color: var(--color-hairline);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: rgba(226, 88, 34, 0.28);
+    color: var(--color-ink);
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    color: var(--color-ink);
+  }
+
+  /* Slim, premium scrollbar */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(163, 177, 138, 0.22);
+    border-radius: 999px;
+    border: 3px solid var(--color-canvas);
+  }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(226, 88, 34, 0.45); }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Reusable design utilities                                         */
+/* ------------------------------------------------------------------ */
+
+@layer utilities {
+  /* Eyebrow / kicker — pixel labels, matching the Mission Control HUD */
+  .eyebrow {
+    font-family: var(--font-pixel);
+    font-size: 0.5rem;
+    letter-spacing: 0.18em;
+    line-height: 1.6;
+    text-transform: uppercase;
+    color: var(--color-emerald);
+  }
+
+  /* Gradient text — premium, never rainbow */
+  .text-gradient-blue {
+    background: linear-gradient(110deg, var(--color-blue), var(--color-indigo) 55%, var(--color-violet));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .text-gradient-coral {
+    background: linear-gradient(110deg, var(--color-coral), var(--color-pink));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Blueprint grid background */
+  .bg-blueprint {
+    background-image:
+      linear-gradient(to right, var(--color-blueprint-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--color-blueprint-line) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  .bg-blueprint-fine {
+    background-image:
+      linear-gradient(to right, var(--color-blueprint-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--color-blueprint-line) 1px, transparent 1px);
+    background-size: 14px 14px;
+  }
+
+  /* Global boxed-line grid (ref.txt #1) — the single backdrop for every page,
+     kept in the site palette via the blueprint-line tokens. */
+  .bg-grid-global {
+    background-image:
+      linear-gradient(
+        0deg,
+        transparent 24%,
+        var(--color-blueprint-line-strong) 25%,
+        var(--color-blueprint-line-strong) 26%,
+        transparent 27%,
+        transparent 74%,
+        var(--color-blueprint-line-strong) 75%,
+        var(--color-blueprint-line-strong) 76%,
+        transparent 77%,
+        transparent
+      ),
+      linear-gradient(
+        90deg,
+        transparent 24%,
+        var(--color-blueprint-line-strong) 25%,
+        var(--color-blueprint-line-strong) 26%,
+        transparent 27%,
+        transparent 74%,
+        var(--color-blueprint-line-strong) 75%,
+        var(--color-blueprint-line-strong) 76%,
+        transparent 77%,
+        transparent
+      );
+    background-size: 55px 55px;
+  }
+
+  /* Glass panel — dark desert-ops surface */
+  .panel {
+    background: color-mix(in srgb, var(--color-surface) 82%, transparent);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--color-hairline);
+    box-shadow: var(--shadow-panel);
+  }
+
+  .card-surface {
+    background: var(--color-surface);
+    border: 1px solid var(--color-hairline);
+    box-shadow: var(--shadow-soft);
+  }
+
+  /* Corner registration marks (blueprint motif) */
+  .registration::before,
+  .registration::after {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-color: var(--color-blueprint-line-strong);
+  }
+  .registration::before {
+    top: 10px; left: 10px;
+    border-top: 1.5px solid; border-left: 1.5px solid;
+  }
+  .registration::after {
+    bottom: 10px; right: 10px;
+    border-bottom: 1.5px solid; border-right: 1.5px solid;
+  }
+
+  .section-pad {
+    padding-left: clamp(1.25rem, 5vw, 6rem);
+    padding-right: clamp(1.25rem, 5vw, 6rem);
+  }
+
+  .mask-fade-y {
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 8%, black 92%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, black 8%, black 92%, transparent);
+  }
+
+  .mask-fade-x {
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  }
+
+  .noise-overlay {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Keyframes (Magic UI + bespoke)                                    */
+/* ------------------------------------------------------------------ */
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-100% - var(--gap, 1rem))); }
+}
+@keyframes marquee-vertical {
+  from { transform: translateY(0); }
+  to { transform: translateY(calc(-100% - var(--gap, 1rem))); }
+}
+@keyframes orbit {
+  0% { transform: rotate(calc(var(--angle, 0) * 1deg)) translateY(calc(var(--radius, 100) * 1px)) rotate(calc(var(--angle, 0) * -1deg)); }
+  100% { transform: rotate(calc(var(--angle, 0) * 1deg + 360deg)) translateY(calc(var(--radius, 100) * 1px)) rotate(calc((var(--angle, 0) * -1deg) - 360deg)); }
+}
+@keyframes shimmer-slide {
+  to { transform: translate(calc(100cqw - 100%), 0); }
+}
+@keyframes spin-around {
+  0% { transform: translateZ(0) rotate(0); }
+  15%, 35% { transform: translateZ(0) rotate(90deg); }
+  65%, 85% { transform: translateZ(0) rotate(270deg); }
+  100% { transform: translateZ(0) rotate(360deg); }
+}
+@keyframes shine {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
+}
+@keyframes aurora {
+  0% { background-position: 0% 50%; transform: rotate(-5deg) scale(0.9); }
+  25% { background-position: 50% 100%; transform: rotate(5deg) scale(1.1); }
+  50% { background-position: 100% 50%; transform: rotate(-3deg) scale(0.95); }
+  75% { background-position: 50% 0%; transform: rotate(3deg) scale(1.05); }
+  100% { background-position: 0% 50%; transform: rotate(-5deg) scale(0.9); }
+}
+@keyframes border-beam {
+  100% { offset-distance: 100%; }
+}
+@keyframes gradient {
+  to { background-position: var(--bg-size, 300%) 0; }
+}
+@keyframes grid {
+  0% { transform: translateY(-50%); }
+  100% { transform: translateY(0); }
+}
+@keyframes meteor {
+  0% { transform: rotate(var(--angle)) translateX(0); opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: rotate(var(--angle)) translateX(-500px); opacity: 0; }
+}
+@keyframes ripple {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(0.9); }
+}
+@keyframes line-shadow {
+  0% { background-position: 0 0; }
+  100% { background-position: 100% -100%; }
+}
+@keyframes rainbow {
+  0% { background-position: 0%; }
+  100% { background-position: 200%; }
+}
+
+/* Bespoke: blueprint draw-in */
+@keyframes draw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+/* Gentle idle hover for ambient pixel sprites (paired with frame cycling). */
+@keyframes sprite-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+/* Slow buoyant rise-fall + slight roll for the pirate ship "live" asset. */
+@keyframes ship-bob {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50%      { transform: translateY(-6px) rotate(1deg); }
+}
+
+/* Marching-ants for the active sea route on the Capabilities chart. */
+@keyframes route-march {
+  to { stroke-dashoffset: -24; }
+}
+
+/* Restless flicker for single-frame flame art (no frame pairs in the source). */
+@keyframes sprite-flicker {
+  0%   { transform: scaleY(1)    scaleX(1);    opacity: 1;    filter: brightness(1); }
+  33%  { transform: scaleY(1.06) scaleX(0.97); opacity: 0.92; filter: brightness(1.15); }
+  66%  { transform: scaleY(0.96) scaleX(1.03); opacity: 1;    filter: brightness(0.95); }
+  100% { transform: scaleY(1.03) scaleX(0.99); opacity: 0.97; filter: brightness(1.08); }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Accessibility                                                     */
+/* ------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  MISSION CONTROL — Desert-Ops theme (scoped to the .ops hero)       */
+/*  ① base #14110C  ② olive-drab #A3B18A  ③ rust-orange #E25822        */
+/* ------------------------------------------------------------------ */
+
+@theme {
+  /* Desert-ops surfaces */
+  --color-ops-base: #14110c;
+  --color-ops-surface: #1f1a12;
+  --color-ops-surface-2: #2a2318;
+
+  /* Desert-ops ink (warm sand on dark) */
+  --color-ops-sand: #ddd0b0;
+  --color-ops-sand-soft: #a99f82;
+  --color-ops-sand-faint: #6f6651;
+
+  /* Desert-ops accents (the 3-step order) */
+  --color-ops-olive: #a3b18a; /* primary */
+  --color-ops-olive-bright: #c7d3b0;
+  --color-ops-rust: #e25822; /* accent */
+  --color-ops-rust-bright: #ff6b33;
+
+  /* Hairlines / lines */
+  --color-ops-line: rgba(163, 177, 138, 0.18);
+  --color-ops-line-strong: rgba(163, 177, 138, 0.32);
+
+  /* Pixel type — wired to next/font in layout */
+  --font-pixel: "Courier New", "Lucida Console", ui-monospace, monospace;
+  --font-pixel-readable: "Courier New", "Lucida Console", ui-monospace, monospace;
+}
+
+@layer utilities {
+  /* Scoped desert-ops surface: sand ink + readable pixel body. Background stays
+     transparent so the single global boxed-line grid (bg-grid-global, mounted
+     once in BackgroundEnvironment) shows through every section — only the
+     per-section legibility washes sit on top of it. */
+  .ops {
+    background-color: transparent;
+    color: var(--color-ops-sand);
+    font-family: var(--font-pixel-readable);
+  }
+
+  /* Crisp pixel rendering for any voxel/sprite imagery */
+  .pixelated {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+
+  /* Tactical recon grid (desert-ops variant of the blueprint grid) */
+  .bg-ops-grid {
+    background-image:
+      linear-gradient(to right, var(--color-ops-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--color-ops-line) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+
+  /* Faint CRT scanline overlay — sits above content, never blocks clicks */
+  .ops-scanlines::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 30;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 0,
+      rgba(0, 0, 0, 0) 2px,
+      rgba(0, 0, 0, 0.12) 3px,
+      rgba(0, 0, 0, 0) 4px
+    );
+    mix-blend-mode: multiply;
+    opacity: 0.5;
+  }
+
+  /* Warm rust→olive gradient text for the hero name */
+  .text-ops-gradient {
+    background: linear-gradient(100deg, var(--color-ops-rust), var(--color-ops-olive-bright) 80%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+@keyframes ops-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.15; }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Custom pixel-key cursor                                           */
+/*  Replaces the default arrow/pointer site-wide with the golden key  */
+/*  (public/cursor-key.png, extracted by feed/extract_ui.py). These   */
+/*  rules are intentionally unlayered so they win over Tailwind's     */
+/*  @layer cursor-* utilities (e.g. cursor-pointer on buttons).       */
+/* ------------------------------------------------------------------ */
+html,
+body {
+  cursor: url("/cursor-key.png") 6 6, auto;
+}
+a,
+button,
+label,
+summary,
+select,
+[role="button"],
+.cursor-pointer {
+  cursor: url("/cursor-key.png") 6 6, pointer;
+}
+/* keep a usable text caret in editable fields */
+input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
+textarea,
+[contenteditable="true"] {
+  cursor: text;
+}

@@ -1,0 +1,39 @@
+# dependencies
+node_modules/
+
+#Agents
+.claude
+.codex
+
+
+# Next.js
+.next/
+out/
+
+# production
+build/
+dist/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+package-lock.json
+
+# environment
+.env
+
+
+# deployment
+.vercel/
+.firebase/
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
