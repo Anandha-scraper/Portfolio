@@ -5,65 +5,68 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { PixelSprite } from "@/components/ui/pixel-sprite";
 import { DungeonFrame } from "@/components/ui/dungeon-frame";
 import { Icon } from "@/components/ui/icon";
-import { CapabilityDungeon } from "@/components/capability-network/capability-dungeon";
-import { skillCategories } from "@/data/skills";
 import { NAV_ITEMS, SECTION_IDS } from "@/lib/constants";
 import { socials } from "@/data/socials";
 import { SPRITE_CONTROL } from "@/lib/sprite-control";
 import { useActiveSection } from "@/hooks/use-active-section";
 import { scrollToSection } from "@/lib/scroll";
+import { DOCK } from "@/lib/capability-dock";
 import { cn } from "@/lib/utils";
 
 const DOCK_SOCIALS = socials.filter((s) => ["GitHub", "LinkedIn"].includes(s.label));
 
 const OPEN_EVENT = "open-chest-sidebar";
+const CLOSE_EVENT = "close-chest-sidebar";
 
-// Drawer geometry — viewport insets + width (hardcoded; was the size store).
-const SIDEBAR = { width: 264, top: 88, bottom: 32 };
+// Drawer geometry for the normal (undocked) full-height nav. When the
+// Capabilities tech dungeon docks beneath the drawer, the shared height/width come
+// from `DOCK` (lib/capability-dock) so the nav and dungeon stay in lockstep.
+const SIDEBAR = { width: 264, top: DOCK.top, bottom: DOCK.bottom };
 
 /** Imperatively open the dungeon sidebar from anywhere (e.g. the idle companion). */
 export function openChestSidebar() {
   window.dispatchEvent(new Event(OPEN_EVENT));
 }
 
+/** Imperatively close the dungeon sidebar (e.g. the Capabilities idle timer). */
+export function closeChestSidebar() {
+  window.dispatchEvent(new Event(CLOSE_EVENT));
+}
+
 export function ChestSidebar() {
   const [open, setOpen] = useState(false);
+  // The Capabilities tech dungeon docks beneath the drawer; while docked the nav
+  // shrinks to the top portion and widens to the shared 1/3-viewport column.
+  const [dungeonDocked, setDungeonDocked] = useState(false);
   const reduceMotion = useReducedMotion();
   const active = useActiveSection(SECTION_IDS);
   const panelId = useId();
 
   const chestRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  // Index of the open Capabilities skill card, if any (null = none). While
-  // set, the sidebar (if also open) stacks the card below its nav instead of
-  // it popping out beside the voyage stage — see CapabilityNetwork.
-  const [cardIndex, setCardIndex] = useState<number | null>(null);
-  const cardOpenRef = useRef(false);
 
-  // Open imperatively via openChestSidebar() — but ignore the companion's
-  // auto-open while a card is up, so it doesn't yank the sidebar over the
-  // skill card the user is looking at.
+  // Open/close imperatively (e.g. the idle companion opens; the Capabilities idle
+  // timer closes).
   useEffect(() => {
-    const onOpen = () => {
-      if (cardOpenRef.current) return;
-      setOpen(true);
-    };
-    const onCardOpen = (e: Event) => {
-      cardOpenRef.current = true;
-      const idx = (e as CustomEvent<{ index: number }>).detail?.index;
-      setCardIndex(typeof idx === "number" ? idx : null);
-    };
-    const onCardClose = () => {
-      cardOpenRef.current = false;
-      setCardIndex(null);
-    };
+    const onOpen = () => setOpen(true);
+    const onClose = () => setOpen(false);
     window.addEventListener(OPEN_EVENT, onOpen);
-    window.addEventListener("capability-card-open", onCardOpen);
-    window.addEventListener("capability-card-close", onCardClose);
+    window.addEventListener(CLOSE_EVENT, onClose);
     return () => {
       window.removeEventListener(OPEN_EVENT, onOpen);
-      window.removeEventListener("capability-card-open", onCardOpen);
-      window.removeEventListener("capability-card-close", onCardClose);
+      window.removeEventListener(CLOSE_EVENT, onClose);
+    };
+  }, []);
+
+  // Track whether the Capabilities tech dungeon is docked beneath the drawer.
+  useEffect(() => {
+    const onDock = () => setDungeonDocked(true);
+    const onUndock = () => setDungeonDocked(false);
+    window.addEventListener("capability-dungeon-open", onDock);
+    window.addEventListener("capability-dungeon-close", onUndock);
+    return () => {
+      window.removeEventListener("capability-dungeon-open", onDock);
+      window.removeEventListener("capability-dungeon-close", onUndock);
     };
   }, []);
 
@@ -93,11 +96,13 @@ export function ChestSidebar() {
 
   const go = (id: (typeof NAV_ITEMS)[number]["id"]) => {
     scrollToSection(id);
-    setOpen(false);
+    // Navigating into Capabilities: leave the drawer open — the section's
+    // active-section effect re-docks it (nav + tech dungeon) in one motion, so
+    // force-closing here would only cause a close→open flicker.
+    if (id !== "capabilities") setOpen(false);
   };
 
   const chest = SPRITE_CONTROL.chest;
-  const cardCategory = cardIndex !== null ? skillCategories[cardIndex] : null;
 
   return (
     <div>
@@ -133,16 +138,16 @@ export function ChestSidebar() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: reduceMotion ? 0 : -24 }}
             transition={{ duration: 0.28, ease: "easeOut" }}
-            className="fixed left-4 z-[75] flex flex-col gap-3"
+            className="fixed left-4 z-[75] flex flex-col gap-3 transition-[width,height] duration-400 ease-out"
             style={{
               top: SIDEBAR.top,
-              bottom: SIDEBAR.bottom,
-              width: `min(${SIDEBAR.width}px, calc(100vw - 2rem))`,
+              ...(dungeonDocked
+                ? { height: DOCK.navHeight, width: DOCK.width }
+                : { bottom: SIDEBAR.bottom, width: `min(${SIDEBAR.width}px, calc(100vw - 2rem))` }),
             }}
           >
-            {/* Nav — shrinks to half height (flex-1 splits evenly with the
-                card panel below) whenever a Capabilities card is open, so the
-                two never fight for the same footprint. */}
+            {/* Nav — fills the full drawer height (the Capabilities skill card
+                now lives beside the voyage stage, not stacked in here). */}
             <DungeonFrame
               wall={26}
               className="flex min-h-0 flex-1 flex-col font-pixel-readable text-ops-sand"
@@ -189,35 +194,16 @@ export function ChestSidebar() {
                   ))}
                 </div>
 
-                {/* Tall dungeon floor — ambient dwellers roam here. Hidden once
-                    the card panel takes the lower half — there isn't room to
-                    read it as a floor anymore. */}
-                {!cardCategory && (
-                  <div
-                    aria-hidden
-                    className="relative mt-auto min-h-0 flex-1 overflow-hidden"
-                  >
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-ops-line-strong" />
-                    <FloorRoamers reduceMotion={!!reduceMotion} />
-                  </div>
-                )}
+                {/* Tall dungeon floor — ambient dwellers roam here. */}
+                <div
+                  aria-hidden
+                  className="relative mt-auto min-h-0 flex-1 overflow-hidden"
+                >
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-ops-line-strong" />
+                  <FloorRoamers reduceMotion={!!reduceMotion} />
+                </div>
               </div>
             </DungeonFrame>
-
-            {/* Capability-dungeon card — stacked below the (now half-height)
-                nav instead of popping out beside the voyage stage, so the
-                sidebar and the card never overlap. */}
-            <AnimatePresence>
-              {cardCategory && (
-                <CapabilityDungeon
-                  key={cardCategory.id}
-                  category={cardCategory}
-                  takeFocus={false}
-                  onClose={() => window.dispatchEvent(new Event("close-capability-card"))}
-                  className="min-h-0 flex-1"
-                />
-              )}
-            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>

@@ -1,15 +1,25 @@
 import type { Metadata, Viewport } from "next";
+import { Pixelify_Sans } from "next/font/google";
 import { BackgroundEnvironment } from "@/components/blueprint/background-environment";
 import { SkeletonCompanion } from "@/components/companion/skeleton-companion";
 import { AssetGallery } from "@/components/ui/asset-gallery";
 import "./globals.css";
+
+// Global pixel typeface. next/font self-hosts the files at build time, so this
+// stays compatible with the static export (no runtime fetch to Google).
+const pixelify = Pixelify_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-pixelify",
+  display: "swap",
+});
 
 const SITE_URL = "https://anandhakumaran.dev";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Anandha Kumaran M S — Full Stack Developer",
+    default: "Anandha Kumaran M S ",
     template: "%s · Anandha Kumaran M S",
   },
   description:
@@ -55,7 +65,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={pixelify.variable}>
       <body className="relative min-h-dvh antialiased">
         <BackgroundEnvironment />
         {/* Cursor companion. mode: "chase" | "rest" | "wander";

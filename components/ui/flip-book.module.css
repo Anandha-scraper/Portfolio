@@ -1,0 +1,251 @@
+/* FlipBook — sprite-driven, scroll-timeline page-flip book.
+ *
+ * Ported from a CodePen demo (CSS Sprite-Based Flip Carousel Using
+ * Scroll-Timeline). Requires very recent Chrome (scroll-timeline,
+ * animation-timeline: view(), ::scroll-button, ::scroll-marker-group,
+ * @property, mod()/round() math) — no fallback for other browsers.
+ *
+ * All custom properties the original demo declared at `:root`/`.container`
+ * live on `.flipBook` instead, so mounting this component never touches the
+ * rest of the site's global styles.
+ */
+
+@font-face {
+  font-family: "FlipBookPixel";
+  src: url("https://assets.codepen.io/36869/Grand9KPixel.ttf");
+}
+
+@property --sprite-fs {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: true;
+}
+@property --_progress {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+.flipBook {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+  font-family: "FlipBookPixel", serif;
+  color: #333;
+
+  /* sprite sheet geometry — overridden per-instance via inline style
+     (see components/ui/flip-book.tsx) to match whatever spriteImage is
+     passed in; these are just the book.webp defaults. */
+  --sprite-c: 5;
+  --sprite-h: 3000;
+  --sprite-w: 9600;
+  --sprite-f: 7;
+  --sprite-fr: 12;
+
+  /* animation config */
+  --sprite-as: calc(var(--sprite-f) / var(--sprite-fr) * 1s);
+  --sprite-ad: normal;
+  --sprite-af: none;
+  --sprite-ap: running;
+  --sprite-ai: infinite;
+  --sprite-at: linear;
+
+  /* derived geometry */
+  --sprite-r: round(up, calc(var(--sprite-f) / var(--sprite-c)), 1);
+  --sprite-sh: calc(var(--sprite-h) / var(--sprite-r));
+  --sprite-th: calc(var(--sprite-sh) / 2);
+  --sprite-ar: calc(var(--sprite-th) / var(--sprite-sh));
+  --sprite-uh: calc(var(--sprite-h) * var(--sprite-ar));
+  --sprite-uw: calc(var(--sprite-w) * var(--sprite-ar));
+  --sprite-tw: calc(var(--sprite-uw) / var(--sprite-c));
+}
+
+.book {
+  position: relative;
+  display: grid;
+  grid-template-areas:
+    "scroll scroll scroll"
+    "left markers right";
+  gap: 1rem;
+}
+
+.sprite {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(1px * var(--sprite-th));
+  width: calc(1px * var(--sprite-tw));
+  margin: calc(-1px * calc((var(--sprite-th) - (var(--sprite-th) * 0.6107)) / 2))
+    calc(-1px * calc((var(--sprite-tw) - (var(--sprite-tw) * 0.7042)) / 2));
+  background-image: var(--sprite-image);
+  transform-origin: center center;
+  background-repeat: no-repeat;
+  background-size: calc(1px * var(--sprite-uw)) calc(1px * var(--sprite-uh));
+  z-index: -1;
+
+  --sprite-fe: calc(var(--sprite-f) * (var(--slides) - 1));
+  --sprite-fs-n: mod(var(--sprite-fs), var(--sprite-f));
+  --row: calc(round(down, calc(calc(var(--sprite-tw) * var(--sprite-fs-n)) / var(--sprite-uw)), 1) * var(--sprite-th));
+  --col: mod(calc(var(--sprite-tw) * var(--sprite-fs-n)), var(--sprite-uw));
+
+  background-position: calc(-1px * var(--col)) calc(-1px * var(--row));
+  animation: frame var(--sprite-as) var(--sprite-at) 0s var(--sprite-ad) var(--sprite-af) var(--sprite-ap);
+  animation-timeline: --carousel-timeline;
+}
+
+.carousel {
+  counter-increment: curpage;
+  grid-area: scroll;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+
+  display: grid;
+  margin: 0 auto;
+  width: calc(1px * (var(--sprite-tw) * 0.7042));
+  height: calc(1px * (var(--sprite-th) * 0.6107));
+  grid: 1fr / auto-flow 100%;
+  scroll-timeline: --carousel-timeline x;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  scroll-marker-group: after;
+
+  /* ::scroll-button(*)/::scroll-marker(-group) rules live in a raw <style>
+     tag in flip-book.tsx instead — Turbopack's CSS parser doesn't recognize
+     these pseudo-elements yet and fails the whole module on them, even
+     though target browsers support them fine. See that file for the rules. */
+
+  & > .carouselItem {
+    scroll-snap-stop: always;
+    scroll-snap-align: start;
+    animation: countBefore linear forwards;
+    animation-range: exit;
+    counter-increment: page;
+    animation-timeline: view(x);
+
+    position: relative;
+    box-sizing: border-box;
+    color: #333;
+
+    /* ::scroll-marker rules (base + :last-of-type) also live in the raw
+       <style> tag in flip-book.tsx — see the comment on .carousel above. */
+
+    .pageContainer {
+      display: flex;
+      gap: 3rem;
+      height: 100%;
+
+      animation: stayCentered linear both;
+      animation-timeline: view(x);
+      timeline-scope: --parallax-item;
+    }
+
+    .leftPage, .rightPage {
+      flex: 1;
+      font-size: small;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: 1fr auto;
+
+      &:after {
+        bottom: 15px;
+        color: hsl(45.71deg 69.23% 30%);
+      }
+
+      > div {
+        text-align: justify;
+        hyphens: auto;
+        line-height: normal;
+        display: block;
+        word-wrap: break-word;
+      }
+    }
+
+    .leftPage {
+      padding: 20px 0 20px 20px;
+      &:after {
+        content: counter(curpage);
+      }
+    }
+
+    .rightPage {
+      padding: 20px 20px 20px 0;
+      counter-increment: curpage;
+      &:after {
+        content: counter(curpage);
+        place-self: self-end;
+      }
+    }
+  }
+}
+
+@media (width < 748px) {
+  .flipBook {
+    --sprite-th: calc(var(--sprite-sh) / 2.5);
+  }
+  .page > div {
+    font-size: .6rem;
+  }
+}
+
+@media (width < 560px) {
+  .flipBook {
+    --sprite-th: calc(var(--sprite-sh) / 4);
+  }
+  .page > div {
+    font-size: .35rem;
+  }
+  .page:after {
+    font-size: .5rem;
+  }
+}
+
+@keyframes stayCentered {
+  entry 0% {
+    opacity: 0;
+    translate: -100%;
+  }
+  entry 75% {
+    opacity: 0;
+    translate: -25%;
+  }
+  entry 100% {
+    opacity: 1;
+    translate: 0%;
+  }
+  exit 0% {
+    opacity: 1;
+    translate: 0%;
+  }
+  exit 50% {
+    opacity: 0;
+    translate: 50%;
+  }
+  exit 100% {
+    opacity: 0;
+    translate: 100%;
+  }
+}
+
+@keyframes countBefore {
+  1%,
+  100% {
+    counter-increment: page curpage;
+  }
+}
+
+/* @keyframes progress moved to the raw <style> tag in flip-book.tsx —
+   it's only consumed by ::scroll-marker-group, which lives there too. */
+
+@keyframes frame {
+  to {
+    --sprite-fs: var(--sprite-fe);
+  }
+}
+
+@media (prefers-reduced-motion) {
+  .flipBook * {
+    animation: none;
+  }
+}

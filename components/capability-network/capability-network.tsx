@@ -1,17 +1,29 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Ship } from "@/components/ui/ship";
-import PixelTrail, { type TrailPosition } from "@/components/ui/pixel-trail";
+import { closeChestSidebar, openChestSidebar } from "@/components/navigation/chest-sidebar";
+import type { TrailPosition } from "@/components/ui/pixel-trail";
 import { ACCENTS } from "@/lib/accents";
 import { skillCategories } from "@/data/skills";
 import { scrollToSection } from "@/lib/scroll";
+import { DOCK } from "@/lib/capability-dock";
+import { SECTION_IDS } from "@/lib/constants";
+import { useActiveSection } from "@/hooks/use-active-section";
+import { cn } from "@/lib/utils";
 import { CapabilityDungeon } from "./capability-dungeon";
 import { ChartMap } from "./chart-map";
 import { IslandNode } from "./island-node";
 import { ROUTE_SLOTS, SHIP_HOME, type Point } from "./types";
-import { cn } from "@/lib/utils";
+
+// Code-split: PixelTrail pulls in three.js/@react-three/fiber/drei for a
+// purely decorative wake effect — deferred off the initial JS payload since
+// CapabilityNetwork itself isn't lazy-loaded (it's above the fold).
+const PixelTrail = dynamic(() => import("@/components/ui/pixel-trail"), {
+  ssr: false,
+});
 
 /**
  * CapabilityNetwork — "The Voyage". The skill categories from data/skills.ts are
@@ -67,18 +79,18 @@ export function CapabilityNetwork() {
   const stageRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 0, h: 0 });
 
-  // Mirror the project-ecosystem: yield room to the sidebar when it opens.
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  useEffect(() => {
-    const onOpen = () => setSidebarOpen(true);
-    const onClose = () => setSidebarOpen(false);
-    window.addEventListener("chest-sidebar-open", onOpen);
-    window.addEventListener("chest-sidebar-close", onClose);
-    return () => {
-      window.removeEventListener("chest-sidebar-open", onOpen);
-      window.removeEventListener("chest-sidebar-close", onClose);
-    };
-  }, []);
+  // The tech dungeon docks under the chest sidebar as a single left-column unit.
+  // It is visible IFF the Capabilities section is active AND the chest sidebar is
+  // open AND the ship is at rest — a single reconcile() (below) is the only code
+  // path that flips it, so the nav + tech dungeon can never desync or orphan.
+  const [dungeonOpen, setDungeonOpen] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const dungeonOpenRef = useRef(false);
+  const sidebarOpenRef = useRef(false);
+
+  const active = useActiveSection(SECTION_IDS);
+  const activeRef = useRef(active);
+  activeRef.current = active;
 
   const [leg, setLegState] = useState<Leg | null>(null);
   // Island the ship currently rests at. It survives the whole voyage — it only
@@ -87,32 +99,6 @@ export function CapabilityNetwork() {
   // shipIndexRef.
   const [dockedIndex, setDockedIndex] = useState<number>(0);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
-  // Which island's capability-dungeon panel is open (null = closed). Opens
-  // when the ship *arrives* at an island (never on initial mount); closes on
-  // a new voyage or via the panel's own close / Escape.
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
-
-  // While the chest sidebar is open, it renders the capability-dungeon card
-  // itself — stacked below a half-height nav (see ChestSidebar) — instead of
-  // it popping out beside the voyage stage, so the two fixed-position panels
-  // never overlap on mobile. This section stays the source of truth for which
-  // island is open; it just hands the card off via the same window-event bus
-  // the chest sidebar already uses to announce its own open/close.
-  useEffect(() => {
-    const onCloseFromSidebar = () => setOpenIndex(null);
-    window.addEventListener("close-capability-card", onCloseFromSidebar);
-    return () => window.removeEventListener("close-capability-card", onCloseFromSidebar);
-  }, []);
-
-  // Announce which island's card is open (if any) so the chest sidebar can
-  // mirror it into its own stacked panel.
-  useEffect(() => {
-    if (openIndex !== null) {
-      window.dispatchEvent(new CustomEvent("capability-card-open", { detail: { index: openIndex } }));
-    } else {
-      window.dispatchEvent(new Event("capability-card-close"));
-    }
-  }, [openIndex]);
 
   // Fixed voyage layout — islands sit in a deliberate route (image.png), one
   // anchor per skill category, so the ship, chart line, and invisible anchor
@@ -132,15 +118,75 @@ export function CapabilityNetwork() {
   // Ship's live normalised position, read each frame by the PixelTrail wake.
   const trailPosRef = useRef<TrailPosition | null>(null);
 
-  // Measure the stage so percentage slots become pixel points.
+  // The one rule: the tech dungeon shows only in Capabilities, while the sidebar
+  // is open and the ship is at rest. Dispatch the shared events so the sidebar
+  // shrinks its height (docks) in lockstep.
+  const reconcile = useCallback(() => {
+    const show =
+      activeRef.current === "capabilities" && sidebarOpenRef.current && !legRef.current;
+    dungeonOpenRef.current = show;
+    setDungeonOpen(show);
+    window.dispatchEvent(new Event(show ? "capability-dungeon-open" : "capability-dungeon-close"));
+  }, []);
+
+  // Ask the chest sidebar to open/close, then reconcile the tech dungeon to it.
+  const requestSidebar = useCallback(
+    (open: boolean) => {
+      sidebarOpenRef.current = open;
+      if (open) openChestSidebar();
+      else closeChestSidebar();
+      reconcile();
+    },
+    [reconcile]
+  );
+  // Open the dock for island `i` (selects its dungeon content); close the dock.
+  const openDock = useCallback(
+    (i: number) => {
+      setSelectedIndex(i);
+      requestSidebar(true);
+    },
+    [requestSidebar]
+  );
+  const closeDock = useCallback(() => requestSidebar(false), [requestSidebar]);
+
+  // Mirror external chest toggles (chest button / outside-click / Esc) into the
+  // tech dungeon, so nav + dungeon always move together as one unit.
+  useEffect(() => {
+    const onOpen = () => {
+      sidebarOpenRef.current = true;
+      reconcile();
+    };
+    const onClose = () => {
+      sidebarOpenRef.current = false;
+      reconcile();
+    };
+    window.addEventListener("chest-sidebar-open", onOpen);
+    window.addEventListener("chest-sidebar-close", onClose);
+    return () => {
+      window.removeEventListener("chest-sidebar-open", onOpen);
+      window.removeEventListener("chest-sidebar-close", onClose);
+    };
+  }, [reconcile]);
+
+  // Measure the stage so percentage slots become pixel points. Coalesced to at
+  // most once per animation frame — the stage width is actively easing during
+  // the sidebar open/close transition (transition-[padding]), and calling
+  // setSize on every raw ResizeObserver callback would re-render the whole
+  // scene on every tick of that 400ms transition.
   useEffect(() => {
     const el = stageRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(([e]) =>
-      setSize({ w: e.contentRect.width, h: e.contentRect.height })
-    );
+    let raf = 0;
+    const ro = new ResizeObserver(([e]) => {
+      const { width, height } = e.contentRect;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => setSize({ w: width, h: height }));
+    });
     ro.observe(el);
-    return () => ro.disconnect();
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
   }, []);
 
   const slotPoint = useCallback(
@@ -203,16 +249,21 @@ export function CapabilityNetwork() {
   );
 
   // Settle the ship at island `index`.
-  const dockAt = useCallback((index: number) => {
-    shipIndexRef.current = index;
-    queueRef.current = [];
-    targetRef.current = null;
-    trailPosRef.current = null;
-    setLeg(null);
-    setDockedIndex(index);
-    // Arriving at an island pops its capability dungeon.
-    setOpenIndex(index);
-  }, []);
+  const dockAt = useCallback(
+    (index: number) => {
+      shipIndexRef.current = index;
+      queueRef.current = [];
+      targetRef.current = null;
+      trailPosRef.current = null;
+      setLeg(null);
+      // The tech dungeon drawer mirrors the docked island (falls back to it when
+      // no island has been explicitly selected yet).
+      setDockedIndex(index);
+      // Voyage complete → reopen the nav + dungeon for the newly-docked island.
+      openDock(index);
+    },
+    [openDock]
+  );
 
   // A hop finished: advance the ship one island, then either run the next hop or
   // dock at the destination.
@@ -236,33 +287,54 @@ export function CapabilityNetwork() {
       // Snap the whole section into view, even if it's only half-scrolled.
       scrollToSection("capabilities");
       if (reduce) {
-        // No sailing under reduced motion — just dock at the chosen island.
+        // No sailing under reduced motion — dock at once and show its dungeon.
         shipIndexRef.current = i;
         setDockedIndex(i);
-        setOpenIndex(i);
+        openDock(i);
         return;
       }
-      // Re-click the current destination while sailing → arrive immediately.
+      // Re-click the current destination while sailing → arrive immediately
+      // (dockAt reopens the dungeon for it).
       if (legRef.current && targetRef.current === i) {
         dockAt(i);
         return;
       }
-      // Already docked here → nothing to do.
-      if (!legRef.current && shipIndexRef.current === i) return;
+      // Already docked here → just (re)open its dungeon.
+      if (!legRef.current && shipIndexRef.current === i) {
+        openDock(i);
+        return;
+      }
+      // Different island → collapse the whole dock (nav + dungeon) so the ship
+      // sails across the full width unobstructed; it reopens on arrival.
+      closeDock();
       // Chart a fresh course from the ship's current island slot (always fresh,
       // so it stays correct after a stage resize).
       const from = slotPoint(shipIndexRef.current);
       const legs = buildRoute(from, shipIndexRef.current, i);
       if (!legs.length) return;
-      // Close any open dungeon while a new voyage is under way; it re-opens
-      // on arrival (dockAt).
-      setOpenIndex(null);
       targetRef.current = i;
       queueRef.current = legs.slice(1);
       setLeg(legs[0]);
     },
-    [reduce, dockAt, buildRoute, slotPoint]
+    [reduce, dockAt, buildRoute, slotPoint, openDock, closeDock]
   );
+
+  // Hovering an island only charts a preview route line.
+  const onIslandHover = useCallback((i: number | null) => setHoverIndex(i), []);
+
+  // Entering Capabilities auto-opens the dock (default = Frontend, the ship's
+  // berth); leaving collapses it. While the ship is sailing the dock stays closed
+  // (it reopens on arrival via dockAt).
+  const wasCapabilitiesRef = useRef(false);
+  useEffect(() => {
+    const isCapabilities = active === "capabilities";
+    if (isCapabilities) {
+      if (!legRef.current) openDock(shipIndexRef.current);
+    } else if (wasCapabilitiesRef.current) {
+      closeDock();
+    }
+    wasCapabilitiesRef.current = isCapabilities;
+  }, [active, openDock, closeDock]);
 
   // Derived visuals. While sailing, the active island is the course's ultimate
   // destination (targetRef), not the intermediate hop.
@@ -283,10 +355,6 @@ export function CapabilityNetwork() {
   const restPoint = slotPoint(dockedIndex);
   const shipTarget = leg ? leg.to : restPoint;
   const shipFrameProps = leg ? { frame: leg.frame, flip: leg.flip } : { frame: 3, flip: false };
-  // The card only renders inline beside the stage when the chest sidebar
-  // isn't open — otherwise it's stacked into the sidebar itself (see
-  // ChestSidebar), so nothing here needs to shrink to make room for it.
-  const cardInline = openIndex !== null && !sidebarOpen;
 
   return (
     <section id="capabilities" className="ops ops-scanlines relative w-full overflow-hidden scroll-mt-24">
@@ -303,7 +371,10 @@ export function CapabilityNetwork() {
       <div
         className={cn(
           "relative z-5 w-full px-3 pt-2 pb-12 transition-[padding] duration-400 sm:px-5 sm:pb-16",
-          sidebarOpen && "lg:pl-[290px]"
+          // When the dock is open it reserves the left column (widest = the tech
+          // dungeon); shrink the stage in (like the Projects page) so islands
+          // reflow clear of it. Keep in sync with DOCK.stagePad (396 + 24 = 420).
+          dungeonOpen && "lg:pl-[420px]"
         )}
       >
         {/* HUD */}
@@ -315,17 +386,17 @@ export function CapabilityNetwork() {
           </span>
         </div>
 
-        {/* Voyage stage + capability dungeon share a row; on lg the stage
-            flex-shrinks when the panel opens so the islands compress beside it.
-            The stage carries the dark-ocean backdrop (capa_2) behind the grid /
-            islands / ship, plus its nine-slice dungeon-wall border. */}
-        <div className="relative flex w-full gap-3">
+        {/* Voyage stage — full width. The tech dungeon no longer sits inline; it
+            docks under the chest sidebar as the bottom of the left 1/3-viewport
+            column (rendered below, opened on island select). The stage carries
+            the dark-ocean backdrop (capabg) behind the grid / islands / ship,
+            plus its nine-slice dungeon-wall border. */}
         <div
           ref={stageRef}
-          className="pixelated relative h-[87vh] max-h-[1000px] min-h-[560px] w-full min-w-0 flex-1 overflow-hidden"
+          className="pixelated relative h-[87vh] max-h-[1000px] min-h-[560px] w-full min-w-0 overflow-hidden"
           style={{
             backgroundColor: "#0e1622",
-            backgroundImage: "url(/capa_2.jpeg)",
+            backgroundImage: "url(/capabg.webp)",
             backgroundSize: "cover",
             backgroundPosition: "center",
             borderStyle: "solid",
@@ -342,13 +413,13 @@ export function CapabilityNetwork() {
           <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
             <div
               className="absolute -translate-x-1/2 -translate-y-1/2"
-              style={{ left: `${SHIP_HOME.xPct}%`, top: `${SHIP_HOME.yPct}%`, width: "clamp(130px, 20vw, 200px)", aspectRatio: "1" }}
+              style={{ left: `${SHIP_HOME.xPct}%`, top: `${SHIP_HOME.yPct}%`, width: "clamp(170px, 26vw, 280px)", aspectRatio: "1" }}
             />
             {slots.map((slot, i) => (
               <div
                 key={i}
                 className="absolute -translate-x-1/2 -translate-y-1/2"
-                style={{ left: `${slot.xPct}%`, top: `${slot.yPct}%`, width: "clamp(130px, 20vw, 200px)", aspectRatio: "1" }}
+                style={{ left: `${slot.xPct}%`, top: `${slot.yPct}%`, width: "clamp(170px, 26vw, 280px)", aspectRatio: "1" }}
               />
             ))}
           </div>
@@ -382,10 +453,10 @@ export function CapabilityNetwork() {
               category={category}
               index={i}
               slot={slots[i]}
-              width={cardInline ? "clamp(90px, 14vw, 150px)" : "clamp(130px, 20vw, 200px)"}
+              width="clamp(120px, 18vw, 210px)"
               active={(leg ? targetRef.current : dockedIndex) === i}
               atShip={!leg && dockedIndex === i}
-              onHover={setHoverIndex}
+              onHover={onIslandHover}
               onSelect={select}
             />
           ))}
@@ -435,7 +506,7 @@ export function CapabilityNetwork() {
                 <Ship
                   frame={shipFrameProps.frame}
                   flip={shipFrameProps.flip}
-                  width={cardInline ? 84 : 108}
+                  width={84}
                   className="drop-shadow-[0_10px_18px_rgba(0,0,0,0.6)]"
                 />
               </motion.div>
@@ -443,23 +514,31 @@ export function CapabilityNetwork() {
           )}
         </div>
 
-        {/* Capability dungeon — pops from the right on ship arrival. On lg it
-            is a static flex column (pushing/shrinking the stage); below lg it
-            overlays the right of the stage. While the chest sidebar is open,
-            it renders this card itself (stacked below its nav) instead, so
-            it's skipped here to avoid two copies / overlapping panels. */}
+        {/* Tech dungeon — docks under the chest sidebar as the bottom of the
+            left 1/3-viewport column. Opens on island select (content follows the
+            selected island immediately), auto-dismisses with the sidebar on idle. */}
         <AnimatePresence>
-          {openIndex !== null && !sidebarOpen && (
-            <CapabilityDungeon
-              key={skillCategories[openIndex].id}
-              category={skillCategories[openIndex]}
-              takeFocus
-              onClose={() => setOpenIndex(null)}
-              className="absolute inset-y-0 right-0 z-50 w-[86%] max-w-sm lg:static lg:inset-auto lg:z-auto lg:w-[clamp(320px,32%,460px)] lg:max-w-none lg:self-stretch"
-            />
+          {dungeonOpen && (
+            <motion.div
+              key="capability-dungeon-drawer"
+              className="fixed left-4 z-[75]"
+              style={{
+                top: DOCK.dungeonTop,
+                bottom: DOCK.bottom,
+                width: DOCK.dungeonWidth,
+              }}
+              initial={reduce ? false : { opacity: 0, x: -24 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={reduce ? { opacity: 0 } : { opacity: 0, x: -24 }}
+              transition={{ duration: 0.28, ease: "easeOut" }}
+            >
+              <CapabilityDungeon
+                category={skillCategories[selectedIndex ?? dockedIndex]}
+                className="h-full"
+              />
+            </motion.div>
           )}
         </AnimatePresence>
-        </div>
       </div>
     </section>
   );

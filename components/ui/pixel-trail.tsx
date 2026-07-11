@@ -1,12 +1,27 @@
 /* eslint-disable react/no-unknown-property */
 "use client";
 
-import { useMemo, type RefObject } from "react";
+import { useMemo, useState, useEffect, type RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { shaderMaterial, useTrailTexture } from "@react-three/drei";
 import * as THREE from "three";
 
 import "./pixel-trail.css";
+
+/** Returns false when the browser/GPU cannot create a WebGL context (e.g.
+ *  sandboxed Optimus setups). Avoids console spam from R3F Canvas. */
+function isWebGLAvailable(): boolean {
+  try {
+    const canvas = document.createElement("canvas");
+    return !!(
+      canvas.getContext("webgl2") ||
+      canvas.getContext("webgl") ||
+      canvas.getContext("experimental-webgl")
+    );
+  } catch {
+    return false;
+  }
+}
 
 /**
  * PixelTrail (ref.txt #2) — a gooey pixel wake. Forked from the React Bits
@@ -156,6 +171,13 @@ export default function PixelTrail({
   gooeyFilter = { id: "ship-goo-filter", strength: 2 },
   className = "",
 }: PixelTrailProps) {
+  // Defer the WebGL check to the client — avoids SSR mismatch and skips the
+  // Canvas entirely when the GPU/driver cannot create a WebGL context.
+  const [webgl, setWebgl] = useState<boolean | null>(null);
+  useEffect(() => { setWebgl(isWebGLAvailable()); }, []);
+
+  if (!webgl) return null; // null during SSR and when WebGL is unavailable
+
   return (
     <>
       {gooeyFilter && <GooeyFilter id={gooeyFilter.id} strength={gooeyFilter.strength} />}

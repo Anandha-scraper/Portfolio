@@ -74,6 +74,35 @@ function fighterGroup(
   return { label, assets };
 }
 
+/** Build a directional group where every action (incl. death) has its own
+ *  per-direction strip (feed/Vampires1 → /sprites/vampire1) — unlike
+ *  `fighterGroup`, whose death is a single non-directional strip. */
+const VAMPIRE_ACTIONS = ["idle", "walk", "run", "attack", "hurt", "death"] as const;
+const VAMPIRE_ACTION_MS = { idle: 160, walk: 140, run: 110, attack: 110, hurt: 120, death: 160 } as const;
+
+function directionalGroup(
+  label: string,
+  set: string,
+  counts: Record<(typeof VAMPIRE_ACTIONS)[number], [number, number, number, number]>
+): Group {
+  const assets: Asset[] = [];
+  VAMPIRE_ACTIONS.forEach((action) => {
+    DIRS.forEach((d, i) => {
+      assets.push({
+        kind: "sprite",
+        name: `${action} ${ARROW[d]}`,
+        src: `/sprites/${set}/${action}_${d}.png`,
+        frames: counts[action][i],
+        frameSize: 64,
+        scale: 0.75,
+        frameMs: VAMPIRE_ACTION_MS[action],
+        bob: action === "idle" || action === "walk" ? undefined : false, // attacks/hurt/death shouldn't hover
+      });
+    });
+  });
+  return { label, assets };
+}
+
 const GROUPS: Group[] = [
   {
     label: "Characters",
@@ -91,7 +120,6 @@ const GROUPS: Group[] = [
       { kind: "sprite", name: "vampire", src: "/sprites/vampire.png", frames: 4, frameSize: 16, scale: 3, frameMs: 240 },
       { kind: "sprite", name: "knight", src: "/sprites/dungeon/char_knight.png", frames: 3, frameSize: 16, scale: 3, frameMs: 220 },
       { kind: "sprite", name: "skeleton2", src: "/sprites/dungeon/char_skeleton2.png", frames: 3, frameSize: 16, scale: 3, frameMs: 200 },
-      { kind: "sprite", name: "zombie", src: "/sprites/dungeon/char_zombie.png", frames: 2, frameSize: 16, scale: 3, frameMs: 320 },
       { kind: "sprite", name: "gentleman", src: "/sprites/dungeon/char_gentleman.png", frames: 2, frameSize: 16, scale: 3, frameMs: 300 },
       { kind: "sprite", name: "chest", src: "/sprites/dungeon/chest.png", frames: 3, frameSize: 16, scale: 3, frameMs: 320 },
     ],
@@ -99,6 +127,30 @@ const GROUPS: Group[] = [
   fighterGroup("Hero (s2)", "s2", { walk: [9, 10, 9, 8], bow: [13, 13, 13, 13], spear: [9, 8, 8, 8] }),
   fighterGroup("Ranger (s3)", "s3", { walk: [10, 10, 9, 9], bow: [13, 13, 13, 13], spear: [8, 8, 9, 8] }),
   fighterGroup("Monk (s4)", "s4", { walk: [10, 10, 9, 9], bow: [13, 13, 13, 13], spear: [8, 8, 8, 8] }),
+  directionalGroup("Vampire 1", "vampire1", {
+    idle: [4, 4, 4, 4],
+    walk: [6, 6, 6, 6],
+    run: [8, 8, 8, 8],
+    attack: [12, 12, 12, 12],
+    hurt: [4, 4, 4, 4],
+    death: [11, 11, 11, 11],
+  }),
+  directionalGroup("Vampire 2", "vampire2", {
+    idle: [4, 4, 4, 4],
+    walk: [6, 6, 6, 6],
+    run: [8, 8, 8, 8],
+    attack: [12, 12, 12, 12],
+    hurt: [4, 4, 4, 4],
+    death: [11, 11, 11, 11],
+  }),
+  directionalGroup("Vampire 3", "vampire3", {
+    idle: [4, 4, 4, 4],
+    walk: [6, 6, 6, 6],
+    run: [8, 8, 8, 8],
+    attack: [12, 12, 12, 12],
+    hurt: [4, 4, 4, 4],
+    death: [11, 11, 11, 11],
+  }),
   {
     // Boss-class sprites flattened from feed/{devil,monster,shadow}.png. Devil &
     // monster play idle→collapse (they have no attack, only a hurt/death cycle);
@@ -129,30 +181,23 @@ const GROUPS: Group[] = [
     ],
   },
   {
+    // Catalogue-only — extracted from feed/treasure/ by feed/extract_treasure.py.
+    // Not wired into any live scene.
+    label: "Treasure",
+    assets: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => ({
+      kind: "image" as const,
+      name: `Treasure ${i}`,
+      src: `/sprites/treasure/treasure_${String(i).padStart(2, "0")}.png`,
+      w: 40,
+    })),
+  },
+  {
     // Dynamic aim reticle (feed/cursor.png) — 5-frame expand from a wide
     // crosshair to a locked target.
     label: "Aim",
     assets: [
       { kind: "sprite", name: "aim", src: "/sprites/ui/aim.png", frames: 5, frameSize: 13, scale: 3, frameMs: 120 },
     ],
-  },
-  {
-    label: "Treasures",
-    assets: [1, 2].map((i) => ({
-      kind: "image" as const,
-      name: `treasure ${i}`,
-      src: `/sprites/dungeon/treasure_${i}.png`,
-      w: 44,
-    })),
-  },
-  {
-    label: "Treasures (open)",
-    assets: [1, 2].map((i) => ({
-      kind: "image" as const,
-      name: `treasure ${i} open`,
-      src: `/sprites/dungeon/treasure_${i}_open.png`,
-      w: 48,
-    })),
   },
   {
     // Three surviving ship angles (3/4/5) — each gently bobs (Ship / ship-bob).
@@ -164,22 +209,6 @@ const GROUPS: Group[] = [
       w: 56,
       bob: true,
     })),
-  },
-  {
-    // Eight painted islands (feed/island.png + island2.png) — Island Siege targets.
-    label: "Islands",
-    assets: Array.from({ length: 8 }, (_, i) => ({
-      kind: "image" as const,
-      name: `island ${i + 1}`,
-      src: `/sprites/islands/island_${i + 1}.png`,
-      w: 96,
-    })),
-  },
-  {
-    label: "Chain",
-    assets: [
-      { kind: "image", name: "chain", src: "/sprites/dungeon/chain.png", w: 96 },
-    ],
   },
   {
     // Single-frame flames — kept alive with a CSS flicker rather than frames.
@@ -211,7 +240,6 @@ const GROUPS: Group[] = [
   {
     label: "UI panels",
     assets: [
-      { kind: "image", name: "coverpage", src: "/sprites/ui/coverpage.png", w: 96 },
       { kind: "image", name: "banner", src: "/sprites/ui/banner.png", w: 96 },
       { kind: "image", name: "header", src: "/sprites/ui/header.png", w: 80 },
       { kind: "image", name: "textfield", src: "/sprites/ui/textfield.png", w: 80 },

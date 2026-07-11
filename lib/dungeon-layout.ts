@@ -33,6 +33,20 @@ export interface ChestMarker {
   x: number;
   y: number;
 }
+/** A dungeon "block" (room) outlined so its bounds read as a distinct cabin.
+ *  `role` splits the central `hub` from the remaining `project` rooms. Rect
+ *  is the room bounding box in map px. */
+export type BlockRole = "hub" | "project";
+export interface RoomBlock {
+  id: string;
+  role: BlockRole;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  cols: number;
+  rows: number;
+}
 export interface DungeonMap {
   cols: number;
   rows: number;
@@ -44,6 +58,8 @@ export interface DungeonMap {
   chests: ChestMarker[];
   /** central map-px rectangle the wandering NPCs stay inside. */
   walkBounds: { x: number; y: number; w: number; h: number };
+  /** every room outlined + tagged by role, to split the blocks up visually. */
+  blocks: RoomBlock[];
 }
 
 interface Rect {
@@ -231,7 +247,19 @@ function build(): DungeonMap {
     h: (hub.h - 2) * CELL,
   };
 
-  return { cols: COLS, rows: ROWS, cell: CELL, cellTiles, staticProps, torches, chests, walkBounds };
+  // 8) role-tagged block outlines — hub / plain project rooms.
+  const blocks: RoomBlock[] = rooms.map((r) => ({
+    id: r.projectId ?? "hub",
+    role: r === hub ? "hub" : "project",
+    x: px(r.x),
+    y: px(r.y),
+    w: r.w * CELL,
+    h: r.h * CELL,
+    cols: r.w,
+    rows: r.h,
+  }));
+
+  return { cols: COLS, rows: ROWS, cell: CELL, cellTiles, staticProps, torches, chests, walkBounds, blocks };
 }
 
 /** Built once — deterministic, so it's safe at module scope. */

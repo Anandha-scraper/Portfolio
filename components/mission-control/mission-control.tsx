@@ -91,7 +91,7 @@ export function MissionControl() {
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/island-bg.jpeg"
+          src="/island-bg.webp"
           alt=""
           className="pixelated h-full w-full object-cover object-bottom"
         />

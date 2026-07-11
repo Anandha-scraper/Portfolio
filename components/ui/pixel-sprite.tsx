@@ -25,8 +25,14 @@ import { cn } from "@/lib/utils";
 
 interface PixelSpriteProps {
   src: string;
-  /** Number of frames in the strip. */
+  /** Number of frames to animate through. With `frameOffset`/`sheetFrames`
+   *  this can be a sub-window of a longer strip (e.g. a boss's idle frames). */
   frames: number;
+  /** Total frames in the source image, for correct background scaling.
+   *  Defaults to `frames` (the whole strip is the window). */
+  sheetFrames?: number;
+  /** Index of the first frame of the window inside the strip. Default 0. */
+  frameOffset?: number;
   /** ms per frame. Default 160. */
   frameMs?: number;
   /** Source frame size in px (square). Default 16. */
@@ -54,6 +60,8 @@ interface PixelSpriteProps {
 export function PixelSprite({
   src,
   frames,
+  sheetFrames,
+  frameOffset = 0,
   frameMs = 160,
   frameSize = 16,
   frameW,
@@ -82,8 +90,10 @@ export function PixelSprite({
     const el = spriteRef.current;
     if (!el) return;
 
+    // `f` is a local window index (0..frames-1); shift by frameOffset into the
+    // full strip so a sub-window (e.g. boss idle frames) scrolls to the right spot.
     const setFrame = (f: number) => {
-      el.style.backgroundPositionX = `-${f * w}px`;
+      el.style.backgroundPositionX = `-${(frameOffset + f) * w}px`;
     };
 
     // --- one-shot --------------------------------------------------------
@@ -144,7 +154,7 @@ export function PixelSprite({
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [mode, direction, playKey, frames, frameMs, w, reduceMotion]);
+  }, [mode, direction, playKey, frames, frameOffset, frameMs, w, reduceMotion]);
 
   // flip lives on the wrapper and bob on the sprite, so the two transforms
   // compose instead of overwriting each other.
@@ -166,7 +176,7 @@ export function PixelSprite({
           height: h,
           backgroundImage: `url(${src})`,
           backgroundRepeat: "no-repeat",
-          backgroundSize: `${frames * w}px ${h}px`,
+          backgroundSize: `${(sheetFrames ?? frames) * w}px ${h}px`,
           animation:
             bob && mode === "loop" && !reduceMotion
               ? "sprite-bob 1.6s ease-in-out infinite"

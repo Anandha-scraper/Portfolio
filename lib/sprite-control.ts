@@ -131,6 +131,144 @@ export const SPRITE_CONTROL = {
     death: { src: "/sprites/s4/death.png", frames: 6, frameMs: 190 },
   },
 
+  /** Vampire fighter (feed/Vampires1 → /sprites/vampire1). Fully directional
+   *  across all six actions, including death (unlike s2/s3/s4, whose death
+   *  is a single non-directional strip). Catalogue-only for now (surfaced in
+   *  the Asset Gallery info); can later drive a live actor exactly like the
+   *  companion. */
+  vampire1: {
+    frameSize: 64,
+    scale: 0.75,
+    actions: {
+      idle:   { frameMs: 160, dir: {
+        down:  { src: "/sprites/vampire1/idle_down.png",  frames: 4 },
+        up:    { src: "/sprites/vampire1/idle_up.png",    frames: 4 },
+        left:  { src: "/sprites/vampire1/idle_left.png",  frames: 4 },
+        right: { src: "/sprites/vampire1/idle_right.png", frames: 4 },
+      } },
+      walk:   { frameMs: 140, dir: {
+        down:  { src: "/sprites/vampire1/walk_down.png",  frames: 6 },
+        up:    { src: "/sprites/vampire1/walk_up.png",    frames: 6 },
+        left:  { src: "/sprites/vampire1/walk_left.png",  frames: 6 },
+        right: { src: "/sprites/vampire1/walk_right.png", frames: 6 },
+      } },
+      run:    { frameMs: 110, dir: {
+        down:  { src: "/sprites/vampire1/run_down.png",  frames: 8 },
+        up:    { src: "/sprites/vampire1/run_up.png",    frames: 8 },
+        left:  { src: "/sprites/vampire1/run_left.png",  frames: 8 },
+        right: { src: "/sprites/vampire1/run_right.png", frames: 8 },
+      } },
+      attack: { frameMs: 110, dir: {
+        down:  { src: "/sprites/vampire1/attack_down.png",  frames: 12 },
+        up:    { src: "/sprites/vampire1/attack_up.png",    frames: 12 },
+        left:  { src: "/sprites/vampire1/attack_left.png",  frames: 12 },
+        right: { src: "/sprites/vampire1/attack_right.png", frames: 12 },
+      } },
+      hurt:   { frameMs: 120, dir: {
+        down:  { src: "/sprites/vampire1/hurt_down.png",  frames: 4 },
+        up:    { src: "/sprites/vampire1/hurt_up.png",    frames: 4 },
+        left:  { src: "/sprites/vampire1/hurt_left.png",  frames: 4 },
+        right: { src: "/sprites/vampire1/hurt_right.png", frames: 4 },
+      } },
+      death:  { frameMs: 160, dir: {
+        down:  { src: "/sprites/vampire1/death_down.png",  frames: 11 },
+        up:    { src: "/sprites/vampire1/death_up.png",    frames: 11 },
+        left:  { src: "/sprites/vampire1/death_left.png",  frames: 11 },
+        right: { src: "/sprites/vampire1/death_right.png", frames: 11 },
+      } },
+    },
+  },
+
+  /** Second vampire fighter (feed/Vampires2 → /sprites/vampire2). Same shape
+   *  as `vampire1`, different art. Catalogue-only for now. */
+  vampire2: {
+    frameSize: 64,
+    scale: 0.75,
+    actions: {
+      idle:   { frameMs: 160, dir: {
+        down:  { src: "/sprites/vampire2/idle_down.png",  frames: 4 },
+        up:    { src: "/sprites/vampire2/idle_up.png",    frames: 4 },
+        left:  { src: "/sprites/vampire2/idle_left.png",  frames: 4 },
+        right: { src: "/sprites/vampire2/idle_right.png", frames: 4 },
+      } },
+      walk:   { frameMs: 140, dir: {
+        down:  { src: "/sprites/vampire2/walk_down.png",  frames: 6 },
+        up:    { src: "/sprites/vampire2/walk_up.png",    frames: 6 },
+        left:  { src: "/sprites/vampire2/walk_left.png",  frames: 6 },
+        right: { src: "/sprites/vampire2/walk_right.png", frames: 6 },
+      } },
+      run:    { frameMs: 110, dir: {
+        down:  { src: "/sprites/vampire2/run_down.png",  frames: 8 },
+        up:    { src: "/sprites/vampire2/run_up.png",    frames: 8 },
+        left:  { src: "/sprites/vampire2/run_left.png",  frames: 8 },
+        right: { src: "/sprites/vampire2/run_right.png", frames: 8 },
+      } },
+      attack: { frameMs: 110, dir: {
+        down:  { src: "/sprites/vampire2/attack_down.png",  frames: 12 },
+        up:    { src: "/sprites/vampire2/attack_up.png",    frames: 12 },
+        left:  { src: "/sprites/vampire2/attack_left.png",  frames: 12 },
+        right: { src: "/sprites/vampire2/attack_right.png", frames: 12 },
+      } },
+      hurt:   { frameMs: 120, dir: {
+        down:  { src: "/sprites/vampire2/hurt_down.png",  frames: 4 },
+        up:    { src: "/sprites/vampire2/hurt_up.png",    frames: 4 },
+        left:  { src: "/sprites/vampire2/hurt_left.png",  frames: 4 },
+        right: { src: "/sprites/vampire2/hurt_right.png", frames: 4 },
+      } },
+      death:  { frameMs: 160, dir: {
+        down:  { src: "/sprites/vampire2/death_down.png",  frames: 11 },
+        up:    { src: "/sprites/vampire2/death_up.png",    frames: 11 },
+        left:  { src: "/sprites/vampire2/death_left.png",  frames: 11 },
+        right: { src: "/sprites/vampire2/death_right.png", frames: 11 },
+      } },
+    },
+  },
+
+  /** Third vampire fighter (feed/Vampires3 → /sprites/vampire3). Same shape
+   *  as `vampire1`, different art. Catalogue-only for now. */
+  vampire3: {
+    frameSize: 64,
+    scale: 0.75,
+    actions: {
+      idle:   { frameMs: 160, dir: {
+        down:  { src: "/sprites/vampire3/idle_down.png",  frames: 4 },
+        up:    { src: "/sprites/vampire3/idle_up.png",    frames: 4 },
+        left:  { src: "/sprites/vampire3/idle_left.png",  frames: 4 },
+        right: { src: "/sprites/vampire3/idle_right.png", frames: 4 },
+      } },
+      walk:   { frameMs: 140, dir: {
+        down:  { src: "/sprites/vampire3/walk_down.png",  frames: 6 },
+        up:    { src: "/sprites/vampire3/walk_up.png",    frames: 6 },
+        left:  { src: "/sprites/vampire3/walk_left.png",  frames: 6 },
+        right: { src: "/sprites/vampire3/walk_right.png", frames: 6 },
+      } },
+      run:    { frameMs: 110, dir: {
+        down:  { src: "/sprites/vampire3/run_down.png",  frames: 8 },
+        up:    { src: "/sprites/vampire3/run_up.png",    frames: 8 },
+        left:  { src: "/sprites/vampire3/run_left.png",  frames: 8 },
+        right: { src: "/sprites/vampire3/run_right.png", frames: 8 },
+      } },
+      attack: { frameMs: 110, dir: {
+        down:  { src: "/sprites/vampire3/attack_down.png",  frames: 12 },
+        up:    { src: "/sprites/vampire3/attack_up.png",    frames: 12 },
+        left:  { src: "/sprites/vampire3/attack_left.png",  frames: 12 },
+        right: { src: "/sprites/vampire3/attack_right.png", frames: 12 },
+      } },
+      hurt:   { frameMs: 120, dir: {
+        down:  { src: "/sprites/vampire3/hurt_down.png",  frames: 4 },
+        up:    { src: "/sprites/vampire3/hurt_up.png",    frames: 4 },
+        left:  { src: "/sprites/vampire3/hurt_left.png",  frames: 4 },
+        right: { src: "/sprites/vampire3/hurt_right.png", frames: 4 },
+      } },
+      death:  { frameMs: 160, dir: {
+        down:  { src: "/sprites/vampire3/death_down.png",  frames: 11 },
+        up:    { src: "/sprites/vampire3/death_up.png",    frames: 11 },
+        left:  { src: "/sprites/vampire3/death_left.png",  frames: 11 },
+        right: { src: "/sprites/vampire3/death_right.png", frames: 11 },
+      } },
+    },
+  },
+
   /** Ambient dungeon characters that roam the sidebar floor (chest-sidebar). */
   floorChars: {
     frameSize: 16,
@@ -248,18 +386,4 @@ export const SPRITE_CONTROL = {
     frameMs: 120,
   },
 
-  /** Boss-class sprites flattened from feed/{devil,monster,shadow}.png into a
-   *  single horizontal strip each. Idle→collapse for devil/monster; a land→full
-   *  evolve for the shadow. Catalogue-only (Asset Gallery). */
-  bosses: {
-    dir: "/sprites/boss",
-    list: {
-      devil:   { src: "/sprites/boss/devil.png",   frames: 17, frameW: 120, frameH: 100, frameMs: 140, scale: 0.5 },
-      monster: { src: "/sprites/boss/monster.png", frames: 11, frameW: 45,  frameH: 51,  frameMs: 140, scale: 1 },
-      shadow:  { src: "/sprites/boss/shadow.png",  frames: 18, frameW: 80,  frameH: 70,  frameMs: 120, scale: 0.7 },
-    },
-  },
-
 } as const;
-
-export type SpriteControl = typeof SPRITE_CONTROL;
