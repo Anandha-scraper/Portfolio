@@ -1,6 +1,6 @@
 {
   "//": "No Firebase project is linked yet. Run `firebase login` then `firebase use --add` from the repo root — it will overwrite this file with your real project ID.",
   "projects": {
-    "default": "YOUR_FIREBASE_PROJECT_ID"
+    "default": "anandha-scraper"
   }
 }
