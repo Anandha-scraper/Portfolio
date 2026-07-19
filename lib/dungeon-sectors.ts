@@ -12,7 +12,8 @@ export interface SectorGroup {
   points: { x: number; y: number }[];
 }
 
-// See polygon.md at the repo root for the workflow to fill this back in.
+// Traced with the dev polygon tool that used to live in dungeon-map.tsx
+// (removed once all eight sectors were final — see git history to revive it).
 export const PROJECT_SECTOR_GROUPS: SectorGroup[] = [
   {
     label: "A",

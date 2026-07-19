@@ -27,6 +27,7 @@ feed/
 
 # environment
 .env
+review-ss
 
 
 # deployment

@@ -22,17 +22,6 @@ export const MAP_H = ROWS * CELL;
 
 type CellKind = 0 | 1 | 2; // void | floor | wall
 
-export interface PlacedProp {
-  id: number;
-  x: number;
-  y: number;
-}
-export interface ChestMarker {
-  projectId: string;
-  /** centre of the chest, in map px */
-  x: number;
-  y: number;
-}
 /** A dungeon "block" (room) outlined so its bounds read as a distinct cabin.
  *  `role` splits the central `hub` from the remaining `project` rooms. Rect
  *  is the room bounding box in map px. */
@@ -53,10 +42,7 @@ export interface DungeonMap {
   cell: number;
   /** length cols*rows; tile id per cell, or -1 for void. */
   cellTiles: number[];
-  staticProps: PlacedProp[];
-  torches: { x: number; y: number }[];
-  chests: ChestMarker[];
-  /** central map-px rectangle the wandering NPCs stay inside. */
+  /** hub-interior map-px rectangle — the playable hero's spawn area. */
   walkBounds: { x: number; y: number; w: number; h: number };
   /** every room outlined + tagged by role, to split the blocks up visually. */
   blocks: RoomBlock[];
@@ -235,13 +221,9 @@ function build(): DungeonMap {
     }
   }
 
-  // 6) bare map structure only — no decoration props, torches, chests or NPCs.
-  const staticProps: PlacedProp[] = [];
-  const torches: { x: number; y: number }[] = [];
-  const chests: ChestMarker[] = [];
   const px = (c: number) => c * CELL;
 
-  // 7) NPC roam area — the hub interior, inset by a cell, in px.
+  // 6) hero spawn area — the hub interior, inset by a cell, in px.
   const walkBounds = {
     x: px(hub.x + 1),
     y: px(hub.y + 1),
@@ -249,7 +231,7 @@ function build(): DungeonMap {
     h: (hub.h - 2) * CELL,
   };
 
-  // 8) role-tagged block outlines — hub / plain project rooms.
+  // 7) role-tagged block outlines — hub / plain project rooms.
   const blocks: RoomBlock[] = rooms.map((r) => ({
     id: r.projectId ?? "hub",
     role: r === hub ? "hub" : "project",
@@ -261,11 +243,11 @@ function build(): DungeonMap {
     rows: r.h,
   }));
 
-  // 9) walkability — floor cells only, consumed by lib/dungeon-walk.ts.
+  // 8) walkability — floor cells only, consumed by lib/dungeon-walk.ts.
   const walkable = new Uint8Array(COLS * ROWS);
   for (let i = 0; i < walkable.length; i++) walkable[i] = kind[i] === 1 ? 1 : 0;
 
-  return { cols: COLS, rows: ROWS, cell: CELL, cellTiles, staticProps, torches, chests, walkBounds, blocks, walkable };
+  return { cols: COLS, rows: ROWS, cell: CELL, cellTiles, walkBounds, blocks, walkable };
 }
 
 /** Built once — deterministic, so it's safe at module scope. */

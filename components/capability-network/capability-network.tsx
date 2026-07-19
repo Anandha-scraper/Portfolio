@@ -446,7 +446,8 @@ export function CapabilityNetwork() {
             // Yield to the fixed nav + dungeon column while it's open so the
             // is1 berth (and the ship docked there) is never hidden behind it;
             // the ResizeObserver re-derives slots for the narrower stage.
-            dungeonOpen && "lg:ml-[424px] lg:w-auto"
+            // Keep in sync with DOCK.stagePad (lib/capability-dock.ts).
+            dungeonOpen && "lg:ml-[420px] lg:w-auto"
           )}
           style={{
             backgroundColor: "#0e1622",
