@@ -91,8 +91,10 @@ export const skillCategories: SkillCategory[] = [
     label: "Web3",
     icon: "Boxes",
     accent: "coral",
-    art: "/sprites/maps/map_1_land.png",
-    artActive: "/sprites/maps/map_1_sea.png",
+    // Only five map_N art sets exist for six categories — web3 previously
+    // duplicated backend's map_1. It uses the volcanic island sprite instead
+    // (no artActive; island-node.tsx falls back to `art` while docked).
+    art: "/sprites/islands/island_8.png",
     blurb: "Smart contracts and decentralized storage for tamper-proof systems.",
     skills: [
       { name: "Ethereum Smart Contracts", level: 64, note: "Hackathon-built" },

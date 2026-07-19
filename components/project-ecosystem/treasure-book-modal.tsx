@@ -1,108 +1,30 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { FlipBook, type FlipBookSlide } from "@/components/ui/flip-book";
-import { Icon } from "@/components/ui/icon";
+import { DungeonFrame } from "@/components/ui/dungeon-frame";
+import { ProjectPreviewPanel } from "@/components/project-ecosystem/project-preview-panel";
+import { ACCENTS } from "@/lib/accents";
+import { projects } from "@/data/projects";
+import { SECTOR_PROJECT_MAP } from "@/lib/dungeon-sectors";
+import { cn } from "@/lib/utils";
 
 /**
- * TreasureBookModal — opens the FlipBook (components/ui/flip-book.tsx) when
- * a dungeon sector's treasure marker is clicked (see dungeon-treasures.tsx /
- * dungeon-map.tsx). Content is placeholder for now (the original CodePen demo
- * copy) — every sector opens the same book until real per-project content is
- * wired in.
+ * TreasureBookModal — opens when a dungeon sector's treasure marker is
+ * clicked (see dungeon-treasures.tsx / dungeon-map.tsx). `sector` resolves
+ * to a real Project (SECTOR_PROJECT_MAP, lib/dungeon-sectors.ts), rendered
+ * inside a DungeonFrame as two panes: the screenshot carousel
+ * (ProjectPreviewPanel) beside a scrollable details pane. Stacks vertically
+ * below `lg`.
  */
 
-// eslint-disable-next-line @next/next/no-img-element
-const BrilliantGif = () => <img src="https://assets.codepen.io/36869/brilliant.gif" alt="" style={{ width: "100%" }} />;
-// eslint-disable-next-line @next/next/no-img-element
-const PixelCatImg = () => <img src="https://assets.codepen.io/36869/pixel-cat.jpg" alt="" style={{ width: "100%" }} />;
-
-const LOREM =
-  "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nobis qui quibusdam suscipit unde velit veritatis vitae voluptas? Aliquid deleniti deserunt dolorem expedita id in iusto libero maiores minima molestiae natus non odio perferendis placeat provident quae quaerat qui quidem reiciendis, rem repellendus sit sunt tempore unde vero vitae voluptatum. Earum ipsum rem tempora voluptas? Debitis eaque, labore natus sit voluptatem voluptatum. Asperiores assumenda autem consequatur deleniti eligendi magnam natus nihil quidem repudiandae, soluta veniam voluptates. Eaque eveniet sed sunt voluptas.";
-
-const DEMO_SLIDES: FlipBookSlide[] = [
-  {
-    left: (
-      <div>
-        <p style={{ margin: 0, textIndent: "1rem" }}>
-          🧩 Overview This project is a pure CSS-based dynamic interactive book that simulates page-flipping
-          animations using cutting-edge features available in modern Chrome (134–135+). It seamlessly combines
-          several powerful CSS technologies to create a fully scrollable, sprite-driven animated experience
-          resembling a book with turning pages.
-        </p>
-        <BrilliantGif />
-      </div>
-    ),
-    right: (
-      <div>
-        <p style={{ margin: 0, textIndent: "1rem" }}>🚀 Core Features</p>
-        <p style={{ margin: 0, textIndent: "1rem" }}>📚 Book-like Page Flipping</p>
-        <p style={{ margin: 0, textIndent: "1rem" }}>
-          Each &ldquo;slide&rdquo; or section of the book corresponds to a virtual page. The animation mimics a
-          realistic flipping effect using sprite sheets and scroll-driven animations.
-        </p>
-        <br />
-        <p style={{ margin: 0, textIndent: "1rem" }}>🔧 Technologies Used</p>
-        <ul style={{ padding: 0, listStyle: "auto", listStylePosition: "inside", margin: 0 }}>
-          <li>Scroll Snap</li>
-          <li>View Timeline + Scroll Timeline</li>
-          <li>Sprite Sheets (mod, round)</li>
-          <li>Dynamic Sizing</li>
-          <li>Dynamic Sprite Calculation</li>
-        </ul>
-        <br />
-        <p style={{ margin: 0, textIndent: "1rem" }}>🧠 Dynamic Behavior</p>
-        <p style={{ margin: 0, textIndent: "1rem" }}>
-          All animations are automatically adjusted when changing the number of slides via the --slides variable.
-          Frame
-        </p>
-      </div>
-    ),
-  },
-  {
-    left: (
-      <div>
-        <p style={{ margin: 0 }}>
-          count, sprite layout, and total animation length adapt based on user-defined CSS variables. The animation
-          is responsive to scroll progress using scroll-timeline and is scoped per element using timeline-scope.
-        </p>
-        <br />
-        <p style={{ margin: 0, textIndent: "1rem" }}>🖼️ Visual Layers</p>
-        <p style={{ margin: 0, textIndent: "1rem" }}>
-          The book page uses a layered sprite system: One sprite sheet per page flip animation Positioned and
-          animated via background-image The correct frame is selected based on scroll or button input
-        </p>
-        <br />
-        <p style={{ margin: 0, textIndent: "1rem" }}>🧪 Browser Support</p>
-        <p style={{ margin: 0, textIndent: "1rem" }}>
-          Requires Chrome 134+ for experimental CSS features like scroll-timeline, animation-timeline,
-          ::scroll-button, and ::scroll-marker Best viewed with flags enabled or origin trials if needed
-        </p>
-      </div>
-    ),
-    right: (
-      <div>
-        <p style={{ margin: 0, textIndent: "1rem" }}>📦 Use Cases</p>
-        <p style={{ margin: 0 }}>
-          Digital storytelling
-          <br />
-          Visual novels
-          <br />
-          Portfolio presentations
-          <br />
-          Interactive learning materials
-        </p>
-        <br />
-        <PixelCatImg />
-      </div>
-    ),
-  },
-  { left: <div>{LOREM}</div>, right: <div>{LOREM}</div> },
-  { left: <div>{LOREM}</div>, right: <div>{LOREM}</div> },
-];
-
 export function TreasureBookModal({ sector, onClose }: { sector: string | null; onClose: () => void }) {
+  const project = useMemo(() => {
+    if (!sector) return null;
+    const id = SECTOR_PROJECT_MAP[sector];
+    return projects.find((p) => p.id === id) ?? null;
+  }, [sector]);
+
   useEffect(() => {
     if (!sector) return;
     const onKey = (e: KeyboardEvent) => {
@@ -112,11 +34,13 @@ export function TreasureBookModal({ sector, onClose }: { sector: string | null; 
     return () => document.removeEventListener("keydown", onKey);
   }, [sector, onClose]);
 
+  const accent = project ? ACCENTS[project.accent] : null;
+
   return (
     <AnimatePresence>
-      {sector && (
+      {sector && project && accent && (
         <motion.div
-          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+          className="absolute inset-0 z-[90] flex items-center justify-center bg-black/70 p-3 backdrop-blur-sm sm:p-4 md:p-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -126,7 +50,7 @@ export function TreasureBookModal({ sector, onClose }: { sector: string | null; 
           }}
         >
           <motion.div
-            className="relative w-full max-w-3xl"
+            className="relative w-full max-w-2xl lg:max-w-4xl"
             initial={{ opacity: 0, scale: 0.96, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 12 }}
@@ -135,12 +59,126 @@ export function TreasureBookModal({ sector, onClose }: { sector: string | null; 
             <button
               type="button"
               onClick={onClose}
-              aria-label="Close"
-              className="absolute -right-3 -top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-ops-line bg-ops-surface text-ops-sand transition-colors hover:border-ops-rust/50 hover:text-ops-rust"
+              className="absolute -right-2 -top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full border border-ops-line bg-ops-base text-ops-sand-soft transition-colors hover:text-ops-rust"
+              aria-label="Close project details"
             >
-              <Icon name="X" size={16} />
+              ✕
             </button>
-            <FlipBook slides={DEMO_SLIDES} spriteImage="https://assets.codepen.io/36869/book.webp" />
+
+            <DungeonFrame wall={22} className="w-full">
+              <div className="flex max-h-[78vh] flex-col gap-4 overflow-y-auto p-3 sm:p-4 lg:max-h-[72vh] lg:flex-row lg:gap-6">
+                {/* Screenshot pane */}
+                <div className="lg:sticky lg:top-0 lg:self-start lg:pt-1">
+                  <ProjectPreviewPanel project={project} />
+                </div>
+
+                {/* Details pane */}
+                <div className="min-w-0 flex-1 text-ops-sand-soft">
+                  <header className="mb-3">
+                    <h3 className={cn("text-lg font-bold sm:text-xl", accent.text)}>
+                      {project.name}
+                    </h3>
+                    <p className="mt-0.5 text-sm opacity-80">{project.tagline}</p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-[0.65rem] uppercase tracking-wider">
+                      <span className={cn("rounded-sm border px-2 py-0.5", accent.border, accent.text)}>
+                        {project.status}
+                      </span>
+                      <span className="rounded-sm border border-ops-line px-2 py-0.5 opacity-80">
+                        {project.year}
+                      </span>
+                      <span className="rounded-sm border border-ops-line px-2 py-0.5 opacity-80">
+                        {project.category}
+                      </span>
+                    </div>
+                  </header>
+
+                  <p className="text-sm leading-relaxed opacity-90">{project.overview}</p>
+
+                  <h4 className="mb-1.5 mt-4 text-[0.7rem] font-semibold uppercase tracking-widest opacity-70">
+                    Highlights
+                  </h4>
+                  <ul className="space-y-1.5 text-sm">
+                    {project.highlights.map((h, i) => (
+                      <li key={i} className="flex gap-2">
+                        <span className={cn("mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full", accent.dot)} />
+                        <span className="opacity-90">{h}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <h4 className="mb-1.5 mt-4 text-[0.7rem] font-semibold uppercase tracking-widest opacity-70">
+                    Tech Stack
+                  </h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {project.stack.map((s) => (
+                      <span
+                        key={s}
+                        className={cn(
+                          "rounded-sm border px-2 py-0.5 text-xs",
+                          accent.border,
+                          accent.bgSoft,
+                          accent.text,
+                        )}
+                      >
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+
+                  {project.metrics.length > 0 && (
+                    <>
+                      <h4 className="mb-1.5 mt-4 text-[0.7rem] font-semibold uppercase tracking-widest opacity-70">
+                        Metrics
+                      </h4>
+                      <div className="flex flex-wrap gap-x-6 gap-y-2">
+                        {project.metrics.map((m) => (
+                          <div key={m.label}>
+                            <div className={cn("text-base font-bold", accent.text)}>
+                              {m.prefix ?? ""}
+                              {m.value}
+                              {m.suffix ?? ""}
+                            </div>
+                            <div className="text-[0.65rem] uppercase tracking-wider opacity-70">
+                              {m.label}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  {(project.links.github || project.links.live) && (
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      {project.links.github && (
+                        <a
+                          href={project.links.github}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="rounded-sm border border-ops-line bg-ops-base px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors hover:text-ops-rust"
+                        >
+                          GitHub ↗
+                        </a>
+                      )}
+                      {project.links.live && (
+                        <a
+                          href={project.links.live}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={cn(
+                            "rounded-sm border px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors",
+                            accent.border,
+                            accent.bgSoft,
+                            accent.text,
+                          )}
+                        >
+                          Live Site ↗
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </DungeonFrame>
           </motion.div>
         </motion.div>
       )}

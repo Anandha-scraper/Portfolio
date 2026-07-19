@@ -60,6 +60,8 @@ export interface DungeonMap {
   walkBounds: { x: number; y: number; w: number; h: number };
   /** every room outlined + tagged by role, to split the blocks up visually. */
   blocks: RoomBlock[];
+  /** length cols*rows; 1 iff the cell is floor (playable-hero collision). */
+  walkable: Uint8Array;
 }
 
 interface Rect {
@@ -259,7 +261,11 @@ function build(): DungeonMap {
     rows: r.h,
   }));
 
-  return { cols: COLS, rows: ROWS, cell: CELL, cellTiles, staticProps, torches, chests, walkBounds, blocks };
+  // 9) walkability — floor cells only, consumed by lib/dungeon-walk.ts.
+  const walkable = new Uint8Array(COLS * ROWS);
+  for (let i = 0; i < walkable.length; i++) walkable[i] = kind[i] === 1 ? 1 : 0;
+
+  return { cols: COLS, rows: ROWS, cell: CELL, cellTiles, staticProps, torches, chests, walkBounds, blocks, walkable };
 }
 
 /** Built once — deterministic, so it's safe at module scope. */

@@ -1,13 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
+import { useReducedMotion } from "motion/react";
 
 import { cn } from "@/lib/utils";
+import { useInViewport } from "@/hooks/use-in-viewport";
 
 const morphTime = 1.5;
 const cooldownTime = 0.5;
 
-const useMorphingText = (texts: string[]) => {
+const useMorphingText = (texts: string[], active: boolean) => {
   const textIndexRef = useRef(0);
   const morphRef = useRef(0);
   const cooldownRef = useRef(0);
@@ -64,7 +66,22 @@ const useMorphingText = (texts: string[]) => {
   }, []);
 
   useEffect(() => {
+    // Paused (offscreen / reduced motion): rest on the current text, sharp
+    // and fully opaque, with no rAF running.
+    if (!active) {
+      const [current1, current2] = [text1Ref.current, text2Ref.current];
+      if (current1 && current2) {
+        current1.textContent = texts[textIndexRef.current % texts.length];
+        current1.style.filter = "none";
+        current1.style.opacity = "100%";
+        current2.style.opacity = "0%";
+      }
+      return;
+    }
+
     let animationFrameId: number;
+    // Reset the clock so the pause doesn't register as a huge dt on resume.
+    timeRef.current = new Date();
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
@@ -83,7 +100,7 @@ const useMorphingText = (texts: string[]) => {
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [doMorph, doCooldown]);
+  }, [doMorph, doCooldown, active, texts]);
 
   return { text1Ref, text2Ref };
 };
@@ -93,8 +110,11 @@ interface MorphingTextProps {
   texts: string[];
 }
 
-const Texts: React.FC<Pick<MorphingTextProps, "texts">> = ({ texts }) => {
-  const { text1Ref, text2Ref } = useMorphingText(texts);
+const Texts: React.FC<Pick<MorphingTextProps, "texts"> & { active: boolean }> = ({
+  texts,
+  active,
+}) => {
+  const { text1Ref, text2Ref } = useMorphingText(texts, active);
   return (
     <>
       <span
@@ -133,14 +153,21 @@ const SvgFilters: React.FC = () => (
 export const MorphingText: React.FC<MorphingTextProps> = ({
   texts,
   className,
-}) => (
-  <div
-    className={cn(
-      "relative mx-auto h-16 w-full max-w-screen-md text-center font-sans text-[40pt] leading-none font-bold [filter:url(#threshold)_blur(0.6px)] md:h-24 lg:text-[6rem]",
-      className,
-    )}
-  >
-    <Texts texts={texts} />
-    <SvgFilters />
-  </div>
-);
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const inView = useInViewport(containerRef);
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <div
+      ref={containerRef}
+      className={cn(
+        "relative mx-auto h-16 w-full max-w-screen-md text-center font-sans text-[40pt] leading-none font-bold [filter:url(#threshold)_blur(0.6px)] md:h-24 lg:text-[6rem]",
+        className,
+      )}
+    >
+      <Texts texts={texts} active={inView && !reduceMotion} />
+      <SvgFilters />
+    </div>
+  );
+};

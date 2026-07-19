@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { Icon, type IconName } from "@/components/ui/icon";
 import { TechRadialChart } from "./tech-radial-chart";
@@ -19,10 +20,15 @@ import type { SkillCategory } from "@/types";
 export function CapabilityDungeon({
   category,
   className,
+  navSlot,
 }: {
   category: SkillCategory;
   /** Positioning classes from the parent (the fixed dock fills its container). */
   className?: string;
+  /** Optional content rendered between the header and the chart body — used
+   *  by the mobile stacked layout (capability-network.tsx) to slot in the
+   *  nav list without duplicating this component's header/frame markup. */
+  navSlot?: ReactNode;
 }) {
   const reduce = useReducedMotion();
 
@@ -59,6 +65,8 @@ export function CapabilityDungeon({
           {category.blurb}
         </span>
       </div>
+
+      {navSlot}
 
       {/* Body — radial completion chart; hover a ring for icon + name + %. */}
       <TechRadialChart category={category} className="min-h-0 w-full flex-1" />

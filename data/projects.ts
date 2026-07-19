@@ -25,6 +25,9 @@ export const projects: Project[] = [
     links: { github: "https://github.com/Anandha-scraper/Blocksmiths" },
     related: ["harvestchain"],
     featured: true,
+    // Placeholder frames — drop real screenshots into
+    // public/projects/blocksmiths/ (01.png, 02.png, …) and list them here.
+    previewImages: ["/projects/blocksmiths/01.png"],
   },
   {
     id: "harvestchain",
@@ -50,6 +53,7 @@ export const projects: Project[] = [
     links: { github: "https://github.com/Anandha-scraper/HarvestChain" },
     related: ["blocksmiths", "techub"],
     featured: true,
+    previewImages: ["/projects/harvestchain/01.png"],
   },
   {
     id: "skyloom",
@@ -75,6 +79,7 @@ export const projects: Project[] = [
     links: { github: "https://github.com/Anandha-scraper/Skyloom" },
     related: ["techub"],
     featured: true,
+    previewImages: ["/projects/skyloom/01.png"],
   },
   {
     id: "techub",
@@ -100,6 +105,7 @@ export const projects: Project[] = [
     links: { github: "https://github.com/Anandha-scraper/Techub" },
     related: ["harvestchain", "syntax"],
     featured: true,
+    previewImages: ["/projects/techub/01.png"],
   },
   {
     id: "syntax",
@@ -121,6 +127,7 @@ export const projects: Project[] = [
     links: { github: "https://github.com/Anandha-scraper/Syntax" },
     related: ["techub"],
     featured: false,
+    previewImages: ["/projects/syntax/01.png"],
   },
   {
     id: "spot",
@@ -142,6 +149,7 @@ export const projects: Project[] = [
     links: { github: "https://github.com/Anandha-scraper/SPOT-Q" },
     related: ["magizh", "crm3i"],
     featured: false,
+    previewImages: ["/projects/spot/01.png"],
   },
   {
     id: "magizh",
@@ -163,6 +171,7 @@ export const projects: Project[] = [
     links: { github: "https://github.com/Anandha-scraper/Magizh-Industries" },
     related: ["spot", "crm3i"],
     featured: false,
+    previewImages: ["/projects/magizh/01.png"],
   },
   {
     id: "crm3i",
@@ -184,6 +193,7 @@ export const projects: Project[] = [
     links: { github: "https://github.com/Anandha-scraper/3I-Services" },
     related: ["spot", "magizh"],
     featured: false,
+    previewImages: ["/projects/crm3i/01.png"],
   },
 ];
 

@@ -87,6 +87,11 @@ export interface Project {
   // ids of related projects (drives ecosystem connector lines)
   related: string[];
   featured: boolean;
+  // Screenshots for the treasure-book preview panel
+  // (components/project-ecosystem/project-preview-panel.tsx). Drop files under
+  // public/projects/<id>/ and reference them here — renders a placeholder
+  // card until populated.
+  previewImages?: string[];
 }
 
 export interface Social {

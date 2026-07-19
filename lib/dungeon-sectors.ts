@@ -187,3 +187,15 @@ export const PROJECT_SECTOR_GROUPS: SectorGroup[] = [
     ],
   },
 ];
+
+/** Which project (data/projects.ts id) each sector's treasure opens. */
+export const SECTOR_PROJECT_MAP: Record<string, string> = {
+  A: "blocksmiths",
+  B: "harvestchain",
+  C: "skyloom",
+  D: "techub",
+  E: "syntax",
+  F: "spot",
+  G: "magizh",
+  H: "crm3i",
+};

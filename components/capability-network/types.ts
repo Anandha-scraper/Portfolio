@@ -29,7 +29,37 @@ export const ROUTE_SLOTS: Slot[] = [
 ];
 
 /**
+ * PORTRAIT_SLOTS — the same six islands re-arranged for portrait/phone stages
+ * as a 2-column × 3-row serpentine (right, down, left, down, right), so the
+ * chain still reads as one continuous route in the same category order and
+ * `buildRoute`'s cyclic-hop + edge-wrap logic works unchanged (the is6 → is1
+ * wrap still exits/enters horizontally).
+ */
+export const PORTRAIT_SLOTS: Slot[] = [
+  { xPct: 26, yPct: 16 }, // is1 frontend   — row 1 left
+  { xPct: 74, yPct: 16 }, // is2 backend    — row 1 right
+  { xPct: 74, yPct: 50 }, // is3 databases  — row 2 right
+  { xPct: 26, yPct: 50 }, // is4 devops     — row 2 left
+  { xPct: 26, yPct: 84 }, // is5 agentic-ai — row 3 left
+  { xPct: 74, yPct: 84 }, // is6 web3       — row 3 right (exits right)
+];
+
+/** Aspect ratio below which the stage switches to the portrait serpentine. */
+const PORTRAIT_RATIO = 1.05;
+
+/**
+ * computeSlots — pick the island arrangement for a measured stage size.
+ * Landscape keeps the classic left→right zig-zag; portrait (phones) uses the
+ * 2×3 serpentine so islands never crowd or overlap at narrow widths.
+ */
+export function computeSlots(w: number, h: number): Slot[] {
+  if (w <= 0 || h <= 0) return ROUTE_SLOTS;
+  return w / h >= PORTRAIT_RATIO ? ROUTE_SLOTS : PORTRAIT_SLOTS;
+}
+
+/**
  * SHIP_HOME — the ship's starting berth: docked at the first island (is1). The
  * first navigation line is drawn from here until the user picks a course.
+ * (Same slot in both arrangements' order — index 0.)
  */
 export const SHIP_HOME: Slot = ROUTE_SLOTS[0];

@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from "motion/react";
 import { PixelSprite } from "@/components/ui/pixel-sprite";
 import { DungeonFrame } from "@/components/ui/dungeon-frame";
 import { Icon } from "@/components/ui/icon";
-import { TECH_ICON_SLUGS } from "@/lib/tech-icons";
 import { cn } from "@/lib/utils";
 
 /**
@@ -270,18 +269,6 @@ const GROUPS: Group[] = [
       { kind: "image" as const, name: "land", src: `/sprites/maps/map_${n}_land.png`, w: 96 },
     ],
   })),
-  {
-    // Tech-stack glyphs sliced from feed/techicon.png (feed/extract_tech_icons.py).
-    // Git, VS Code, Prettier and ESLint were intentionally excluded. Rendered as
-    // project stack badges via components/ui/tech-icon.tsx.
-    label: "Tech Icons",
-    assets: TECH_ICON_SLUGS.map((slug) => ({
-      kind: "image" as const,
-      name: slug,
-      src: `/sprites/tech-icons/${slug}.png`,
-      w: 36,
-    })),
-  },
 ];
 
 function Thumb({ asset }: { asset: Asset }) {

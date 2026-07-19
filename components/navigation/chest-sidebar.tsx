@@ -138,7 +138,13 @@ export function ChestSidebar() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: reduceMotion ? 0 : -24 }}
             transition={{ duration: 0.28, ease: "easeOut" }}
-            className="fixed left-4 z-[75] flex flex-col gap-3 transition-[width,height] duration-400 ease-out"
+            className={cn(
+              "fixed left-4 z-[75] flex flex-col gap-3 transition-[width,height] duration-400 ease-out",
+              // On mobile, the Capabilities section renders an in-flow stacked
+              // dungeon-header/nav/chart block instead (capability-network.tsx)
+              // while docked — hide this fixed drawer there so it doesn't double up.
+              dungeonDocked && "max-lg:hidden"
+            )}
             style={{
               top: SIDEBAR.top,
               ...(dungeonDocked

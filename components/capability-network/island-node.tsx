@@ -42,6 +42,10 @@ function IslandNodeComponent({
   onSelect: (index: number) => void;
 }) {
   const accent = ACCENTS[category.accent];
+  const avgLevel = Math.round(
+    category.skills.reduce((sum, s) => sum + s.level, 0) /
+      Math.max(1, category.skills.length),
+  );
 
   return (
     <button
@@ -88,10 +92,11 @@ function IslandNodeComponent({
 
       {/* Name caption — a bold banner under the island. Accent-bordered and
           text-shadowed for legibility over the dark ocean; scales up when the
-          ship is docked / sailing here. */}
+          ship is docked / sailing here. A second line surfaces the category's
+          depth (skill count + honest average proficiency) right on the map. */}
       <span
         className={cn(
-          "font-pixel mx-auto mt-1.5 flex items-center justify-center gap-1.5 whitespace-nowrap rounded-sm border bg-black/70 px-2.5 py-1.5 text-[0.6rem] uppercase leading-none backdrop-blur-sm transition-transform duration-300 sm:text-[0.7rem]",
+          "font-pixel mx-auto mt-1.5 flex flex-col items-center justify-center gap-1 rounded-sm border bg-black/70 px-2.5 py-1.5 uppercase leading-none backdrop-blur-sm transition-transform duration-300",
           active
             ? "scale-110 border-2 group-hover:scale-110"
             : "border group-hover:scale-105",
@@ -100,8 +105,13 @@ function IslandNodeComponent({
         )}
         style={{ textShadow: "0 1px 3px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.7)" }}
       >
-        <Icon name={category.icon} size={13} />
-        {category.label}
+        <span className="flex items-center gap-1.5 whitespace-nowrap text-[0.6rem] sm:text-[0.7rem]">
+          <Icon name={category.icon} size={13} />
+          {category.label}
+        </span>
+        <span className="whitespace-nowrap text-[0.5rem] normal-case tracking-wide text-ops-sand-soft">
+          {category.skills.length} skills · avg {avgLevel}%
+        </span>
       </span>
     </button>
   );

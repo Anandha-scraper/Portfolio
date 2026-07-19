@@ -4,19 +4,27 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Ship } from "@/components/ui/ship";
+import { Icon } from "@/components/ui/icon";
 import { closeChestSidebar, openChestSidebar } from "@/components/navigation/chest-sidebar";
 import type { TrailPosition } from "@/components/ui/pixel-trail";
 import { ACCENTS } from "@/lib/accents";
 import { skillCategories } from "@/data/skills";
+import { socials } from "@/data/socials";
 import { scrollToSection } from "@/lib/scroll";
 import { DOCK } from "@/lib/capability-dock";
-import { SECTION_IDS } from "@/lib/constants";
+import { NAV_ITEMS, SECTION_IDS } from "@/lib/constants";
 import { useActiveSection } from "@/hooks/use-active-section";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { cn } from "@/lib/utils";
 import { CapabilityDungeon } from "./capability-dungeon";
 import { ChartMap } from "./chart-map";
 import { IslandNode } from "./island-node";
-import { ROUTE_SLOTS, SHIP_HOME, type Point } from "./types";
+import { computeSlots, type Point } from "./types";
+
+// Same GitHub/LinkedIn-only filter chest-sidebar.tsx uses for its compact
+// socials row — duplicated here (not hoisted) since it's a one-line filter
+// and the two call sites otherwise share no other code.
+const MOBILE_NAV_SOCIALS = socials.filter((s) => ["GitHub", "LinkedIn"].includes(s.label));
 
 // Code-split: PixelTrail pulls in three.js/@react-three/fiber/drei for a
 // purely decorative wake effect — deferred off the initial JS payload since
@@ -78,6 +86,10 @@ export function CapabilityNetwork() {
   const reduce = useReducedMotion();
   const stageRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 0, h: 0 });
+  // The wake's three.js canvas only earns its keep on desktop pointers and
+  // only while a voyage is in flight — everywhere else it would just burn GPU.
+  const finePointer = useMediaQuery("(hover: hover) and (pointer: fine)");
+  const isMobileLayout = useMediaQuery("(max-width: 1023.5px)");
 
   // The tech dungeon docks under the chest sidebar as a single left-column unit.
   // It is visible IFF the Capabilities section is active AND the chest sidebar is
@@ -99,11 +111,14 @@ export function CapabilityNetwork() {
   // shipIndexRef.
   const [dockedIndex, setDockedIndex] = useState<number>(0);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  // Arrival "salvo" — a short fire burst at the island the ship just docked at.
+  const [salvo, setSalvo] = useState<{ index: number; key: number } | null>(null);
+  const salvoTimer = useRef<number | null>(null);
 
-  // Fixed voyage layout — islands sit in a deliberate route (image.png), one
-  // anchor per skill category, so the ship, chart line, and invisible anchor
-  // cards all read off the same positions.
-  const slots = ROUTE_SLOTS;
+  // Voyage layout — one anchor per skill category. Landscape keeps the classic
+  // zig-zag; portrait stages switch to a 2×3 serpentine so islands never
+  // crowd at phone widths (computeSlots, ./types.ts).
+  const slots = computeSlots(size.w, size.h);
 
   // Refs mirror state so the animation callbacks stay current.
   const legRef = useRef<Leg | null>(null);
@@ -117,6 +132,10 @@ export function CapabilityNetwork() {
   const targetRef = useRef<number | null>(null);
   // Ship's live normalised position, read each frame by the PixelTrail wake.
   const trailPosRef = useRef<TrailPosition | null>(null);
+  // Below lg the dungeon renders as an in-flow block under the stage — after
+  // an explicit dock (voyage end / reduced-motion click) bring it into view.
+  const mobileDockRef = useRef<HTMLDivElement>(null);
+  const scrollDockPending = useRef(false);
 
   // The one rule: the tech dungeon shows only in Capabilities, while the sidebar
   // is open and the ship is at rest. Dispatch the shared events so the sidebar
@@ -197,9 +216,17 @@ export function CapabilityNetwork() {
   // div's `initial` position. Its resting spot thereafter is derived from the
   // docked island's slot (see `restPoint`), so it tracks stage resizes.
   const home: Point = {
-    x: (SHIP_HOME.xPct / 100) * size.w,
-    y: (SHIP_HOME.yPct / 100) * size.h,
+    x: (slots[0].xPct / 100) * size.w,
+    y: (slots[0].yPct / 100) * size.h,
   };
+
+  // Island / ship footprint in px, from the measured stage — never lets six
+  // islands overlap at narrow widths (the old `18vw` clamp tracked the
+  // viewport, not the stage, and ignored height entirely).
+  const islandW = Math.round(
+    Math.max(92, Math.min(size.w * 0.2, size.h * 0.24, 210)),
+  );
+  const shipW = Math.round(Math.max(56, Math.min(islandW * 0.55, 90)));
 
   const headingFrame = (from: Point, to: Point) => {
     const dx = to.x - from.x;
@@ -217,7 +244,7 @@ export function CapabilityNetwork() {
   // the stage edge and re-enters from the other side.
   const buildRoute = useCallback(
     (from: Point, cur: number, target: number): Leg[] => {
-      const N = ROUTE_SLOTS.length;
+      const N = slots.length;
       const fwd = (target - cur + N) % N;
       const bwd = (cur - target + N) % N;
       const dir = fwd <= bwd ? 1 : -1;
@@ -245,7 +272,7 @@ export function CapabilityNetwork() {
       if (legs.length) legs[legs.length - 1].openOnArrive = true;
       return legs;
     },
-    [slotPoint, size]
+    [slotPoint, size, slots]
   );
 
   // Settle the ship at island `index`.
@@ -260,9 +287,24 @@ export function CapabilityNetwork() {
       // no island has been explicitly selected yet).
       setDockedIndex(index);
       // Voyage complete → reopen the nav + dungeon for the newly-docked island.
+      scrollDockPending.current = true;
       openDock(index);
+      // Arrival salvo — a short burst at the dock point (skipped under
+      // reduced motion; cleared after the burst plays out).
+      if (!reduce) {
+        setSalvo((s) => ({ index, key: (s?.key ?? 0) + 1 }));
+        if (salvoTimer.current) window.clearTimeout(salvoTimer.current);
+        salvoTimer.current = window.setTimeout(() => setSalvo(null), 750);
+      }
     },
-    [openDock]
+    [openDock, reduce]
+  );
+
+  useEffect(
+    () => () => {
+      if (salvoTimer.current) window.clearTimeout(salvoTimer.current);
+    },
+    []
   );
 
   // A hop finished: advance the ship one island, then either run the next hop or
@@ -290,6 +332,7 @@ export function CapabilityNetwork() {
         // No sailing under reduced motion — dock at once and show its dungeon.
         shipIndexRef.current = i;
         setDockedIndex(i);
+        scrollDockPending.current = true;
         openDock(i);
         return;
       }
@@ -321,6 +364,19 @@ export function CapabilityNetwork() {
 
   // Hovering an island only charts a preview route line.
   const onIslandHover = useCallback((i: number | null) => setHoverIndex(i), []);
+
+  // After an explicit dock on the mobile layout, bring the stacked dungeon
+  // block into view (it renders below the stage, off-screen otherwise).
+  useEffect(() => {
+    if (!scrollDockPending.current) return;
+    if (!dungeonOpen) return;
+    scrollDockPending.current = false;
+    if (!isMobileLayout) return;
+    mobileDockRef.current?.scrollIntoView({
+      behavior: reduce ? "auto" : "smooth",
+      block: "nearest",
+    });
+  }, [dungeonOpen, dockedIndex, selectedIndex, isMobileLayout, reduce]);
 
   // Entering Capabilities auto-opens the dock (default = Frontend, the ship's
   // berth); leaving collapses it. While the ship is sailing the dock stays closed
@@ -368,17 +424,9 @@ export function CapabilityNetwork() {
 
       <h2 className="sr-only">Capabilities</h2>
 
-      <div
-        className={cn(
-          "relative z-5 w-full px-3 pt-2 pb-12 transition-[padding] duration-400 sm:px-5 sm:pb-16",
-          // When the dock is open it reserves the left column (widest = the tech
-          // dungeon); shrink the stage in (like the Projects page) so islands
-          // reflow clear of it. Keep in sync with DOCK.stagePad (396 + 24 = 420).
-          dungeonOpen && "lg:pl-[420px]"
-        )}
-      >
+      <div className="relative z-5 w-full px-3 pt-2 pb-12 sm:px-5 sm:pb-16">
         {/* HUD */}
-        <div className="-mb-2 flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-center font-pixel text-[0.5rem] uppercase tracking-wider text-ops-sand-faint">
+        <div className="relative z-10 mb-1 flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-center font-pixel text-[0.5rem] uppercase tracking-wider text-ops-sand-faint">
           <span>
             {reduce
               ? "// click an island to reveal its stack"
@@ -393,7 +441,13 @@ export function CapabilityNetwork() {
             plus its nine-slice dungeon-wall border. */}
         <div
           ref={stageRef}
-          className="pixelated relative h-[87vh] max-h-[1000px] min-h-[560px] w-full min-w-0 overflow-hidden"
+          className={cn(
+            "pixelated relative h-[87vh] max-h-[1000px] min-h-[560px] w-full min-w-0 overflow-hidden transition-[margin] duration-400",
+            // Yield to the fixed nav + dungeon column while it's open so the
+            // is1 berth (and the ship docked there) is never hidden behind it;
+            // the ResizeObserver re-derives slots for the narrower stage.
+            dungeonOpen && "lg:ml-[424px] lg:w-auto"
+          )}
           style={{
             backgroundColor: "#0e1622",
             backgroundImage: "url(/capabg.webp)",
@@ -411,15 +465,11 @@ export function CapabilityNetwork() {
               and every island slot, so the arrangement reads as a deliberate
               composition. Purely positional: no visible border / background. */}
           <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
-            <div
-              className="absolute -translate-x-1/2 -translate-y-1/2"
-              style={{ left: `${SHIP_HOME.xPct}%`, top: `${SHIP_HOME.yPct}%`, width: "clamp(170px, 26vw, 280px)", aspectRatio: "1" }}
-            />
             {slots.map((slot, i) => (
               <div
                 key={i}
                 className="absolute -translate-x-1/2 -translate-y-1/2"
-                style={{ left: `${slot.xPct}%`, top: `${slot.yPct}%`, width: "clamp(170px, 26vw, 280px)", aspectRatio: "1" }}
+                style={{ left: `${slot.xPct}%`, top: `${slot.yPct}%`, width: islandW * 1.35, aspectRatio: "1" }}
               />
             ))}
           </div>
@@ -433,8 +483,10 @@ export function CapabilityNetwork() {
           />
 
           {/* Pixel wake (ref.txt #2) — a gooey trail painted at the ship's
-              position while it sails between islands. */}
-          {size.w > 0 && (
+              position while it sails between islands. Mounted only while a
+              voyage is in flight, on fine pointers, with motion allowed — so
+              the three.js render loop never runs idle or on mobile. */}
+          {size.w > 0 && leg && finePointer && !reduce && (
             <PixelTrail
               positionRef={trailPosRef}
               color={OCEAN_WAKE}
@@ -453,13 +505,39 @@ export function CapabilityNetwork() {
               category={category}
               index={i}
               slot={slots[i]}
-              width="clamp(120px, 18vw, 210px)"
+              width={islandW}
               active={(leg ? targetRef.current : dockedIndex) === i}
               atShip={!leg && dockedIndex === i}
               onHover={onIslandHover}
               onSelect={select}
             />
           ))}
+
+          {/* Arrival salvo — accent-lit fire burst at the freshly docked
+              island (SPRITE_CONTROL.fire art, single-frame, scaled + faded
+              by motion). Skipped under reduced motion (never set then). */}
+          <AnimatePresence>
+            {salvo && size.w > 0 && (
+              <motion.div
+                key={salvo.key}
+                aria-hidden
+                className="pointer-events-none absolute z-[46]"
+                style={{ left: slotPoint(salvo.index).x, top: slotPoint(salvo.index).y }}
+                initial={{ opacity: 0, scale: 0.4 }}
+                animate={{ opacity: [0, 1, 0], scale: [0.5, 1.2, 1.45] }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.7, ease: "easeOut" }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/sprites/fire/explosive_fire.png"
+                  alt=""
+                  width={Math.round(islandW * 0.55)}
+                  className="pixelated -translate-x-1/2 -translate-y-1/2"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* The ship */}
           {size.w > 0 && (
@@ -493,20 +571,29 @@ export function CapabilityNetwork() {
               }}
             >
               {/* Cartoon rocking — exaggerated up/down + roll while a leg is in
-                  flight, so the ship reads as actually sailing the swell. */}
+                  flight, so the ship reads as actually sailing the swell; one
+                  celebratory bounce right after docking (salvo). */}
               <motion.div
                 className="flex h-full w-full items-center justify-center"
-                animate={!reduce && leg ? { y: [0, -9, 0, 7, 0], rotate: [-3, 3, -2, 2, -3] } : { y: 0, rotate: 0 }}
+                animate={
+                  !reduce && leg
+                    ? { y: [0, -9, 0, 7, 0], rotate: [-3, 3, -2, 2, -3] }
+                    : !reduce && salvo
+                      ? { y: [0, -8, 0], rotate: 0, scale: [1, 1.14, 1] }
+                      : { y: 0, rotate: 0, scale: 1 }
+                }
                 transition={
                   !reduce && leg
                     ? { duration: 0.7, repeat: Infinity, ease: "easeInOut" }
-                    : { duration: 0.25 }
+                    : !reduce && salvo
+                      ? { duration: 0.5, ease: "easeOut" }
+                      : { duration: 0.25 }
                 }
               >
                 <Ship
                   frame={shipFrameProps.frame}
                   flip={shipFrameProps.flip}
-                  width={84}
+                  width={shipW}
                   className="drop-shadow-[0_10px_18px_rgba(0,0,0,0.6)]"
                 />
               </motion.div>
@@ -516,12 +603,14 @@ export function CapabilityNetwork() {
 
         {/* Tech dungeon — docks under the chest sidebar as the bottom of the
             left 1/3-viewport column. Opens on island select (content follows the
-            selected island immediately), auto-dismisses with the sidebar on idle. */}
+            selected island immediately), auto-dismisses with the sidebar on idle.
+            Fixed overlay only at lg:+ — below that the stacked block just below
+            takes over so nothing overlaps the map. */}
         <AnimatePresence>
           {dungeonOpen && (
             <motion.div
               key="capability-dungeon-drawer"
-              className="fixed left-4 z-[75]"
+              className="fixed left-4 z-[75] hidden lg:block"
               style={{
                 top: DOCK.dungeonTop,
                 bottom: DOCK.bottom,
@@ -539,7 +628,64 @@ export function CapabilityNetwork() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Mobile stacked dock — below lg the fixed nav+dungeon overlay above is
+            hidden; instead render dungeon header (top ~1/3) → nav → chart as one
+            in-flow block, scoped to this section only. chest-sidebar.tsx hides its
+            own fixed drawer while docked on mobile so this is the only nav shown. */}
+        {dungeonOpen && (
+          <div ref={mobileDockRef} className="mt-4 w-full scroll-mt-20 lg:hidden">
+            <CapabilityDungeon
+              category={skillCategories[selectedIndex ?? dockedIndex]}
+              navSlot={<MobileCapabilityNav active={active} />}
+            />
+          </div>
+        )}
       </div>
     </section>
+  );
+}
+
+/** Compact nav list for the mobile stacked capability dock (see above) — reuses
+ *  the same nav items / socials chest-sidebar.tsx renders in its fixed drawer,
+ *  without that drawer's DungeonFrame/floor-roamer chrome (too tall for a
+ *  block that also has to fit a header and a chart in the page's normal flow). */
+function MobileCapabilityNav({ active }: { active: string | null }) {
+  return (
+    <div className="mb-2 flex shrink-0 flex-col gap-1 border-b border-ops-line/70 pb-2 font-pixel-readable text-ops-sand">
+      {NAV_ITEMS.map((item) => {
+        const isActive = active === item.id;
+        return (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => scrollToSection(item.id)}
+            className={cn(
+              "flex items-center gap-2 rounded-sm px-1.5 py-1 text-left text-sm leading-none transition-colors",
+              isActive
+                ? "bg-ops-rust/15 text-ops-rust"
+                : "text-ops-sand hover:bg-ops-surface-2/60 hover:text-ops-olive-bright"
+            )}
+          >
+            <Icon name={item.icon} size={14} className="shrink-0" />
+            <span>{item.label}</span>
+          </button>
+        );
+      })}
+      <div className="mt-1 flex items-center gap-2 px-1.5">
+        {MOBILE_NAV_SOCIALS.map((s) => (
+          <a
+            key={s.label}
+            href={s.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={s.label}
+            className="flex h-7 w-7 items-center justify-center rounded-sm border border-ops-line text-ops-sand-soft transition-colors hover:border-ops-rust/50 hover:text-ops-sand"
+          >
+            <Icon name={s.icon} size={14} />
+          </a>
+        ))}
+      </div>
+    </div>
   );
 }

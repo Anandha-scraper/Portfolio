@@ -5,37 +5,10 @@ import {
   useEffect,
   useMemo,
   useRef,
-  useState,
   type ComponentPropsWithoutRef,
 } from "react";
 
 import { cn } from "@/lib/utils";
-
-interface MousePosition {
-  x: number;
-  y: number;
-}
-
-function useMousePosition(): MousePosition {
-  const [mousePosition, setMousePosition] = useState<MousePosition>({
-    x: 0,
-    y: 0,
-  });
-
-  useEffect(() => {
-    const handleMouseMove = (event: MouseEvent) => {
-      setMousePosition({ x: event.clientX, y: event.clientY });
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-    };
-  }, []);
-
-  return mousePosition;
-}
 
 interface ParticlesProps extends ComponentPropsWithoutRef<"div"> {
   className?: string;
@@ -95,11 +68,11 @@ export const Particles: React.FC<ParticlesProps> = ({
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const context = useRef<CanvasRenderingContext2D | null>(null);
   const circles = useRef<Circle[]>([]);
-  const mousePosition = useMousePosition();
   const mouse = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const canvasSize = useRef<{ w: number; h: number }>({ w: 0, h: 0 });
   const dpr = typeof window !== "undefined" ? window.devicePixelRatio : 1;
   const rafID = useRef<number | null>(null);
+  const runningRef = useRef(false);
   const resizeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const rgb = useMemo(() => hexToRgb(color), [color]);
@@ -247,7 +220,9 @@ export const Particles: React.FC<ParticlesProps> = ({
         drawCircle(newCircle);
       }
     });
-    rafID.current = window.requestAnimationFrame(animate);
+    if (runningRef.current) {
+      rafID.current = window.requestAnimationFrame(animate);
+    }
   }, [clearContext, drawCircle, circleParams, ease, staticity, vx, vy]);
 
   const initCanvas = useCallback(() => {
@@ -260,7 +235,49 @@ export const Particles: React.FC<ParticlesProps> = ({
       context.current = canvasRef.current.getContext("2d");
     }
     initCanvas();
-    animate();
+
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    // Mouse influence is written straight to a ref — no React state, no
+    // re-render per mousemove.
+    const handleMouseMove = (event: MouseEvent) => {
+      if (!canvasRef.current) return;
+      const rect = canvasRef.current.getBoundingClientRect();
+      const { w, h } = canvasSize.current;
+      const x = event.clientX - rect.left - w / 2;
+      const y = event.clientY - rect.top - h / 2;
+      const inside = x < w / 2 && x > -w / 2 && y < h / 2 && y > -h / 2;
+      if (inside) {
+        mouse.current.x = x;
+        mouse.current.y = y;
+      }
+    };
+
+    const start = () => {
+      if (runningRef.current || reduceMotion) return;
+      runningRef.current = true;
+      window.addEventListener("mousemove", handleMouseMove);
+      rafID.current = window.requestAnimationFrame(animate);
+    };
+    const stop = () => {
+      if (!runningRef.current) return;
+      runningRef.current = false;
+      window.removeEventListener("mousemove", handleMouseMove);
+      if (rafID.current != null) {
+        window.cancelAnimationFrame(rafID.current);
+        rafID.current = null;
+      }
+    };
+
+    // The loop (and its global mousemove listener) only runs while the canvas
+    // is near the viewport; under reduced motion the static first paint stays.
+    const io = new IntersectionObserver(
+      ([entry]) => (entry.isIntersecting ? start() : stop()),
+      { rootMargin: "96px" },
+    );
+    if (canvasContainerRef.current) io.observe(canvasContainerRef.current);
 
     const handleResize = () => {
       if (resizeTimeout.current) {
@@ -274,9 +291,8 @@ export const Particles: React.FC<ParticlesProps> = ({
     window.addEventListener("resize", handleResize);
 
     return () => {
-      if (rafID.current != null) {
-        window.cancelAnimationFrame(rafID.current);
-      }
+      io.disconnect();
+      stop();
       if (resizeTimeout.current) {
         clearTimeout(resizeTimeout.current);
       }
@@ -286,28 +302,9 @@ export const Particles: React.FC<ParticlesProps> = ({
   }, [color]);
 
   useEffect(() => {
-    onMouseMove();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mousePosition.x, mousePosition.y]);
-
-  useEffect(() => {
     initCanvas();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refresh]);
-
-  const onMouseMove = () => {
-    if (canvasRef.current) {
-      const rect = canvasRef.current.getBoundingClientRect();
-      const { w, h } = canvasSize.current;
-      const x = mousePosition.x - rect.left - w / 2;
-      const y = mousePosition.y - rect.top - h / 2;
-      const inside = x < w / 2 && x > -w / 2 && y < h / 2 && y > -h / 2;
-      if (inside) {
-        mouse.current.x = x;
-        mouse.current.y = y;
-      }
-    }
-  };
 
   return (
     <div

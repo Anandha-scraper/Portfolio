@@ -21,7 +21,43 @@ import { cn } from "@/lib/utils";
  *
  * Honours reduced-motion: loops show frame 0 static; one-shots jump to the end
  * frame instantly and still call onDone.
+ *
+ * Loop-mode sprites pause their rAF while offscreen via one shared
+ * IntersectionObserver for every mounted sprite (there can be dozens on the
+ * page at once — chest, treasures, roamers — so per-instance observers or
+ * free-running loops both add up). One-shots self-terminate and are left alone.
  */
+
+const visibilityCallbacks = new WeakMap<Element, (visible: boolean) => void>();
+let sharedObserver: IntersectionObserver | null = null;
+
+/** Subscribe an element to the shared observer. The callback also fires with
+ *  the initial intersection state. Returns an unsubscribe. */
+function observeSpriteVisibility(
+  el: Element,
+  cb: (visible: boolean) => void,
+): () => void {
+  if (typeof IntersectionObserver === "undefined") {
+    cb(true);
+    return () => {};
+  }
+  if (!sharedObserver) {
+    sharedObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          visibilityCallbacks.get(entry.target)?.(entry.isIntersecting);
+        }
+      },
+      { rootMargin: "128px" },
+    );
+  }
+  visibilityCallbacks.set(el, cb);
+  sharedObserver.observe(el);
+  return () => {
+    visibilityCallbacks.delete(el);
+    sharedObserver?.unobserve(el);
+  };
+}
 
 interface PixelSpriteProps {
   src: string;
@@ -51,6 +87,10 @@ interface PixelSpriteProps {
   direction?: "forward" | "reverse";
   /** Bump to replay a "once" animation in the same direction. */
   playKey?: number;
+  /** "once" only: animate the very first mount too (default snaps to the
+   *  resting frame — right for a chest at rest, wrong for e.g. an attack
+   *  sprite that mounts at the moment it should play). */
+  playOnMount?: boolean;
   /** "once" only: fired when the play-through finishes. */
   onDone?: () => void;
   /** "loop" only: add a subtle vertical idle bob. */
@@ -72,6 +112,7 @@ export function PixelSprite({
   mode = "loop",
   direction = "forward",
   playKey = 0,
+  playOnMount = false,
   onDone,
   bob = false,
 }: PixelSpriteProps) {
@@ -99,8 +140,9 @@ export function PixelSprite({
     // --- one-shot --------------------------------------------------------
     if (mode === "once") {
       const restFrame = direction === "forward" ? frames - 1 : 0;
-      // Don't animate on the initial mount, or when motion is reduced — snap.
-      if (firstRunRef.current || reduceMotion) {
+      // Don't animate on the initial mount (unless opted in), or when motion
+      // is reduced — snap.
+      if ((firstRunRef.current && !playOnMount) || reduceMotion) {
         firstRunRef.current = false;
         setFrame(restFrame);
         if (reduceMotion) onDoneRef.current?.();
@@ -141,6 +183,7 @@ export function PixelSprite({
     let acc = 0;
     let last = performance.now();
     let raf = 0;
+    let running = false;
     setFrame(0);
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick);
@@ -152,8 +195,26 @@ export function PixelSprite({
         setFrame(frame);
       }
     };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    const start = () => {
+      if (running) return;
+      running = true;
+      last = performance.now();
+      raf = requestAnimationFrame(tick);
+    };
+    const stop = () => {
+      if (!running) return;
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+    // The shared observer fires immediately with the current state, so the
+    // loop only ever runs while the sprite is near the viewport.
+    const unobserve = observeSpriteVisibility(el, (visible) =>
+      visible ? start() : stop(),
+    );
+    return () => {
+      unobserve();
+      stop();
+    };
   }, [mode, direction, playKey, frames, frameOffset, frameMs, w, reduceMotion]);
 
   // flip lives on the wrapper and bob on the sprite, so the two transforms

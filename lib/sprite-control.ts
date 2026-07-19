@@ -386,4 +386,17 @@ export const SPRITE_CONTROL = {
     frameMs: 120,
   },
 
+  /** Playable dungeon hero (Projects section). Art comes from `vampire1`
+   *  above — this block only tunes the live actor: movement speeds are in
+   *  map-px/second (the dungeon camera zoom multiplies them on screen),
+   *  `interactRadius` is how close (map px) the hero must stand to a treasure
+   *  before E / the action button opens it. */
+  hero: {
+    sprite: "vampire1",
+    scale: 0.75, // 64px source → 48px in map space
+    walkSpeed: 170,
+    runSpeed: 290, // hold Shift
+    interactRadius: 110,
+  },
+
 } as const;
