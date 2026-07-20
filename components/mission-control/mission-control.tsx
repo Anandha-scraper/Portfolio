@@ -1,10 +1,14 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { profile } from "@/data/profile";
 import { Reveal } from "@/components/animations/reveal";
 import { DungeonFrame } from "@/components/ui/dungeon-frame";
 import { MorphingText } from "@/components/ui/morphing-text";
 import { Particles } from "@/components/ui/particles";
+import { NamePatrolSprite } from "@/components/mission-control/name-patrol-sprite";
 
 // Rotating developer one-liners shown inside the "space" card.
 const DEV_WORDS = [
@@ -14,6 +18,48 @@ const DEV_WORDS = [
   "I scale APIs",
   "I solve problems",
 ];
+
+/**
+ * ProfilePhotoReveal — shown first in the space card, on top of the already-
+ * cycling MorphingText, then dissolves away after a short hold to reveal the
+ * word rotation underneath. A one-time intro, not a repeating cycle.
+ */
+function ProfilePhotoReveal() {
+  const reduceMotion = useReducedMotion();
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const holdMs = reduceMotion ? 1100 : 2200;
+    const t = window.setTimeout(() => setVisible(false), holdMs);
+    return () => window.clearTimeout(t);
+  }, [reduceMotion]);
+
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          className="absolute inset-0 z-20 bg-black"
+          exit={
+            reduceMotion
+              ? { opacity: 0, transition: { duration: 0 } }
+              : { opacity: 0, scale: 1.04, filter: "blur(14px)" }
+          }
+          transition={{ duration: 0.9, ease: "easeInOut" }}
+        >
+          <Image
+            src="/profile/anandha.png"
+            alt={profile.name}
+            fill
+            unoptimized
+            priority
+            sizes="(min-width: 1024px) 880px, 100vw"
+            className="object-contain"
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
 
 export function MissionControl() {
   return (
@@ -35,12 +81,28 @@ export function MissionControl() {
         {/* Left — context, anchored toward the top-left */}
         <div
           className="flex flex-col"
-          style={{ maxWidth: "min(520px, 100%)" }}
+          style={{ maxWidth: "min(600px, 100%)" }}
         >
           <Reveal delay={0.1}>
-            <h1 className="font-pixel mt-7 text-[clamp(1.3rem,5vw,2.9rem)] leading-[1.5] lg:-ml-4">
-              <span className="block text-ops-sand">ANANDHA</span>
-              <span className="text-ops-gradient block">KUMARAN</span>
+            <h1 className="font-pixel mt-7 flex flex-col gap-2 text-[clamp(1.4rem,6vw,3.1rem)] leading-[1.2] lg:-ml-4">
+              <span className="flex items-center gap-2">
+                <span className="whitespace-nowrap text-ops-sand">ANANDHA</span>
+                <NamePatrolSprite
+                  character="robot"
+                  direction="rtl"
+                  scale={1.5}
+                  className="h-8 min-w-16 flex-1 max-w-24 sm:h-10 sm:max-w-36 lg:h-12 lg:max-w-48"
+                />
+              </span>
+              <span className="flex items-center gap-2">
+                <NamePatrolSprite
+                  character="skeleton"
+                  direction="ltr"
+                  scale={1.5}
+                  className="h-8 min-w-16 flex-1 max-w-24 sm:h-10 sm:max-w-36 lg:h-12 lg:max-w-48"
+                />
+                <span className="whitespace-nowrap text-ops-gradient">KUMARAN M S</span>
+              </span>
             </h1>
           </Reveal>
 
@@ -76,6 +138,7 @@ export function MissionControl() {
                   className="font-pixel-readable h-12 text-2xl font-normal text-ops-sand md:h-14 md:text-3xl lg:text-4xl"
                 />
               </div>
+              <ProfilePhotoReveal />
             </div>
           </DungeonFrame>
         </Reveal>
