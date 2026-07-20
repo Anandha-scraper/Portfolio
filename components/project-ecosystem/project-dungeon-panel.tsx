@@ -1,78 +1,56 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { DungeonFrame } from "@/components/ui/dungeon-frame";
 import { ProjectPreviewPanel } from "@/components/project-ecosystem/project-preview-panel";
+import { Icon } from "@/components/ui/icon";
 import { ACCENTS } from "@/lib/accents";
-import { projects } from "@/data/projects";
-import { SECTOR_PROJECT_MAP } from "@/lib/dungeon-sectors";
 import { cn } from "@/lib/utils";
+import type { Project } from "@/types";
 
 /**
- * TreasureBookModal — opens when a dungeon sector's treasure marker is
- * clicked (see dungeon-treasures.tsx / dungeon-map.tsx). `sector` resolves
- * to a real Project (SECTOR_PROJECT_MAP, lib/dungeon-sectors.ts), rendered
- * inside a DungeonFrame as two panes: the screenshot carousel
- * (ProjectPreviewPanel) beside a scrollable details pane. Stacks vertically
- * below `lg`.
+ * ProjectDungeonPanel — the project's details, docked beside the dungeon
+ * viewport instead of opening as a popup (see dungeon-map.tsx). In slideshow
+ * mode a project is always showing, driven by the slideshow index — there's
+ * no close affordance. In Playground mode it only appears once the hero
+ * opens a treasure, with a close button so exploring can continue.
  */
-
-export function TreasureBookModal({ sector, onClose }: { sector: string | null; onClose: () => void }) {
-  const project = useMemo(() => {
-    if (!sector) return null;
-    const id = SECTOR_PROJECT_MAP[sector];
-    return projects.find((p) => p.id === id) ?? null;
-  }, [sector]);
-
-  useEffect(() => {
-    if (!sector) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [sector, onClose]);
-
+export function ProjectDungeonPanel({
+  project,
+  onClose,
+}: {
+  project: Project | null;
+  onClose?: () => void;
+}) {
   const accent = project ? ACCENTS[project.accent] : null;
 
   return (
-    <AnimatePresence>
-      {sector && project && accent && (
-        <motion.div
-          className="absolute inset-0 z-[90] flex items-center justify-center bg-black/70 p-3 backdrop-blur-sm sm:p-4 md:p-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) onClose();
-          }}
-        >
+    <div className="w-full lg:w-[380px] lg:shrink-0">
+      <AnimatePresence mode="wait">
+        {project && accent && (
           <motion.div
-            className="relative w-full max-w-2xl lg:max-w-4xl"
-            initial={{ opacity: 0, scale: 0.96, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 12 }}
+            key={project.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
+            className="relative"
           >
-            <button
-              type="button"
-              onClick={onClose}
-              className="absolute -right-2 -top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full border border-ops-line bg-ops-base text-ops-sand-soft transition-colors hover:text-ops-rust"
-              aria-label="Close project details"
-            >
-              ✕
-            </button>
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="absolute -right-2 -top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full border border-ops-line bg-ops-base text-ops-sand-soft transition-colors hover:text-ops-rust"
+                aria-label="Close project details"
+              >
+                <Icon name="X" size={14} />
+              </button>
+            )}
 
             <DungeonFrame wall={22} className="w-full">
-              <div className="flex max-h-[78vh] flex-col gap-4 overflow-y-auto p-3 sm:p-4 lg:max-h-[72vh] lg:flex-row lg:gap-6">
-                {/* Screenshot pane */}
-                <div className="lg:sticky lg:top-0 lg:self-start lg:pt-1">
-                  <ProjectPreviewPanel project={project} />
-                </div>
+              <div className="flex max-h-[78vh] flex-col gap-4 overflow-y-auto p-3 sm:p-4 lg:max-h-[clamp(520px,82vh,1000px)]">
+                <ProjectPreviewPanel project={project} />
 
-                {/* Details pane */}
                 <div className="min-w-0 flex-1 text-ops-sand-soft">
                   <header className="mb-3">
                     <h3 className={cn("text-lg font-bold sm:text-xl", accent.text)}>
@@ -180,8 +158,8 @@ export function TreasureBookModal({ sector, onClose }: { sector: string | null; 
               </div>
             </DungeonFrame>
           </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

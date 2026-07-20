@@ -10,7 +10,6 @@ import { socials } from "@/data/socials";
 import { SPRITE_CONTROL } from "@/lib/sprite-control";
 import { useActiveSection } from "@/hooks/use-active-section";
 import { scrollToSection } from "@/lib/scroll";
-import { DOCK } from "@/lib/capability-dock";
 import { cn } from "@/lib/utils";
 
 const DOCK_SOCIALS = socials.filter((s) => ["GitHub", "LinkedIn"].includes(s.label));
@@ -18,10 +17,8 @@ const DOCK_SOCIALS = socials.filter((s) => ["GitHub", "LinkedIn"].includes(s.lab
 const OPEN_EVENT = "open-chest-sidebar";
 const CLOSE_EVENT = "close-chest-sidebar";
 
-// Drawer geometry for the normal (undocked) full-height nav. When the
-// Capabilities tech dungeon docks beneath the drawer, the shared height/width come
-// from `DOCK` (lib/capability-dock) so the nav and dungeon stay in lockstep.
-const SIDEBAR = { width: 264, top: DOCK.top, bottom: DOCK.bottom };
+// Drawer geometry for the full-height nav.
+const SIDEBAR = { width: 264, top: 88, bottom: 32 };
 
 /** Imperatively open the dungeon sidebar from anywhere (e.g. the idle companion). */
 export function openChestSidebar() {
@@ -35,9 +32,6 @@ export function closeChestSidebar() {
 
 export function ChestSidebar() {
   const [open, setOpen] = useState(false);
-  // The Capabilities tech dungeon docks beneath the drawer; while docked the nav
-  // shrinks to the top portion and widens to the shared 1/3-viewport column.
-  const [dungeonDocked, setDungeonDocked] = useState(false);
   const reduceMotion = useReducedMotion();
   const active = useActiveSection(SECTION_IDS);
   const panelId = useId();
@@ -55,18 +49,6 @@ export function ChestSidebar() {
     return () => {
       window.removeEventListener(OPEN_EVENT, onOpen);
       window.removeEventListener(CLOSE_EVENT, onClose);
-    };
-  }, []);
-
-  // Track whether the Capabilities tech dungeon is docked beneath the drawer.
-  useEffect(() => {
-    const onDock = () => setDungeonDocked(true);
-    const onUndock = () => setDungeonDocked(false);
-    window.addEventListener("capability-dungeon-open", onDock);
-    window.addEventListener("capability-dungeon-close", onUndock);
-    return () => {
-      window.removeEventListener("capability-dungeon-open", onDock);
-      window.removeEventListener("capability-dungeon-close", onUndock);
     };
   }, []);
 
@@ -96,10 +78,7 @@ export function ChestSidebar() {
 
   const go = (id: (typeof NAV_ITEMS)[number]["id"]) => {
     scrollToSection(id);
-    // Navigating into Capabilities: leave the drawer open — the section's
-    // active-section effect re-docks it (nav + tech dungeon) in one motion, so
-    // force-closing here would only cause a close→open flicker.
-    if (id !== "capabilities") setOpen(false);
+    setOpen(false);
   };
 
   const chest = SPRITE_CONTROL.chest;
@@ -138,22 +117,14 @@ export function ChestSidebar() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: reduceMotion ? 0 : -24 }}
             transition={{ duration: 0.28, ease: "easeOut" }}
-            className={cn(
-              "fixed left-4 z-[75] flex flex-col gap-3 transition-[width,height] duration-400 ease-out",
-              // On mobile, the Capabilities section renders an in-flow stacked
-              // dungeon-header/nav/chart block instead (capability-network.tsx)
-              // while docked — hide this fixed drawer there so it doesn't double up.
-              dungeonDocked && "max-lg:hidden"
-            )}
+            className="fixed left-4 z-[75] flex flex-col gap-3"
             style={{
               top: SIDEBAR.top,
-              ...(dungeonDocked
-                ? { height: DOCK.navHeight, width: DOCK.width }
-                : { bottom: SIDEBAR.bottom, width: `min(${SIDEBAR.width}px, calc(100vw - 2rem))` }),
+              bottom: SIDEBAR.bottom,
+              width: `min(${SIDEBAR.width}px, calc(100vw - 2rem))`,
             }}
           >
-            {/* Nav — fills the full drawer height (the Capabilities skill card
-                now lives beside the voyage stage, not stacked in here). */}
+            {/* Nav — fills the full drawer height. */}
             <DungeonFrame
               wall={26}
               className="flex min-h-0 flex-1 flex-col font-pixel-readable text-ops-sand"

@@ -45,6 +45,11 @@ import {
   Info,
   Sun,
   Moon,
+  Play,
+  Pause,
+  SkipBack,
+  SkipForward,
+  Gamepad2,
   type LucideIcon,
 } from "lucide-react";
 
@@ -95,6 +100,11 @@ const ICONS = {
   Info,
   Sun,
   Moon,
+  Play,
+  Pause,
+  SkipBack,
+  SkipForward,
+  Gamepad2,
 } satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof ICONS;

@@ -1,12 +1,12 @@
 import dynamic from "next/dynamic";
 import { Navigation } from "@/components/navigation/navigation";
 import { MissionControl } from "@/components/mission-control/mission-control";
-import { CapabilityNetwork } from "@/components/capability-network/capability-network";
+import { ProjectEcosystem } from "@/components/project-ecosystem/project-ecosystem";
 
 // Below-the-fold sections are code-split to keep the initial bundle lean.
-const ProjectEcosystem = dynamic(() =>
-  import("@/components/project-ecosystem/project-ecosystem").then(
-    (m) => m.ProjectEcosystem
+const CapabilityNetwork = dynamic(() =>
+  import("@/components/capability-network/capability-network").then(
+    (m) => m.CapabilityNetwork
   )
 );
 const ContactStudio = dynamic(() =>
@@ -19,8 +19,8 @@ export default function Home() {
       <Navigation />
       <main className="pb-24 md:pb-28">
         <MissionControl />
-        <CapabilityNetwork />
         <ProjectEcosystem />
+        <CapabilityNetwork />
         <ContactStudio />
       </main>
     </>
