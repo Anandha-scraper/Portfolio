@@ -4,8 +4,9 @@
  * each sector A–H (TREASURE_POINTS, lib/dungeon-treasure-points.ts — the
  * same points the hero's proximity check uses). Map-space overlay (map-px
  * coords), so it pans/zooms with the camera. Each marker is a real button
- * that opens that sector's TreasureBookModal on click, and the marker the
- * hero is standing near (`nearSector`) glows to invite the E / ⚔ interact.
+ * that opens that sector's project on click; whichever sector should
+ * currently glow (`highlightSector` — hero proximity in Playground mode, or
+ * the active slide in slideshow mode) invites the E / ⚔ interact / view.
  */
 
 import { TREASURE_POINTS } from "@/lib/dungeon-treasure-points";
@@ -15,15 +16,15 @@ const SIZE = 60;
 
 export function DungeonTreasures({
   onSectorClick,
-  nearSector,
+  highlightSector,
 }: {
   onSectorClick: (sector: string) => void;
-  nearSector?: string | null;
+  highlightSector?: string | null;
 }) {
   return (
     <div className="pointer-events-none absolute inset-0">
       {TREASURE_POINTS.map(({ sector, treasure, x, y }) => {
-        const near = nearSector === sector;
+        const near = highlightSector === sector;
         return (
           <button
             key={sector}

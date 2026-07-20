@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import dynamic from "next/dynamic";
 import { DungeonFrame } from "@/components/ui/dungeon-frame";
 import { PixelSprite } from "@/components/ui/pixel-sprite";
 import { DungeonTilesCanvas } from "@/components/project-ecosystem/dungeon-tiles-canvas";
@@ -13,32 +12,34 @@ import {
   type HeroFacing,
 } from "@/components/project-ecosystem/dungeon-hero";
 import { DungeonTouchControls } from "@/components/project-ecosystem/dungeon-touch-controls";
+import {
+  DungeonSlideshowControls,
+  ExitPlaygroundControl,
+} from "@/components/project-ecosystem/dungeon-slideshow-controls";
+import { ProjectDungeonPanel } from "@/components/project-ecosystem/project-dungeon-panel";
 import { SPRITE_CONTROL } from "@/lib/sprite-control";
 import { MAP_W, MAP_H } from "@/lib/dungeon-layout";
 import { moveWithCollision, heroSpawn, HERO_HALF_H } from "@/lib/dungeon-walk";
 import { nearestTreasure } from "@/lib/dungeon-treasure-points";
+import { SECTOR_PROJECT_MAP, SECTOR_ORDER } from "@/lib/dungeon-sectors";
+import { projects } from "@/data/projects";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { scrollToSection } from "@/lib/scroll";
 import { cn } from "@/lib/utils";
 
-// Code-split: TreasureBookModal is mounted unconditionally by DungeonMap
-// below (AnimatePresence needs it mounted at rest to animate its own exit),
-// so this chunk starts fetching as soon as the Projects section itself
-// mounts — about as early as it can be.
-const TreasureBookModal = dynamic(() =>
-  import("@/components/project-ecosystem/treasure-book-modal").then(
-    (m) => m.TreasureBookModal
-  )
-);
-
 /**
- * DungeonMap — the Projects section as a playable top-down mini-game. A hero
- * (SPRITE_CONTROL.vampire1, tuned by SPRITE_CONTROL.hero) walks the dungeon
- * with WASD/arrows (hold Shift to run) or the virtual joystick on touch;
- * walls collide (lib/dungeon-walk.ts); the camera follows the hero. Walking
- * up to a sector's treasure and pressing E / Enter (or the ⚔ button on
- * touch) plays an attack flourish and opens that project's modal. Treasures
- * also stay directly clickable/tappable.
+ * DungeonMap — the Projects section. Two modes:
+ *
+ *  - "slideshow" (default): auto-advances through every project every few
+ *    seconds, driven by the top-right transport controls (Prev / Play-Pause /
+ *    Next). The camera stays put — no touring — the active treasure just
+ *    glows and its project shows in the docked panel beside the map.
+ *  - "playground" (opt-in, via the controls' Playground button): the classic
+ *    walkable hero — WASD/arrows (hold Shift to run) or the on-screen
+ *    joystick on touch, walls collide (lib/dungeon-walk.ts), camera follows.
+ *    Walking up to a treasure and pressing E / Enter (or ⚔ on touch) opens
+ *    that project in the same docked panel; treasures stay directly
+ *    clickable too.
  *
  * Rendering stays imperative where it's hot: hero + camera transforms are
  * written to the DOM inside one rAF game loop that only runs while there is
@@ -49,6 +50,9 @@ const TreasureBookModal = dynamic(() =>
 const AIM = SPRITE_CONTROL.aim;
 const AIM_PX = AIM.frameSize * AIM.scale; // ~39
 const HERO_CTRL = SPRITE_CONTROL.hero;
+const SLIDE_INTERVAL_MS = 4500;
+
+type DungeonMode = "slideshow" | "playground";
 
 const KEYMAP: Record<string, "left" | "right" | "up" | "down"> = {
   ArrowLeft: "left", ArrowRight: "right", ArrowUp: "up", ArrowDown: "down",
@@ -59,7 +63,12 @@ const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v
 export function DungeonMap() {
   const [aiming, setAiming] = useState(false);
 
-  // treasure book modal: opened via the hero interact or a direct click.
+  // slideshow: which sector's project is showing, and whether it's auto-advancing.
+  const [mode, setMode] = useState<DungeonMode>("slideshow");
+  const [slideIndex, setSlideIndex] = useState(0);
+  const [playing, setPlaying] = useState(true);
+
+  // playground: opened via the hero interact or a direct treasure click.
   const [openSector, setOpenSector] = useState<string | null>(null);
 
   // hero render state — changes a few times a second at most.
@@ -87,15 +96,18 @@ export function DungeonMap() {
   const autoFocused = useRef(false);
 
   // mirrors so the rAF loop / handlers read fresh values without re-binding
+  const modeRef = useRef<DungeonMode>(mode);
   const openSectorRef = useRef<string | null>(null);
   const attackingRef = useRef(false);
   const nearSectorRef = useRef<string | null>(null);
   const actionRef = useRef<HeroAction>("idle");
   const facingRef = useRef<HeroFacing>("down");
   const startLoopRef = useRef<() => void>(() => {});
+  const applyHeroRef = useRef<() => void>(() => {});
+  modeRef.current = mode;
   openSectorRef.current = openSector;
 
-  /** attack flourish + open the nearby treasure's project modal. */
+  /** attack flourish + open the nearby treasure's project panel (Playground only). */
   const interact = useCallback(() => {
     const near = nearSectorRef.current;
     if (!near || openSectorRef.current || attackingRef.current) return;
@@ -120,8 +132,7 @@ export function DungeonMap() {
   useEffect(() => {
     const view = viewRef.current;
     const map = mapRef.current;
-    const hero = heroRef.current;
-    if (!view || !map || !hero) return;
+    if (!view || !map) return;
 
     fine.current = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
@@ -138,16 +149,20 @@ export function DungeonMap() {
       map.style.transform = `translate3d(${-cam.current.x}px, ${-cam.current.y}px, 0) scale(${zoom})`;
     };
     const applyHero = () => {
+      const hero = heroRef.current;
+      if (!hero) return;
       const p = heroPos.current;
       // feet anchor: sprite bottom sits a hair under the hitbox bottom
       hero.style.transform = `translate3d(${p.x - HERO_PX / 2}px, ${p.y + HERO_HALF_H - HERO_PX + 2}px, 0)`;
     };
+    applyHeroRef.current = applyHero;
     const camTarget = () => ({
       x: clamp(heroPos.current.x * zoom - view.clientWidth / 2, 0, Math.max(0, mapW() - view.clientWidth)),
       y: clamp(heroPos.current.y * zoom - view.clientHeight / 2, 0, Math.max(0, mapH() - view.clientHeight)),
     });
 
-    // start centred on the hero at its hub spawn
+    // start centred on the hero at its hub spawn — this is also the
+    // slideshow's static default framing, since the hero never moves there.
     zoom = computeZoom();
     cam.current = camTarget();
     applyCam();
@@ -184,10 +199,11 @@ export function DungeonMap() {
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
 
-      // gather input (keys + joystick), zeroed while the modal or attack owns the hero
+      // gather input (keys + joystick) — only in Playground, and zeroed while
+      // the panel or attack owns the hero
       let ix = 0;
       let iy = 0;
-      if (!openSectorRef.current && !attackingRef.current) {
+      if (modeRef.current === "playground" && !openSectorRef.current && !attackingRef.current) {
         const k = keys.current;
         if (k.has("left")) ix -= 1;
         if (k.has("right")) ix += 1;
@@ -245,6 +261,7 @@ export function DungeonMap() {
     const active = () => hovered.current || focused.current;
 
     const onKeyDown = (e: KeyboardEvent) => {
+      if (modeRef.current !== "playground") return;
       if (e.key === "Shift") {
         running.current = true;
         return;
@@ -384,114 +401,194 @@ export function DungeonMap() {
     return () => observer.disconnect();
   }, []);
 
+  // DungeonHero only mounts in Playground — sync its transform the instant it
+  // does, since the game loop otherwise only writes it on movement, and the
+  // main effect above (which owns applyHero) doesn't rerun on mode changes.
+  useEffect(() => {
+    if (mode === "playground") applyHeroRef.current();
+  }, [mode]);
+
+  // slideshow autoplay — advances one sector every SLIDE_INTERVAL_MS while
+  // playing; stops entirely once Playground takes over.
+  useEffect(() => {
+    if (mode !== "slideshow" || !playing) return;
+    const id = window.setInterval(() => {
+      setSlideIndex((i) => (i + 1) % SECTOR_ORDER.length);
+    }, SLIDE_INTERVAL_MS);
+    return () => window.clearInterval(id);
+  }, [mode, playing]);
+
+  const stepSlide = useCallback((delta: number) => {
+    setSlideIndex((i) => (i + delta + SECTOR_ORDER.length) % SECTOR_ORDER.length);
+    setPlaying(false);
+  }, []);
+  const handlePrev = useCallback(() => stepSlide(-1), [stepSlide]);
+  const handleNext = useCallback(() => stepSlide(1), [stepSlide]);
+  const handleTogglePlay = useCallback(() => setPlaying((p) => !p), []);
+  const enterPlayground = useCallback(() => setMode("playground"), []);
+
   const closeModal = useCallback(() => {
     setOpenSector(null);
     viewRef.current?.focus({ preventScroll: true });
   }, []);
 
+  const exitPlayground = useCallback(() => {
+    keys.current.clear();
+    running.current = false;
+    setMode("slideshow");
+    setPlaying(false);
+    setOpenSector(null);
+  }, []);
+
+  /** direct treasure click: jump-and-pause in slideshow, open in Playground. */
+  const handleTreasureClick = useCallback(
+    (sector: string) => {
+      if (mode === "playground") {
+        setOpenSector(sector);
+        return;
+      }
+      const idx = SECTOR_ORDER.indexOf(sector);
+      if (idx !== -1) {
+        setSlideIndex(idx);
+        setPlaying(false);
+      }
+    },
+    [mode]
+  );
+
+  const activeSector = mode === "slideshow" ? SECTOR_ORDER[slideIndex] : openSector;
+  const activeProject = activeSector
+    ? projects.find((p) => p.id === SECTOR_PROJECT_MAP[activeSector]) ?? null
+    : null;
+  const highlightSector = mode === "slideshow" ? SECTOR_ORDER[slideIndex] : nearSector;
+
   return (
     <div>
       {/* HUD */}
       <div className="-mb-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-center font-pixel text-[0.5rem] uppercase tracking-wider text-ops-sand-faint">
-        <span className="text-ops-sand-soft">03 — Project Dungeon</span>
+        <span className="text-ops-sand-soft">02 — Project Dungeon</span>
         <span className="text-ops-sand-faint">
-          {coarsePointer
-            ? "// stick to walk · ⚔ to open treasure"
-            : "// wasd to walk · shift to run · E to open treasure"}
+          {mode === "playground"
+            ? coarsePointer
+              ? "// stick to walk · ⚔ to open treasure"
+              : "// wasd to walk · shift to run · E to open treasure"
+            : "// slideshow — step into playground to walk it yourself"}
         </span>
       </div>
 
-      <DungeonFrame wall={24} className="font-pixel-readable">
-        <div
-          ref={viewRef}
-          tabIndex={0}
-          role="application"
-          aria-label="Playable project dungeon — walk with WASD or arrow keys, press E near a treasure to view a project"
-          className={cn(
-            "relative h-[clamp(520px,82vh,1000px)] w-full overflow-hidden bg-ops-base outline-none",
-            aiming && "cursor-none"
-          )}
-          style={{ touchAction: "pan-y" }}
-        >
-          {/* the panned map layer (camera transform written imperatively).
-              The void — anywhere DungeonTilesCanvas leaves transparent —
-              shows this backdrop; floor/wall tiles paint over it opaquely. */}
-          <div
-            ref={mapRef}
-            className="pixelated absolute left-0 top-0 will-change-transform"
-            style={{
-              width: MAP_W,
-              height: MAP_H,
-              transformOrigin: "0 0",
-              background:
-                "linear-gradient(rgba(20,17,12,.55), rgba(20,17,12,.55)), url(/dungeon_bg.webp) center/cover no-repeat",
-            }}
-          >
-            <DungeonTilesCanvas />
-            {/* one treasure asset pinned at the center of each sector */}
-            <DungeonTreasures onSectorClick={setOpenSector} nearSector={nearSector} />
-            {/* the playable hero (positioned imperatively by the game loop) */}
-            <DungeonHero
-              ref={heroRef}
-              action={heroAction}
-              facing={heroFacing}
-              attackKey={attackKey}
-              onAttackDone={onAttackDone}
-            />
-          </div>
-
-          {/* aim reticle — screen space, follows the real pointer */}
-          <div
-            ref={aimRef}
-            aria-hidden
-            className={cn(
-              "pointer-events-none absolute left-0 top-0 z-50 will-change-transform transition-opacity",
-              aiming ? "opacity-100" : "opacity-0"
-            )}
-          >
-            <PixelSprite
-              src={AIM.src}
-              frames={AIM.frames}
-              frameSize={AIM.frameSize}
-              scale={AIM.scale}
-              frameMs={AIM.frameMs}
-            />
-          </div>
-
-          {/* edge vignettes */}
-          <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 z-40 w-16 bg-gradient-to-r from-ops-base/70 to-transparent" />
-          <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 z-40 w-16 bg-gradient-to-l from-ops-base/70 to-transparent" />
-          <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-40 h-12 bg-gradient-to-b from-ops-base/70 to-transparent" />
-          <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-40 h-12 bg-gradient-to-t from-ops-base/70 to-transparent" />
-
-          {/* hint */}
-          <div className="pointer-events-none absolute bottom-3 left-1/2 z-40 -translate-x-1/2 rounded-sm border border-ops-line bg-ops-base/80 px-3 py-1 font-pixel text-[0.5rem] uppercase tracking-wide text-ops-sand-soft">
-            {nearSector
-              ? coarsePointer
-                ? "Treasure nearby — tap ⚔"
-                : "Press E to open the treasure"
-              : coarsePointer
-                ? "Use the stick to explore"
-                : "WASD to explore · Shift to run"}
-          </div>
-
-          {/* touch controls (coarse pointers only) */}
-          {coarsePointer && (
-            <DungeonTouchControls
-              inputRef={joy}
-              onWake={wake}
-              onInteract={interact}
-              interactReady={!!nearSector}
-            />
-          )}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+        <div className="order-2 lg:order-1">
+          <ProjectDungeonPanel
+            project={activeProject}
+            onClose={mode === "playground" ? closeModal : undefined}
+          />
         </div>
 
-        {/* sibling of viewRef, still inside DungeonFrame's own box: covers
-            exactly the framed viewport (not the HUD line above it), isn't
-            clipped by viewRef's overflow-hidden, and isn't affected by
-            mapRef's camera transform. */}
-        <TreasureBookModal sector={openSector} onClose={closeModal} />
-      </DungeonFrame>
+        <div className="order-1 min-w-0 flex-1 lg:order-2">
+          <DungeonFrame wall={24} className="font-pixel-readable">
+            <div
+              ref={viewRef}
+              tabIndex={0}
+              role="application"
+              aria-label="Playable project dungeon — walk with WASD or arrow keys, press E near a treasure to view a project"
+              className={cn(
+                "relative h-[clamp(520px,82vh,1000px)] w-full overflow-hidden bg-ops-base outline-none",
+                aiming && "cursor-none"
+              )}
+              style={{ touchAction: "pan-y" }}
+            >
+              {/* the panned map layer (camera transform written imperatively).
+                  The void — anywhere DungeonTilesCanvas leaves transparent —
+                  shows this backdrop; floor/wall tiles paint over it opaquely. */}
+              <div
+                ref={mapRef}
+                className="pixelated absolute left-0 top-0 will-change-transform"
+                style={{
+                  width: MAP_W,
+                  height: MAP_H,
+                  transformOrigin: "0 0",
+                  background:
+                    "linear-gradient(rgba(20,17,12,.55), rgba(20,17,12,.55)), url(/dungeon_bg.webp) center/cover no-repeat",
+                }}
+              >
+                <DungeonTilesCanvas />
+                {/* one treasure asset pinned at the center of each sector */}
+                <DungeonTreasures onSectorClick={handleTreasureClick} highlightSector={highlightSector} />
+                {/* the playable hero — Playground only (imperatively positioned) */}
+                {mode === "playground" && (
+                  <DungeonHero
+                    ref={heroRef}
+                    action={heroAction}
+                    facing={heroFacing}
+                    attackKey={attackKey}
+                    onAttackDone={onAttackDone}
+                  />
+                )}
+              </div>
+
+              {/* aim reticle — screen space, follows the real pointer */}
+              <div
+                ref={aimRef}
+                aria-hidden
+                className={cn(
+                  "pointer-events-none absolute left-0 top-0 z-50 will-change-transform transition-opacity",
+                  aiming ? "opacity-100" : "opacity-0"
+                )}
+              >
+                <PixelSprite
+                  src={AIM.src}
+                  frames={AIM.frames}
+                  frameSize={AIM.frameSize}
+                  scale={AIM.scale}
+                  frameMs={AIM.frameMs}
+                />
+              </div>
+
+              {/* edge vignettes */}
+              <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 z-40 w-16 bg-gradient-to-r from-ops-base/70 to-transparent" />
+              <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 z-40 w-16 bg-gradient-to-l from-ops-base/70 to-transparent" />
+              <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-40 h-12 bg-gradient-to-b from-ops-base/70 to-transparent" />
+              <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-40 h-12 bg-gradient-to-t from-ops-base/70 to-transparent" />
+
+              {/* slideshow transport controls / Playground toggle — top-right */}
+              {mode === "slideshow" ? (
+                <DungeonSlideshowControls
+                  playing={playing}
+                  onPrev={handlePrev}
+                  onTogglePlay={handleTogglePlay}
+                  onNext={handleNext}
+                  onPlayground={enterPlayground}
+                />
+              ) : (
+                <ExitPlaygroundControl onExit={exitPlayground} />
+              )}
+
+              {/* hint — Playground only */}
+              {mode === "playground" && (
+                <div className="pointer-events-none absolute bottom-3 left-1/2 z-40 -translate-x-1/2 rounded-sm border border-ops-line bg-ops-base/80 px-3 py-1 font-pixel text-[0.5rem] uppercase tracking-wide text-ops-sand-soft">
+                  {nearSector
+                    ? coarsePointer
+                      ? "Treasure nearby — tap ⚔"
+                      : "Press E to open the treasure"
+                    : coarsePointer
+                      ? "Use the stick to explore"
+                      : "WASD to explore · Shift to run"}
+                </div>
+              )}
+
+              {/* touch controls (Playground, coarse pointers only) */}
+              {mode === "playground" && coarsePointer && (
+                <DungeonTouchControls
+                  inputRef={joy}
+                  onWake={wake}
+                  onInteract={interact}
+                  interactReady={!!nearSector}
+                />
+              )}
+            </div>
+          </DungeonFrame>
+        </div>
+      </div>
     </div>
   );
 }

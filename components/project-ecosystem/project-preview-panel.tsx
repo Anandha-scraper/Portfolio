@@ -4,7 +4,7 @@ import { Carousel } from "@/components/ui/carousel";
 import type { Project } from "@/types";
 
 /**
- * ProjectPreviewPanel — the screenshot pane of TreasureBookModal. A single
+ * ProjectPreviewPanel — the screenshot pane of ProjectDungeonPanel. A single
  * screenshot carousel for the project — optional on Project (types/index.ts);
  * falls back to the shared demo image until real per-project assets are
  * dropped under public/projects/<id>/.

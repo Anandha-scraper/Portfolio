@@ -4,31 +4,18 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Ship } from "@/components/ui/ship";
-import { Icon } from "@/components/ui/icon";
-import { closeChestSidebar, openChestSidebar } from "@/components/navigation/chest-sidebar";
 import type { TrailPosition } from "@/components/ui/pixel-trail";
 import { ACCENTS } from "@/lib/accents";
 import { skillCategories } from "@/data/skills";
-import { socials } from "@/data/socials";
 import { scrollToSection } from "@/lib/scroll";
-import { DOCK } from "@/lib/capability-dock";
-import { NAV_ITEMS, SECTION_IDS } from "@/lib/constants";
-import { useActiveSection } from "@/hooks/use-active-section";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { cn } from "@/lib/utils";
-import { CapabilityDungeon } from "./capability-dungeon";
 import { ChartMap } from "./chart-map";
 import { IslandNode } from "./island-node";
 import { computeSlots, type Point } from "./types";
 
-// Same GitHub/LinkedIn-only filter chest-sidebar.tsx uses for its compact
-// socials row — duplicated here (not hoisted) since it's a one-line filter
-// and the two call sites otherwise share no other code.
-const MOBILE_NAV_SOCIALS = socials.filter((s) => ["GitHub", "LinkedIn"].includes(s.label));
-
 // Code-split: PixelTrail pulls in three.js/@react-three/fiber/drei for a
 // purely decorative wake effect — deferred off the initial JS payload since
-// CapabilityNetwork itself isn't lazy-loaded (it's above the fold).
+// CapabilityNetwork is itself lazy-loaded (it's below the fold, see app/page.tsx).
 const PixelTrail = dynamic(() => import("@/components/ui/pixel-trail"), {
   ssr: false,
 });
@@ -89,20 +76,6 @@ export function CapabilityNetwork() {
   // The wake's three.js canvas only earns its keep on desktop pointers and
   // only while a voyage is in flight — everywhere else it would just burn GPU.
   const finePointer = useMediaQuery("(hover: hover) and (pointer: fine)");
-  const isMobileLayout = useMediaQuery("(max-width: 1023.5px)");
-
-  // The tech dungeon docks under the chest sidebar as a single left-column unit.
-  // It is visible IFF the Capabilities section is active AND the chest sidebar is
-  // open AND the ship is at rest — a single reconcile() (below) is the only code
-  // path that flips it, so the nav + tech dungeon can never desync or orphan.
-  const [dungeonOpen, setDungeonOpen] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const dungeonOpenRef = useRef(false);
-  const sidebarOpenRef = useRef(false);
-
-  const active = useActiveSection(SECTION_IDS);
-  const activeRef = useRef(active);
-  activeRef.current = active;
 
   const [leg, setLegState] = useState<Leg | null>(null);
   // Island the ship currently rests at. It survives the whole voyage — it only
@@ -132,60 +105,6 @@ export function CapabilityNetwork() {
   const targetRef = useRef<number | null>(null);
   // Ship's live normalised position, read each frame by the PixelTrail wake.
   const trailPosRef = useRef<TrailPosition | null>(null);
-  // Below lg the dungeon renders as an in-flow block under the stage — after
-  // an explicit dock (voyage end / reduced-motion click) bring it into view.
-  const mobileDockRef = useRef<HTMLDivElement>(null);
-  const scrollDockPending = useRef(false);
-
-  // The one rule: the tech dungeon shows only in Capabilities, while the sidebar
-  // is open and the ship is at rest. Dispatch the shared events so the sidebar
-  // shrinks its height (docks) in lockstep.
-  const reconcile = useCallback(() => {
-    const show =
-      activeRef.current === "capabilities" && sidebarOpenRef.current && !legRef.current;
-    dungeonOpenRef.current = show;
-    setDungeonOpen(show);
-    window.dispatchEvent(new Event(show ? "capability-dungeon-open" : "capability-dungeon-close"));
-  }, []);
-
-  // Ask the chest sidebar to open/close, then reconcile the tech dungeon to it.
-  const requestSidebar = useCallback(
-    (open: boolean) => {
-      sidebarOpenRef.current = open;
-      if (open) openChestSidebar();
-      else closeChestSidebar();
-      reconcile();
-    },
-    [reconcile]
-  );
-  // Open the dock for island `i` (selects its dungeon content); close the dock.
-  const openDock = useCallback(
-    (i: number) => {
-      setSelectedIndex(i);
-      requestSidebar(true);
-    },
-    [requestSidebar]
-  );
-  const closeDock = useCallback(() => requestSidebar(false), [requestSidebar]);
-
-  // Mirror external chest toggles (chest button / outside-click / Esc) into the
-  // tech dungeon, so nav + dungeon always move together as one unit.
-  useEffect(() => {
-    const onOpen = () => {
-      sidebarOpenRef.current = true;
-      reconcile();
-    };
-    const onClose = () => {
-      sidebarOpenRef.current = false;
-      reconcile();
-    };
-    window.addEventListener("chest-sidebar-open", onOpen);
-    window.addEventListener("chest-sidebar-close", onClose);
-    return () => {
-      window.removeEventListener("chest-sidebar-open", onOpen);
-      window.removeEventListener("chest-sidebar-close", onClose);
-    };
-  }, [reconcile]);
 
   // Measure the stage so percentage slots become pixel points. Coalesced to at
   // most once per animation frame — the stage width is actively easing during
@@ -283,12 +202,7 @@ export function CapabilityNetwork() {
       targetRef.current = null;
       trailPosRef.current = null;
       setLeg(null);
-      // The tech dungeon drawer mirrors the docked island (falls back to it when
-      // no island has been explicitly selected yet).
       setDockedIndex(index);
-      // Voyage complete → reopen the nav + dungeon for the newly-docked island.
-      scrollDockPending.current = true;
-      openDock(index);
       // Arrival salvo — a short burst at the dock point (skipped under
       // reduced motion; cleared after the burst plays out).
       if (!reduce) {
@@ -297,7 +211,7 @@ export function CapabilityNetwork() {
         salvoTimer.current = window.setTimeout(() => setSalvo(null), 750);
       }
     },
-    [openDock, reduce]
+    [reduce]
   );
 
   useEffect(
@@ -329,27 +243,20 @@ export function CapabilityNetwork() {
       // Snap the whole section into view, even if it's only half-scrolled.
       scrollToSection("capabilities");
       if (reduce) {
-        // No sailing under reduced motion — dock at once and show its dungeon.
+        // No sailing under reduced motion — dock at once.
         shipIndexRef.current = i;
         setDockedIndex(i);
-        scrollDockPending.current = true;
-        openDock(i);
         return;
       }
-      // Re-click the current destination while sailing → arrive immediately
-      // (dockAt reopens the dungeon for it).
+      // Re-click the current destination while sailing → arrive immediately.
       if (legRef.current && targetRef.current === i) {
         dockAt(i);
         return;
       }
-      // Already docked here → just (re)open its dungeon.
+      // Already docked here → nothing to do.
       if (!legRef.current && shipIndexRef.current === i) {
-        openDock(i);
         return;
       }
-      // Different island → collapse the whole dock (nav + dungeon) so the ship
-      // sails across the full width unobstructed; it reopens on arrival.
-      closeDock();
       // Chart a fresh course from the ship's current island slot (always fresh,
       // so it stays correct after a stage resize).
       const from = slotPoint(shipIndexRef.current);
@@ -359,38 +266,11 @@ export function CapabilityNetwork() {
       queueRef.current = legs.slice(1);
       setLeg(legs[0]);
     },
-    [reduce, dockAt, buildRoute, slotPoint, openDock, closeDock]
+    [reduce, dockAt, buildRoute, slotPoint]
   );
 
   // Hovering an island only charts a preview route line.
   const onIslandHover = useCallback((i: number | null) => setHoverIndex(i), []);
-
-  // After an explicit dock on the mobile layout, bring the stacked dungeon
-  // block into view (it renders below the stage, off-screen otherwise).
-  useEffect(() => {
-    if (!scrollDockPending.current) return;
-    if (!dungeonOpen) return;
-    scrollDockPending.current = false;
-    if (!isMobileLayout) return;
-    mobileDockRef.current?.scrollIntoView({
-      behavior: reduce ? "auto" : "smooth",
-      block: "nearest",
-    });
-  }, [dungeonOpen, dockedIndex, selectedIndex, isMobileLayout, reduce]);
-
-  // Entering Capabilities auto-opens the dock (default = Frontend, the ship's
-  // berth); leaving collapses it. While the ship is sailing the dock stays closed
-  // (it reopens on arrival via dockAt).
-  const wasCapabilitiesRef = useRef(false);
-  useEffect(() => {
-    const isCapabilities = active === "capabilities";
-    if (isCapabilities) {
-      if (!legRef.current) openDock(shipIndexRef.current);
-    } else if (wasCapabilitiesRef.current) {
-      closeDock();
-    }
-    wasCapabilitiesRef.current = isCapabilities;
-  }, [active, openDock, closeDock]);
 
   // Derived visuals. While sailing, the active island is the course's ultimate
   // destination (targetRef), not the intermediate hop.
@@ -434,21 +314,12 @@ export function CapabilityNetwork() {
           </span>
         </div>
 
-        {/* Voyage stage — full width. The tech dungeon no longer sits inline; it
-            docks under the chest sidebar as the bottom of the left 1/3-viewport
-            column (rendered below, opened on island select). The stage carries
-            the dark-ocean backdrop (capabg) behind the grid / islands / ship,
-            plus its nine-slice dungeon-wall border. */}
+        {/* Voyage stage — full width. The stage carries the dark-ocean backdrop
+            (capabg) behind the grid / islands / ship, plus its nine-slice
+            dungeon-wall border. */}
         <div
           ref={stageRef}
-          className={cn(
-            "pixelated relative h-[87vh] max-h-[1000px] min-h-[560px] w-full min-w-0 overflow-hidden transition-[margin] duration-400",
-            // Yield to the fixed nav + dungeon column while it's open so the
-            // is1 berth (and the ship docked there) is never hidden behind it;
-            // the ResizeObserver re-derives slots for the narrower stage.
-            // Keep in sync with DOCK.stagePad (lib/capability-dock.ts).
-            dungeonOpen && "lg:ml-[420px] lg:w-auto"
-          )}
+          className="pixelated relative h-[87vh] max-h-[1000px] min-h-[560px] w-full min-w-0 overflow-hidden"
           style={{
             backgroundColor: "#0e1622",
             backgroundImage: "url(/capabg.webp)",
@@ -601,92 +472,7 @@ export function CapabilityNetwork() {
             </motion.div>
           )}
         </div>
-
-        {/* Tech dungeon — docks under the chest sidebar as the bottom of the
-            left 1/3-viewport column. Opens on island select (content follows the
-            selected island immediately), auto-dismisses with the sidebar on idle.
-            Fixed overlay only at lg:+ — below that the stacked block just below
-            takes over so nothing overlaps the map. */}
-        <AnimatePresence>
-          {dungeonOpen && (
-            <motion.div
-              key="capability-dungeon-drawer"
-              className="fixed left-4 z-[75] hidden lg:block"
-              style={{
-                top: DOCK.dungeonTop,
-                bottom: DOCK.bottom,
-                width: DOCK.dungeonWidth,
-              }}
-              initial={reduce ? false : { opacity: 0, x: -24 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={reduce ? { opacity: 0 } : { opacity: 0, x: -24 }}
-              transition={{ duration: 0.28, ease: "easeOut" }}
-            >
-              <CapabilityDungeon
-                category={skillCategories[selectedIndex ?? dockedIndex]}
-                className="h-full"
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Mobile stacked dock — below lg the fixed nav+dungeon overlay above is
-            hidden; instead render dungeon header (top ~1/3) → nav → chart as one
-            in-flow block, scoped to this section only. chest-sidebar.tsx hides its
-            own fixed drawer while docked on mobile so this is the only nav shown. */}
-        {dungeonOpen && (
-          <div ref={mobileDockRef} className="mt-4 w-full scroll-mt-20 lg:hidden">
-            <CapabilityDungeon
-              category={skillCategories[selectedIndex ?? dockedIndex]}
-              navSlot={<MobileCapabilityNav active={active} />}
-            />
-          </div>
-        )}
       </div>
     </section>
-  );
-}
-
-/** Compact nav list for the mobile stacked capability dock (see above) — reuses
- *  the same nav items / socials chest-sidebar.tsx renders in its fixed drawer,
- *  without that drawer's DungeonFrame/floor-roamer chrome (too tall for a
- *  block that also has to fit a header and a chart in the page's normal flow). */
-function MobileCapabilityNav({ active }: { active: string | null }) {
-  return (
-    <div className="mb-2 flex shrink-0 flex-col gap-1 border-b border-ops-line/70 pb-2 font-pixel-readable text-ops-sand">
-      {NAV_ITEMS.map((item) => {
-        const isActive = active === item.id;
-        return (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => scrollToSection(item.id)}
-            className={cn(
-              "flex items-center gap-2 rounded-sm px-1.5 py-1 text-left text-sm leading-none transition-colors",
-              isActive
-                ? "bg-ops-rust/15 text-ops-rust"
-                : "text-ops-sand hover:bg-ops-surface-2/60 hover:text-ops-olive-bright"
-            )}
-          >
-            <Icon name={item.icon} size={14} className="shrink-0" />
-            <span>{item.label}</span>
-          </button>
-        );
-      })}
-      <div className="mt-1 flex items-center gap-2 px-1.5">
-        {MOBILE_NAV_SOCIALS.map((s) => (
-          <a
-            key={s.label}
-            href={s.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={s.label}
-            className="flex h-7 w-7 items-center justify-center rounded-sm border border-ops-line text-ops-sand-soft transition-colors hover:border-ops-rust/50 hover:text-ops-sand"
-          >
-            <Icon name={s.icon} size={14} />
-          </a>
-        ))}
-      </div>
-    </div>
   );
 }

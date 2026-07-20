@@ -200,3 +200,6 @@ export const SECTOR_PROJECT_MAP: Record<string, string> = {
   G: "magizh",
   H: "crm3i",
 };
+
+/** Canonical A→H sector order — the slideshow steps through this list. */
+export const SECTOR_ORDER = Object.keys(SECTOR_PROJECT_MAP);
