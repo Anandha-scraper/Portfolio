@@ -301,6 +301,14 @@ export const SPRITE_CONTROL = {
     jump: { src: "/sprites/robot_jump.png", frames: 8, frameMs: 90 },
   },
 
+  /** Legacy-follower skeleton (walk + idle). Available for roaming use. */
+  skeleton: {
+    frameSize: 32,
+    scale: 2,
+    walk: { src: "/sprites/skeleton_walk.png", frames: 10, frameMs: 105 },
+    idle: { src: "/sprites/skeleton_idle.png", frames: 6, frameMs: 225 },
+  },
+
   /** Vampire idle (gentle breathing via the sprite bob). */
   vampire: {
     src: "/sprites/vampire.png",
