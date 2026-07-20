@@ -410,6 +410,18 @@ export function DungeonMap() {
     return () => window.clearInterval(id);
   }, [walking, playing]);
 
+  // Look-ahead prefetch: warm the browser cache for the *next* project's
+  // first screenshot during the current one's dwell time, so autoplay (or
+  // Next) never shows a cold-loading flash.
+  useEffect(() => {
+    const nextSector = SECTOR_ORDER[(activeIndex + 1) % SECTOR_ORDER.length];
+    const nextProject = projects.find((p) => p.id === SECTOR_PROJECT_MAP[nextSector]);
+    const nextSrc = nextProject?.previewImages?.[0];
+    if (!nextSrc) return;
+    const img = new window.Image();
+    img.src = nextSrc;
+  }, [activeIndex]);
+
   const stepIndex = useCallback((delta: number) => {
     setActiveIndex((i) => (i + delta + SECTOR_ORDER.length) % SECTOR_ORDER.length);
     setWalking(false);

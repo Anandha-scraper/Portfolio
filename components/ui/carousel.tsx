@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
+import Image from "next/image";
 import { motion, useMotionValue, useReducedMotion, useTransform, type PanInfo } from "motion/react";
+import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 import styles from "@/components/ui/carousel.module.css";
 
@@ -48,6 +50,10 @@ const TILT_DEG = 40;
 // in carousel.module.css, since the ResizeObserver below measures the outer,
 // unpadded wrapper rather than the bezel-inset viewport itself.
 const BEZEL_INSET = 2 * (10 + 1);
+// Matches the panel's actual rendered width (project-preview-panel.tsx:
+// full-width below lg, a fixed 380px dock at lg:+) so the browser fetches an
+// appropriately-sized image instead of guessing the full viewport always.
+const IMAGE_SIZES = "(min-width: 1024px) 380px, 100vw";
 
 export function Carousel({
   items,
@@ -84,8 +90,15 @@ export function Carousel({
     return (
       <div ref={containerRef} className={cn(styles.container, className)}>
         <div className={cn(styles.viewport, styles.single)}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={items[0].src} alt={items[0].alt} loading="lazy" />
+          <Image
+            src={items[0].src}
+            alt={items[0].alt}
+            fill
+            unoptimized
+            priority
+            sizes={IMAGE_SIZES}
+            className="object-cover"
+          />
         </div>
       </div>
     );
@@ -107,8 +120,15 @@ export function Carousel({
       ) : (
         <div className={styles.container}>
           <div className={styles.viewport}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={items[0].src} alt={items[0].alt} loading="lazy" />
+            <Image
+              src={items[0].src}
+              alt={items[0].alt}
+              fill
+              unoptimized
+              priority
+              sizes={IMAGE_SIZES}
+              className="object-cover"
+            />
           </div>
         </div>
       )}
@@ -206,6 +226,15 @@ function CarouselTrack({
     });
   };
 
+  /** Prev/Next arrow buttons — same clamp handleDragEnd uses. */
+  const stepPosition = (delta: number) => {
+    setPosition((prev) => {
+      const next = prev + delta;
+      const max = itemsForRender.length - 1;
+      return Math.max(0, Math.min(next, max));
+    });
+  };
+
   const dragProps = loop
     ? {}
     : {
@@ -252,9 +281,27 @@ function CarouselTrack({
               trackItemOffset={trackItemOffset}
               x={x}
               transition={effectiveTransition}
+              priority={index === position}
             />
           ))}
         </motion.div>
+
+        <button
+          type="button"
+          onClick={() => stepPosition(-1)}
+          aria-label="Previous screenshot"
+          className="absolute left-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border-2 border-ops-line bg-ops-base/70 text-ops-sand-soft backdrop-blur-sm transition-colors hover:border-ops-rust/50 hover:text-ops-sand"
+        >
+          <Icon name="ChevronLeft" size={16} />
+        </button>
+        <button
+          type="button"
+          onClick={() => stepPosition(1)}
+          aria-label="Next screenshot"
+          className="absolute right-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border-2 border-ops-line bg-ops-base/70 text-ops-sand-soft backdrop-blur-sm transition-colors hover:border-ops-rust/50 hover:text-ops-sand"
+        >
+          <Icon name="ChevronRight" size={16} />
+        </button>
       </div>
 
       <div className={styles.indicators}>
@@ -283,6 +330,7 @@ function CarouselItem({
   trackItemOffset,
   x,
   transition,
+  priority,
 }: {
   item: CarouselImageItem;
   index: number;
@@ -290,14 +338,24 @@ function CarouselItem({
   trackItemOffset: number;
   x: ReturnType<typeof useMotionValue<number>>;
   transition: object;
+  /** the currently-centered slide — eager-loaded, everything else stays lazy. */
+  priority: boolean;
 }) {
   const range = [-(index + 1) * trackItemOffset, -index * trackItemOffset, -(index - 1) * trackItemOffset];
   const rotateY = useTransform(x, range, [TILT_DEG, 0, -TILT_DEG], { clamp: false });
 
   return (
     <motion.div className={styles.item} style={{ width: itemWidth, rotateY }} transition={transition}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={item.src} alt={item.alt} loading="lazy" draggable={false} />
+      <Image
+        src={item.src}
+        alt={item.alt}
+        fill
+        unoptimized
+        priority={priority}
+        draggable={false}
+        sizes={IMAGE_SIZES}
+        className="object-cover"
+      />
     </motion.div>
   );
 }
