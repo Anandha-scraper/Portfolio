@@ -3,6 +3,7 @@ import { Pixelify_Sans } from "next/font/google";
 import { BackgroundEnvironment } from "@/components/blueprint/background-environment";
 import { SkeletonCompanion } from "@/components/companion/skeleton-companion";
 import { AssetGallery } from "@/components/ui/asset-gallery";
+import { BookToggle } from "@/components/book/book-toggle";
 import "./globals.css";
 
 // Global pixel typeface. next/font self-hosts the files at build time, so this
@@ -73,6 +74,9 @@ export default function RootLayout({
         <SkeletonCompanion mode="chase" idleDelayMs={3000} debug={false} />
         {/* Top-right info panel cataloguing every pixel-art asset on the site. */}
         <AssetGallery />
+        {/* Placeholder demo mount for the new codex/book UI — remove or
+            relocate once it has a permanent home and real content. */}
+        <BookToggle />
         <div className="relative z-10">{children}</div>
       </body>
     </html>
