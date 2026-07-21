@@ -87,6 +87,12 @@ export interface Project {
   // ids of related projects (drives ecosystem connector lines)
   related: string[];
   featured: boolean;
+  // True while this project is being rebuilt/replaced. The dungeon room,
+  // treasure, and map connections stay exactly as generated (lib/dungeon-layout.ts
+  // derives the map from the full `projects` array regardless of this flag) —
+  // only ProjectDungeonPanel swaps in a generic "being updated" card instead
+  // of the full detail view when this is set.
+  updating?: boolean;
   // Screenshots for the treasure-book preview panel
   // (components/project-ecosystem/project-preview-panel.tsx). Drop files under
   // public/projects/<id>/ and reference them here — renders a placeholder

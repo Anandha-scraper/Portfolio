@@ -28,8 +28,6 @@ feed/
 # environment
 .env
 review-ss
-
-
 # deployment
 .vercel/
 .firebase/
