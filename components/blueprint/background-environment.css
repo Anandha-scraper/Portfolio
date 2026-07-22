@@ -1,0 +1,61 @@
+/* background-environment.tsx — static structural styles. `.bg-grid-global`
+   and `.noise-overlay` are existing hand-written utilities from
+   app/globals.css, left as-is. Imported once from app/layout.tsx (see
+   components/book/magic-book.css for why). */
+
+.background-environment {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.background-environment__washes {
+  position: absolute;
+  inset: 0;
+}
+
+.background-environment__wash {
+  position: absolute;
+  border-radius: 3.40282e38px;
+  filter: blur(40px);
+}
+
+.background-environment__wash--coral {
+  left: -10%;
+  top: -10%;
+  height: 55vh;
+  width: 55vh;
+  background-image: radial-gradient(circle, rgba(226, 88, 34, 0.1), transparent 70%);
+}
+
+.background-environment__wash--olive {
+  right: -8%;
+  top: 18%;
+  height: 50vh;
+  width: 50vh;
+  background-image: radial-gradient(circle, rgba(163, 177, 138, 0.08), transparent 70%);
+}
+
+.background-environment__wash--amber {
+  bottom: -12%;
+  left: 30%;
+  height: 45vh;
+  width: 45vh;
+  background-image: radial-gradient(circle, rgba(217, 164, 65, 0.07), transparent 70%);
+}
+
+.background-environment__grid {
+  position: absolute;
+  inset: 0;
+  mask-image: radial-gradient(ellipse at center, black 55%, transparent 95%);
+  opacity: 0.8;
+}
+
+.background-environment__noise {
+  position: absolute;
+  inset: 0;
+  opacity: 0.025;
+  mix-blend-mode: multiply;
+}

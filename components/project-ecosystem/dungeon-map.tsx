@@ -61,9 +61,10 @@ export function DungeonMap() {
   const [aiming, setAiming] = useState(false);
 
   // true = the map/hero screen is showing (Playground); false = the current
-  // project fills the frame (the default, auto-advancing screen).
+  // project fills the frame (the default screen). Autoplay starts off —
+  // the play button in DungeonSlideshowControls opts in.
   const [walking, setWalking] = useState(false);
-  const [playing, setPlaying] = useState(true);
+  const [playing, setPlaying] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
 
   // hero render state — changes a few times a second at most.
@@ -464,9 +465,9 @@ export function DungeonMap() {
   return (
     <div>
       {/* HUD */}
-      <div className="-mb-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-center font-pixel text-[0.5rem] uppercase tracking-wider text-ops-sand-faint">
-        <span className="text-ops-sand-soft">02 — Project Dungeon</span>
-        <span className="text-ops-sand-faint">
+      <div className={cn("dungeon-map__hud", "font-pixel")}>
+        <span className="dungeon-map__hud-highlight">02 — Project Dungeon</span>
+        <span className="dungeon-map__hud-note">
           {walking
             ? coarsePointer
               ? "// stick to walk · ⚔ to open treasure"
@@ -481,10 +482,7 @@ export function DungeonMap() {
           tabIndex={0}
           role="application"
           aria-label="Playable project dungeon — walk with WASD or arrow keys, press E near a treasure to view a project"
-          className={cn(
-            "relative h-[clamp(520px,82vh,1000px)] w-full overflow-hidden bg-ops-base outline-none",
-            aiming && walking && "cursor-none"
-          )}
+          className={cn("dungeon-map__viewport", aiming && walking && "dungeon-map__viewport--aiming")}
           style={{ touchAction: "pan-y" }}
         >
           {/* the panned map layer (camera transform written imperatively).
@@ -495,7 +493,7 @@ export function DungeonMap() {
               stale when Playground is toggled. */}
           <div
             ref={mapRef}
-            className="pixelated absolute left-0 top-0 will-change-transform"
+            className={cn("dungeon-map__map-layer", "pixelated")}
             style={{
               width: MAP_W,
               height: MAP_H,
@@ -521,10 +519,7 @@ export function DungeonMap() {
           <div
             ref={aimRef}
             aria-hidden
-            className={cn(
-              "pointer-events-none absolute left-0 top-0 z-30 will-change-transform transition-opacity",
-              aiming && walking ? "opacity-100" : "opacity-0"
-            )}
+            className={cn("dungeon-map__aim", aiming && walking && "dungeon-map__aim--visible")}
           >
             <PixelSprite
               src={AIM.src}
@@ -536,10 +531,10 @@ export function DungeonMap() {
           </div>
 
           {/* edge vignettes */}
-          <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 z-20 w-16 bg-gradient-to-r from-ops-base/70 to-transparent" />
-          <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 z-20 w-16 bg-gradient-to-l from-ops-base/70 to-transparent" />
-          <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-20 h-12 bg-gradient-to-b from-ops-base/70 to-transparent" />
-          <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-12 bg-gradient-to-t from-ops-base/70 to-transparent" />
+          <div aria-hidden className="dungeon-map__vignette dungeon-map__vignette--left" />
+          <div aria-hidden className="dungeon-map__vignette dungeon-map__vignette--right" />
+          <div aria-hidden className="dungeon-map__vignette dungeon-map__vignette--top" />
+          <div aria-hidden className="dungeon-map__vignette dungeon-map__vignette--bottom" />
 
           {/* project view — fills the whole frame, covering the map, whenever
               not walking. Same frame either way: the default auto-advancing
@@ -558,7 +553,7 @@ export function DungeonMap() {
 
           {/* hint — walking only */}
           {walking && (
-            <div className="pointer-events-none absolute bottom-3 left-1/2 z-40 -translate-x-1/2 rounded-sm border border-ops-line bg-ops-base/80 px-3 py-1 font-pixel text-[0.5rem] uppercase tracking-wide text-ops-sand-soft">
+            <div className={cn("dungeon-map__hint", "font-pixel")}>
               {nearSector
                 ? coarsePointer
                   ? "Treasure nearby — tap ⚔"

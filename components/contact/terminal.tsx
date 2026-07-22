@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { buildCommands, resolveCommand, type CommandContext } from "@/lib/commands";
 import { scrollToSection } from "@/lib/scroll";
+import { cn } from "@/lib/utils";
 import type { SectionId } from "@/types";
 
 interface Line {
@@ -79,48 +80,40 @@ export function Terminal() {
   };
 
   return (
-    <div
-      className="ops overflow-hidden rounded-card border border-ops-line bg-ops-base shadow-float"
-      onClick={() => inputRef.current?.focus()}
-    >
+    <div className={cn("terminal", "ops")} onClick={() => inputRef.current?.focus()}>
       {/* chrome */}
-      <div className="flex items-center justify-between border-b border-ops-line bg-ops-surface/90 px-4 py-2.5">
-        <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-ops-rust" />
-          <span className="h-2.5 w-2.5 rounded-full bg-ops-sand-soft" />
-          <span className="h-2.5 w-2.5 rounded-full bg-ops-olive" />
+      <div className="terminal__chrome">
+        <div className="terminal__dots">
+          <span className="terminal__dot terminal__dot--rust" />
+          <span className="terminal__dot terminal__dot--sand" />
+          <span className="terminal__dot terminal__dot--olive" />
         </div>
-        <span className="font-mono text-[0.7rem] text-ops-sand-soft">
-          anandha@portfolio: ~
-        </span>
-        <span className="w-12" />
+        <span className={cn("terminal__chrome-title", "font-mono")}>anandha@portfolio: ~</span>
+        <span className="terminal__chrome-spacer" />
       </div>
 
       {/* body */}
-      <div
-        ref={scrollRef}
-        className="h-72 overflow-y-auto px-4 py-3 font-mono text-[0.8rem] leading-relaxed sm:text-sm"
-      >
+      <div ref={scrollRef} className={cn("terminal__body", "font-mono")}>
         {lines.map((line, i) => (
-          <div key={i} className="whitespace-pre-wrap break-words">
+          <div key={i} className="terminal__line">
             {line.type === "input" ? (
               <span>
-                <span className="text-ops-rust">➜</span>{" "}
-                <span className="text-ops-olive">~</span>{" "}
-                <span className="text-ops-sand">{line.text}</span>
+                <span className="terminal__prompt-glyph">➜</span>{" "}
+                <span className="terminal__prompt-tilde">~</span>{" "}
+                <span className="terminal__text">{line.text}</span>
               </span>
             ) : line.type === "system" ? (
-              <span className="text-ops-sand-faint">{line.text}</span>
+              <span className="terminal__text--system">{line.text}</span>
             ) : (
-              <span className="text-ops-sand">{line.text}</span>
+              <span className="terminal__text">{line.text}</span>
             )}
           </div>
         ))}
 
         {/* prompt */}
-        <div className="flex items-center">
-          <span className="text-ops-rust">➜</span>
-          <span className="ml-2 text-ops-olive">~</span>
+        <div className="terminal__input-row">
+          <span className="terminal__prompt-glyph">➜</span>
+          <span className="terminal__input-tilde">~</span>
           <input
             ref={inputRef}
             value={value}
@@ -129,7 +122,7 @@ export function Terminal() {
             spellCheck={false}
             autoComplete="off"
             aria-label="Terminal input"
-            className="ml-2 flex-1 bg-transparent text-ops-sand caret-ops-rust outline-none"
+            className="terminal__input"
           />
         </div>
       </div>

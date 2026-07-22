@@ -34,7 +34,7 @@ export function ChartMap({
       width={w}
       height={h}
       viewBox={`0 0 ${w} ${h}`}
-      className="pointer-events-none absolute inset-0 z-[1]"
+      className="chart-map__svg"
     >
       {/* The only route line — drawn on hover (preview) or while sailing. */}
       {target && (

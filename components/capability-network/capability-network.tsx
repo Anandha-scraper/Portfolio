@@ -12,6 +12,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { ChartMap } from "./chart-map";
 import { IslandNode } from "./island-node";
 import { computeSlots, type Point } from "./types";
+import { cn } from "@/lib/utils";
 
 // Code-split: PixelTrail pulls in three.js/@react-three/fiber/drei for a
 // purely decorative wake effect — deferred off the initial JS payload since
@@ -293,20 +294,17 @@ export function CapabilityNetwork() {
   const shipFrameProps = leg ? { frame: leg.frame, flip: leg.flip } : { frame: 3, flip: false };
 
   return (
-    <section id="capabilities" className="ops ops-scanlines relative w-full overflow-hidden scroll-mt-24">
+    <section id="capabilities" className={cn("capability-network__section", "ops", "ops-scanlines")}>
       {/* Desert-ops legibility wash — kept light so the global boxed-line grid
           stays visible through it (no background image in this section). */}
-      <div
-        aria-hidden
-        className="absolute inset-0 z-[1] bg-[linear-gradient(180deg,rgba(20,17,12,0.5),rgba(20,17,12,0.16)_42%,rgba(20,17,12,0.06)_70%,rgba(20,17,12,0)_100%)]"
-      />
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-[3] h-28 bg-gradient-to-b from-canvas to-transparent" />
+      <div aria-hidden className="capability-network__wash" />
+      <div aria-hidden className="capability-network__fade" />
 
-      <h2 className="sr-only">Capabilities</h2>
+      <h2 className="capability-network__heading">Capabilities</h2>
 
-      <div className="relative z-5 w-full px-3 pt-2 pb-12 sm:px-5 sm:pb-16">
+      <div className="capability-network__wrap">
         {/* HUD */}
-        <div className="relative z-10 mb-1 flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-center font-pixel text-[0.5rem] uppercase tracking-wider text-ops-sand-faint">
+        <div className={cn("capability-network__hud", "font-pixel")}>
           <span>
             {reduce
               ? "// click an island to reveal its stack"
@@ -319,7 +317,7 @@ export function CapabilityNetwork() {
             dungeon-wall border. */}
         <div
           ref={stageRef}
-          className="pixelated relative h-[87vh] max-h-[1000px] min-h-[560px] w-full min-w-0 overflow-hidden"
+          className={cn("capability-network__stage", "pixelated")}
           style={{
             backgroundColor: "#0e1622",
             backgroundImage: "url(/capabg.webp)",
@@ -336,11 +334,11 @@ export function CapabilityNetwork() {
           {/* Invisible anchor cards — a structural layer pinning the ship home
               and every island slot, so the arrangement reads as a deliberate
               composition. Purely positional: no visible border / background. */}
-          <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
+          <div aria-hidden className="capability-network__anchors">
             {slots.map((slot, i) => (
               <div
                 key={i}
-                className="absolute -translate-x-1/2 -translate-y-1/2"
+                className="capability-network__anchor"
                 style={{ left: `${slot.xPct}%`, top: `${slot.yPct}%`, width: islandW * 1.35, aspectRatio: "1" }}
               />
             ))}
@@ -366,7 +364,7 @@ export function CapabilityNetwork() {
               trailSize={WAKE.trailSize}
               maxAge={WAKE.maxAge}
               interpolate={WAKE.interpolate}
-              className="pointer-events-none z-[45]"
+              className="capability-network__wake"
             />
           )}
 
@@ -393,7 +391,7 @@ export function CapabilityNetwork() {
               <motion.div
                 key={salvo.key}
                 aria-hidden
-                className="pointer-events-none absolute z-[46]"
+                className="capability-network__salvo"
                 style={{ left: slotPoint(salvo.index).x, top: slotPoint(salvo.index).y }}
                 initial={{ opacity: 0, scale: 0.4 }}
                 animate={{ opacity: [0, 1, 0], scale: [0.5, 1.2, 1.45] }}
@@ -405,7 +403,7 @@ export function CapabilityNetwork() {
                   src="/sprites/fire/explosive_fire.png"
                   alt=""
                   width={Math.round(islandW * 0.55)}
-                  className="pixelated -translate-x-1/2 -translate-y-1/2"
+                  className={cn("capability-network__salvo-img", "pixelated")}
                 />
               </motion.div>
             )}
@@ -415,7 +413,7 @@ export function CapabilityNetwork() {
           {size.w > 0 && (
             <motion.div
               aria-hidden
-              className="pointer-events-none absolute z-40"
+              className="capability-network__ship"
               style={{ left: 0, top: 0, width: 120, height: 96, marginLeft: -60, marginTop: -48 }}
               initial={{ x: home.x, y: home.y }}
               animate={{ x: shipTarget.x, y: shipTarget.y }}
@@ -446,7 +444,7 @@ export function CapabilityNetwork() {
                   flight, so the ship reads as actually sailing the swell; one
                   celebratory bounce right after docking (salvo). */}
               <motion.div
-                className="flex h-full w-full items-center justify-center"
+                className="capability-network__ship-inner"
                 animate={
                   !reduce && leg
                     ? { y: [0, -9, 0, 7, 0], rotate: [-3, 3, -2, 2, -3] }
@@ -466,7 +464,7 @@ export function CapabilityNetwork() {
                   frame={shipFrameProps.frame}
                   flip={shipFrameProps.flip}
                   width={shipW}
-                  className="drop-shadow-[0_10px_18px_rgba(0,0,0,0.6)]"
+                  className="capability-network__ship-art"
                 />
               </motion.div>
             </motion.div>

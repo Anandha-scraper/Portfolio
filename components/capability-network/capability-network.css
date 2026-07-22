@@ -1,0 +1,136 @@
+/* capability-network.tsx — static structural styles. The stage's
+   background/border-image (backgroundImage, borderImageSource, etc.) stays
+   inline — it's already a `style` object in the component. `.ops`,
+   `.ops-scanlines`, `.pixelated` are existing hand-written utilities from
+   app/globals.css, left as-is. Imported once from app/layout.tsx (see
+   components/book/magic-book.css for why). */
+
+.capability-network__section {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  scroll-margin-top: 6rem;
+}
+
+.capability-network__wash {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image: linear-gradient(
+    180deg,
+    rgba(20, 17, 12, 0.5),
+    rgba(20, 17, 12, 0.16) 42%,
+    rgba(20, 17, 12, 0.06) 70%,
+    rgba(20, 17, 12, 0) 100%
+  );
+}
+
+.capability-network__fade {
+  pointer-events: none;
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  z-index: 3;
+  height: 7rem;
+  background-image: linear-gradient(to bottom in oklab, var(--color-canvas) 0%, transparent 100%);
+}
+
+.capability-network__heading {
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border-width: 0;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  position: absolute;
+  overflow: hidden;
+}
+
+.capability-network__wrap {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  padding-inline: 0.75rem;
+  padding-top: 0.5rem;
+  padding-bottom: 3rem;
+}
+
+@media (min-width: 40rem) {
+  .capability-network__wrap {
+    padding-inline: 1.25rem;
+    padding-bottom: 4rem;
+  }
+}
+
+.capability-network__hud {
+  position: relative;
+  z-index: 10;
+  margin-bottom: 0.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  column-gap: 0.5rem;
+  row-gap: 0.5rem;
+  text-align: center;
+  font-size: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-ops-sand-faint);
+}
+
+.capability-network__stage {
+  position: relative;
+  height: 87vh;
+  max-height: 1000px;
+  min-height: 560px;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.capability-network__anchors {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.capability-network__anchor {
+  position: absolute;
+  translate: -50% -50%;
+}
+
+.capability-network__wake {
+  pointer-events: none;
+  z-index: 45;
+}
+
+.capability-network__salvo {
+  pointer-events: none;
+  position: absolute;
+  z-index: 46;
+}
+
+.capability-network__salvo-img {
+  translate: -50% -50%;
+}
+
+.capability-network__ship {
+  pointer-events: none;
+  position: absolute;
+  z-index: 40;
+}
+
+.capability-network__ship-inner {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.capability-network__ship-art {
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.6));
+}

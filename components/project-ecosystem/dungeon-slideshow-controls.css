@@ -1,0 +1,84 @@
+/* dungeon-slideshow-controls.tsx — static structural styles. Imported once
+   from app/layout.tsx (see components/book/magic-book.css for why). */
+
+.slideshow-controls__bar {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--color-ops-line);
+  background-color: #14110ce6;
+  padding-block: 0.5rem;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .slideshow-controls__bar {
+    background-color: color-mix(in oklab, var(--color-ops-base) 90%, transparent);
+  }
+}
+
+@media (min-width: 64rem) {
+  .slideshow-controls__bar {
+    inset-inline: auto;
+    right: 0.75rem;
+    top: 0.75rem;
+    justify-content: flex-start;
+    gap: 0.375rem;
+    border-bottom: 0;
+    background-color: transparent;
+    padding-block: 0;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+.slideshow-controls__btn {
+  display: flex;
+  height: 2.75rem;
+  width: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3.40282e38px;
+  border-width: 2px;
+  border-style: solid;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 0.15s;
+  border-color: var(--color-ops-line);
+  background-color: #14110cb3;
+  color: var(--color-ops-sand-soft);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .slideshow-controls__btn {
+    background-color: color-mix(in oklab, var(--color-ops-base) 70%, transparent);
+  }
+}
+
+@media (hover: hover) {
+  .slideshow-controls__btn:hover:not(.slideshow-controls__btn--lit) {
+    border-color: color-mix(in oklab, var(--color-ops-rust) 50%, transparent);
+    color: var(--color-ops-sand);
+  }
+}
+
+.slideshow-controls__btn--lit {
+  border-color: var(--color-ops-rust);
+  background-color: #e2582240;
+  color: var(--color-ops-sand);
+  box-shadow: 0 0 14px rgba(226, 88, 34, 0.5);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .slideshow-controls__btn--lit {
+    background-color: color-mix(in oklab, var(--color-ops-rust) 25%, transparent);
+  }
+}

@@ -1,0 +1,9 @@
+/* dungeon-frame.tsx — static structural style. The border-image/wall-width
+   styling stays inline (already a `style` object in the component, driven
+   by the `wall` prop). `.pixelated` is the existing hand-written utility
+   from app/globals.css, left as-is. Imported once from app/layout.tsx (see
+   components/book/magic-book.css for why). */
+
+.dungeon-frame {
+  position: relative;
+}

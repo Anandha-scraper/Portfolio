@@ -29,22 +29,16 @@ export function ProjectEcosystem() {
   }, []);
 
   return (
-    <section
-      id="ecosystem"
-      className="ops ops-scanlines relative w-full scroll-mt-24 overflow-hidden"
-    >
+    <section id="ecosystem" className={cn("project-ecosystem__section", "ops", "ops-scanlines")}>
       {/* Legibility wash — light, and transparent at both edges so the global
           boxed-line grid runs seamlessly into the sections above and below (no
           dark band at the boundaries). */}
-      <div
-        aria-hidden
-        className="absolute inset-0 z-[1] bg-[linear-gradient(180deg,rgba(20,17,12,0)_0%,rgba(20,17,12,0.18)_45%,rgba(20,17,12,0)_100%)]"
-      />
+      <div aria-hidden className="project-ecosystem__wash" />
 
       <div
         className={cn(
-          "relative z-10 w-full px-2 py-1 transition-[padding] duration-400 sm:px-3 sm:py-1",
-          sidebarOpen && "lg:pl-[290px]"
+          "project-ecosystem__content",
+          sidebarOpen && "project-ecosystem__content--sidebar-open"
         )}
       >
         <Reveal delay={0.1}>

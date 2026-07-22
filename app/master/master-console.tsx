@@ -25,11 +25,9 @@ const ACCENT_OPTIONS = ["blue", "indigo", "violet", "coral", "emerald"] as const
 const CATEGORY_OPTIONS = ["web3", "platform", "enterprise", "data"] as const;
 const STATUS_OPTIONS = ["shipped", "finalist", "internal", "live"] as const;
 
-const inputCls =
-  "w-full rounded-sm border border-ops-line bg-black/40 px-2 py-1.5 text-sm text-ops-sand outline-none transition-colors focus:border-ops-rust/70";
-const labelCls = "mb-1 block font-pixel text-[0.55rem] uppercase tracking-widest text-ops-sand-faint";
-const btnCls =
-  "rounded-sm border border-ops-line px-3 py-1.5 font-pixel text-[0.6rem] uppercase tracking-wider text-ops-sand-soft transition-colors hover:border-ops-rust/60 hover:text-ops-rust";
+const inputCls = "master-console__input";
+const labelCls = cn("master-console__label", "font-pixel");
+const btnCls = cn("master-console__button", "font-pixel");
 
 type Tab = "skills" | "projects" | "import";
 
@@ -120,13 +118,11 @@ export function MasterConsole() {
   );
 
   return (
-    <main className="ops min-h-screen bg-ops-base px-4 py-8 font-pixel-readable text-ops-sand sm:px-8">
-      <div className="mx-auto max-w-4xl">
-        <header className="mb-6">
-          <h1 className="font-pixel text-lg uppercase tracking-widest text-ops-rust">
-            Master Console
-          </h1>
-          <p className="mt-1 text-sm text-ops-sand-soft">
+    <main className={cn("master-console", "ops", "font-pixel-readable")}>
+      <div className="master-console__inner">
+        <header className="master-console__header">
+          <h1 className={cn("master-console__title", "font-pixel")}>Master Console</h1>
+          <p className="master-console__subtitle">
             Edits write straight into <code>data/skills.ts</code> / <code>data/projects.ts</code> on
             disk (local dev only). Inline comments in those files are replaced by generated headers
             on first save. Review with <code>git diff</code>, then commit yourself.
@@ -134,30 +130,23 @@ export function MasterConsole() {
         </header>
 
         {sidecarUp === false && (
-          <div className="mb-4 rounded-sm border border-ops-rust/60 bg-ops-rust/10 p-3 text-sm">
-            <strong className="font-pixel text-[0.6rem] uppercase tracking-wider text-ops-rust">
-              Dev only
-            </strong>{" "}
+          <div className={cn("master-console__banner", "master-console__banner--warn")}>
+            <strong className={cn("master-console__banner-strong", "font-pixel")}>Dev only</strong>{" "}
             — the save sidecar isn&apos;t reachable. Run{" "}
-            <code className="text-ops-rust">npm run master</code> next to{" "}
-            <code className="text-ops-rust">npm run dev</code>, then reload. On the deployed site
+            <code className="master-console__code">npm run master</code> next to{" "}
+            <code className="master-console__code">npm run dev</code>, then reload. On the deployed site
             this console is read-only by design.
           </div>
         )}
 
         {/* tabs */}
-        <div className="mb-5 flex gap-1 border-b border-ops-line">
+        <div className="master-console__tabs">
           {(["skills", "projects", "import"] as Tab[]).map((t) => (
             <button
               key={t}
               type="button"
               onClick={() => setTab(t)}
-              className={cn(
-                "rounded-t-sm px-4 py-2 font-pixel text-[0.6rem] uppercase tracking-wider transition-colors",
-                tab === t
-                  ? "border border-b-0 border-ops-line bg-ops-rust/10 text-ops-rust"
-                  : "text-ops-sand-faint hover:text-ops-sand",
-              )}
+              className={cn("master-console__tab", "font-pixel", tab === t && "master-console__tab--active")}
             >
               {t}
             </button>
@@ -167,10 +156,8 @@ export function MasterConsole() {
         {message && (
           <div
             className={cn(
-              "mb-4 rounded-sm border p-2 text-sm",
-              message.kind === "ok"
-                ? "border-emerald/50 bg-emerald/10 text-emerald"
-                : "border-ops-rust/60 bg-ops-rust/10 text-ops-rust",
+              "master-console__banner",
+              message.kind === "ok" ? "master-console__banner--ok" : "master-console__banner--err"
             )}
           >
             {message.text}
@@ -179,14 +166,12 @@ export function MasterConsole() {
 
         {/* ---- Skills tab ---- */}
         {tab === "skills" && (
-          <div className="space-y-5">
+          <div className="master-console__stack--5">
             {skills.map((cat, ci) => (
-              <section key={cat.id} className="rounded-sm border border-ops-line bg-black/30 p-4">
-                <div className="mb-2 flex items-center justify-between">
-                  <h2 className="font-pixel text-[0.7rem] uppercase tracking-widest text-ops-sand">
-                    {cat.label}
-                  </h2>
-                  <span className="text-xs text-ops-sand-faint">{cat.skills.length} skills</span>
+              <section key={cat.id} className="master-console__section">
+                <div className="master-console__section-head">
+                  <h2 className={cn("master-console__section-title", "font-pixel")}>{cat.label}</h2>
+                  <span className="master-console__meta">{cat.skills.length} skills</span>
                 </div>
                 <label className={labelCls}>Blurb</label>
                 <textarea
@@ -195,11 +180,11 @@ export function MasterConsole() {
                   onChange={(e) =>
                     setSkills((s) => s.map((c, i) => (i === ci ? { ...c, blurb: e.target.value } : c)))
                   }
-                  className={cn(inputCls, "resize-y")}
+                  className={cn(inputCls, "master-console__input--resize")}
                 />
-                <div className="mt-3 space-y-2">
+                <div className={cn("master-console__stack--2", "master-console__skill-rows")}>
                   {cat.skills.map((skill, si) => (
-                    <div key={si} className="flex flex-wrap items-center gap-2">
+                    <div key={si} className="master-console__row">
                       <input
                         value={skill.name}
                         placeholder="Skill name"
@@ -212,7 +197,7 @@ export function MasterConsole() {
                             ),
                           )
                         }
-                        className={cn(inputCls, "w-auto min-w-40 flex-1")}
+                        className={cn(inputCls, "master-console__input--flex-40")}
                       />
                       <input
                         type="number"
@@ -233,7 +218,7 @@ export function MasterConsole() {
                             ),
                           )
                         }
-                        className={cn(inputCls, "w-20")}
+                        className={cn(inputCls, "master-console__input--w20")}
                       />
                       <input
                         value={skill.note ?? ""}
@@ -252,7 +237,7 @@ export function MasterConsole() {
                             ),
                           )
                         }
-                        className={cn(inputCls, "w-auto min-w-32 flex-1")}
+                        className={cn(inputCls, "master-console__input--flex-32")}
                       />
                       <button
                         type="button"
@@ -262,7 +247,7 @@ export function MasterConsole() {
                             s.map((c, i) => (i === ci ? { ...c, skills: c.skills.filter((_, j) => j !== si) } : c)),
                           )
                         }
-                        className="px-1 text-ops-sand-faint hover:text-ops-rust"
+                        className="master-console__remove"
                       >
                         ✕
                       </button>
@@ -276,13 +261,17 @@ export function MasterConsole() {
                       s.map((c, i) => (i === ci ? { ...c, skills: [...c.skills, { name: "", level: 50 }] } : c)),
                     )
                   }
-                  className={cn(btnCls, "mt-3")}
+                  className={cn(btnCls, "master-console__mt-3")}
                 >
                   + Add skill
                 </button>
               </section>
             ))}
-            <button type="button" onClick={() => save("skills", skills)} className={cn(btnCls, "border-ops-rust/60 text-ops-rust")}>
+            <button
+              type="button"
+              onClick={() => save("skills", skills)}
+              className={cn(btnCls, "master-console__button--save")}
+            >
               Save → data/skills.ts
             </button>
           </div>
@@ -290,19 +279,17 @@ export function MasterConsole() {
 
         {/* ---- Projects tab ---- */}
         {tab === "projects" && (
-          <div className="flex flex-col gap-5 md:flex-row">
-            <aside className="shrink-0 md:w-48">
-              <ul className="space-y-1">
+          <div className="master-console__projects-layout">
+            <aside className="master-console__project-nav">
+              <ul className="master-console__stack--1">
                 {projs.map((p) => (
                   <li key={p.id}>
                     <button
                       type="button"
                       onClick={() => setEditingId(p.id)}
                       className={cn(
-                        "w-full rounded-sm border px-2 py-1.5 text-left text-sm transition-colors",
-                        editingId === p.id
-                          ? "border-ops-rust/60 bg-ops-rust/10 text-ops-rust"
-                          : "border-ops-line text-ops-sand-soft hover:text-ops-sand",
+                        "master-console__project-item",
+                        editingId === p.id && "master-console__project-item--active"
                       )}
                     >
                       {p.name}
@@ -310,7 +297,11 @@ export function MasterConsole() {
                   </li>
                 ))}
               </ul>
-              <button type="button" onClick={() => addProjectDraft({})} className={cn(btnCls, "mt-3 w-full")}>
+              <button
+                type="button"
+                onClick={() => addProjectDraft({})}
+                className={cn(btnCls, "master-console__mt-3", "master-console__w-full")}
+              >
                 + New project
               </button>
             </aside>
@@ -327,17 +318,17 @@ export function MasterConsole() {
                 }}
               />
             ) : (
-              <p className="text-sm text-ops-sand-faint">Select a project to edit.</p>
+              <p className="master-console__empty-hint">Select a project to edit.</p>
             )}
 
-            <div className="md:hidden" />
+            <div className="master-console__spacer" />
           </div>
         )}
         {tab === "projects" && (
           <button
             type="button"
             onClick={() => save("projects", projs)}
-            className={cn(btnCls, "mt-5 border-ops-rust/60 text-ops-rust")}
+            className={cn(btnCls, "master-console__mt-5", "master-console__button--save")}
           >
             Save → data/projects.ts
           </button>
@@ -345,8 +336,8 @@ export function MasterConsole() {
 
         {/* ---- Import tab ---- */}
         {tab === "import" && (
-          <div className="space-y-4">
-            <p className="text-sm text-ops-sand-soft">
+          <div className="master-console__stack--4">
+            <p className="master-console__import-intro">
               Paste freeform project notes (a README intro, a description, bullet points, links…).
               &ldquo;Parse&rdquo; heuristically maps them into a project draft you can review in the
               Projects tab — or copy a ready-made prompt and hand the notes to Claude Code instead.
@@ -356,14 +347,14 @@ export function MasterConsole() {
               onChange={(e) => setImportText(e.target.value)}
               rows={12}
               placeholder={"Skyloom — weather analytics dashboard\nstack: Next.js, TypeScript, PostgreSQL\nhttps://github.com/me/skyloom\n- NASA POWER data with graceful fallbacks\n- Trend detection and custom ranges\nShipped 2024."}
-              className={cn(inputCls, "resize-y font-mono text-xs")}
+              className={cn(inputCls, "master-console__input--resize", "master-console__input--mono", "font-mono")}
             />
-            <div className="flex flex-wrap gap-2">
+            <div className="master-console__button-row">
               <button
                 type="button"
                 disabled={!importText.trim()}
                 onClick={() => addProjectDraft(parseProjectDraft(importText))}
-                className={cn(btnCls, "disabled:opacity-40")}
+                className={cn(btnCls, "master-console__button--disabled")}
               >
                 Parse → project draft
               </button>
@@ -374,7 +365,7 @@ export function MasterConsole() {
                   navigator.clipboard?.writeText(buildClaudePrompt(importText));
                   setMessage({ kind: "ok", text: "Claude Code prompt copied to clipboard." });
                 }}
-                className={cn(btnCls, "disabled:opacity-40")}
+                className={cn(btnCls, "master-console__button--disabled")}
               >
                 Copy Claude Code prompt
               </button>
@@ -403,17 +394,17 @@ function ProjectForm({
   const fromLines = (v: string) => v.split("\n").map((s) => s.trim()).filter(Boolean);
 
   return (
-    <div className="min-w-0 flex-1 space-y-3">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <div className={cn("master-console__form", "master-console__stack--3")}>
+      <div className="master-console__grid">
         <div>
           <label className={labelCls}>Id (slug)</label>
-          <input value={project.id} readOnly className={cn(inputCls, "opacity-60")} />
+          <input value={project.id} readOnly className={cn(inputCls, "master-console__input--dim")} />
         </div>
         <div>
           <label className={labelCls}>Name</label>
           <input value={project.name} onChange={(e) => onChange({ name: e.target.value })} className={inputCls} />
         </div>
-        <div className="sm:col-span-2">
+        <div className="master-console__grid-span2">
           <label className={labelCls}>Tagline</label>
           <input value={project.tagline} onChange={(e) => onChange({ tagline: e.target.value })} className={inputCls} />
         </div>
@@ -465,7 +456,7 @@ function ProjectForm({
           value={project.overview}
           rows={3}
           onChange={(e) => onChange({ overview: e.target.value })}
-          className={cn(inputCls, "resize-y")}
+          className={cn(inputCls, "master-console__input--resize")}
         />
       </div>
       <div>
@@ -474,7 +465,7 @@ function ProjectForm({
           value={lines(project.highlights)}
           rows={4}
           onChange={(e) => onChange({ highlights: fromLines(e.target.value) })}
-          className={cn(inputCls, "resize-y")}
+          className={cn(inputCls, "master-console__input--resize")}
         />
       </div>
       <div>
@@ -488,16 +479,16 @@ function ProjectForm({
 
       <div>
         <label className={labelCls}>Metrics</label>
-        <div className="space-y-2">
+        <div className="master-console__stack--2">
           {project.metrics.map((m, i) => (
-            <div key={i} className="flex flex-wrap items-center gap-2">
+            <div key={i} className="master-console__row">
               <input
                 value={m.label}
                 placeholder="label"
                 onChange={(e) =>
                   onChange({ metrics: project.metrics.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)) })
                 }
-                className={cn(inputCls, "w-auto min-w-36 flex-1")}
+                className={cn(inputCls, "master-console__input--flex-36")}
               />
               <input
                 type="number"
@@ -505,7 +496,7 @@ function ProjectForm({
                 onChange={(e) =>
                   onChange({ metrics: project.metrics.map((x, j) => (j === i ? { ...x, value: Number(e.target.value) } : x)) })
                 }
-                className={cn(inputCls, "w-24")}
+                className={cn(inputCls, "master-console__input--w24")}
               />
               <input
                 value={m.prefix ?? ""}
@@ -515,7 +506,7 @@ function ProjectForm({
                     metrics: project.metrics.map((x, j) => (j === i ? { ...x, prefix: e.target.value || undefined } : x)),
                   })
                 }
-                className={cn(inputCls, "w-24")}
+                className={cn(inputCls, "master-console__input--w24")}
               />
               <input
                 value={m.suffix ?? ""}
@@ -525,13 +516,13 @@ function ProjectForm({
                     metrics: project.metrics.map((x, j) => (j === i ? { ...x, suffix: e.target.value || undefined } : x)),
                   })
                 }
-                className={cn(inputCls, "w-24")}
+                className={cn(inputCls, "master-console__input--w24")}
               />
               <button
                 type="button"
                 aria-label="Remove metric"
                 onClick={() => onChange({ metrics: project.metrics.filter((_, j) => j !== i) })}
-                className="px-1 text-ops-sand-faint hover:text-ops-rust"
+                className="master-console__remove"
               >
                 ✕
               </button>
@@ -541,13 +532,13 @@ function ProjectForm({
         <button
           type="button"
           onClick={() => onChange({ metrics: [...project.metrics, { label: "", value: 0 }] })}
-          className={cn(btnCls, "mt-2")}
+          className={cn(btnCls, "master-console__mt-2")}
         >
           + Add metric
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="master-console__grid">
         <div>
           <label className={labelCls}>GitHub link</label>
           <input
@@ -584,12 +575,12 @@ function ProjectForm({
           rows={3}
           placeholder={`/projects/${project.id}/01.png`}
           onChange={(e) => onChange({ previewImages: fromLines(e.target.value) })}
-          className={cn(inputCls, "resize-y font-mono text-xs")}
+          className={cn(inputCls, "master-console__input--resize", "master-console__input--mono", "font-mono")}
         />
       </div>
 
-      <div className="flex items-center justify-between pt-1">
-        <label className="flex items-center gap-2 text-sm">
+      <div className="master-console__footer-row">
+        <label className="master-console__checkbox-label">
           <input
             type="checkbox"
             checked={project.featured}
@@ -597,7 +588,7 @@ function ProjectForm({
           />
           Featured
         </label>
-        <button type="button" onClick={onDelete} className={cn(btnCls, "hover:border-ops-rust hover:text-ops-rust")}>
+        <button type="button" onClick={onDelete} className={cn(btnCls, "master-console__button--danger")}>
           Delete project
         </button>
       </div>

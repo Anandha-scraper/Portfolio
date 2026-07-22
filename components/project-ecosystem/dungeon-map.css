@@ -1,0 +1,124 @@
+/* dungeon-map.tsx — static structural styles, migrated off Tailwind utility
+   strings. Hand-written/theme-derived single-purpose utilities already
+   defined in app/globals.css (`.pixelated`, `.font-pixel`,
+   `.font-pixel-readable`) are left as-is in the component — they're already
+   uniquely-named single-rule classes, not utility soup, so there's nothing
+   to migrate. Imported once from app/layout.tsx (see
+   components/book/magic-book.css for why). */
+
+.dungeon-map__hud {
+  margin-bottom: -1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  column-gap: 0.75rem;
+  row-gap: 0.5rem;
+  text-align: center;
+  font-size: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-ops-sand-faint);
+}
+
+.dungeon-map__hud-highlight {
+  color: var(--color-ops-sand-soft);
+}
+
+.dungeon-map__hud-note {
+  color: var(--color-ops-sand-faint);
+}
+
+.dungeon-map__viewport {
+  position: relative;
+  height: clamp(520px, 82vh, 1000px);
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--color-ops-base);
+  outline-style: none;
+}
+
+.dungeon-map__viewport--aiming {
+  cursor: none;
+}
+
+.dungeon-map__map-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+}
+
+.dungeon-map__aim {
+  pointer-events: none;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 30;
+  will-change: transform;
+  opacity: 0;
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 0.15s;
+}
+
+.dungeon-map__aim--visible {
+  opacity: 1;
+}
+
+.dungeon-map__vignette {
+  pointer-events: none;
+  position: absolute;
+  z-index: 20;
+}
+
+.dungeon-map__vignette--left {
+  inset-block: 0;
+  left: 0;
+  width: 4rem;
+  background-image: linear-gradient(to right in oklab, #14110cb3 0%, transparent 100%);
+}
+
+.dungeon-map__vignette--right {
+  inset-block: 0;
+  right: 0;
+  width: 4rem;
+  background-image: linear-gradient(to left in oklab, #14110cb3 0%, transparent 100%);
+}
+
+.dungeon-map__vignette--top {
+  inset-inline: 0;
+  top: 0;
+  height: 3rem;
+  background-image: linear-gradient(to bottom in oklab, #14110cb3 0%, transparent 100%);
+}
+
+.dungeon-map__vignette--bottom {
+  inset-inline: 0;
+  bottom: 0;
+  height: 3rem;
+  background-image: linear-gradient(to top in oklab, #14110cb3 0%, transparent 100%);
+}
+
+.dungeon-map__hint {
+  pointer-events: none;
+  position: absolute;
+  bottom: 0.75rem;
+  left: 50%;
+  z-index: 40;
+  transform: translateX(-50%);
+  border-radius: 0.25rem;
+  border: 1px solid var(--color-ops-line);
+  background-color: #14110ccc;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  color: var(--color-ops-sand-soft);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .dungeon-map__hint {
+    background-color: color-mix(in oklab, var(--color-ops-base) 80%, transparent);
+  }
+}

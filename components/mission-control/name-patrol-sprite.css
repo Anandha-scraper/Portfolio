@@ -1,0 +1,13 @@
+/* name-patrol-sprite.tsx — static structural styles. Imported once from
+   app/layout.tsx (see components/book/magic-book.css for why). */
+
+.name-patrol__track {
+  position: relative;
+}
+
+.name-patrol__sprite-wrap {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  will-change: transform;
+}

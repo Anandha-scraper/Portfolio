@@ -27,7 +27,7 @@ export function DungeonFrame({
 }: DungeonFrameProps) {
   return (
     <div
-      className={cn("pixelated relative", className)}
+      className={cn("dungeon-frame", "pixelated", className)}
       style={{
         borderStyle: "solid",
         borderWidth: wall,

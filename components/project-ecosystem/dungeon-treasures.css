@@ -1,0 +1,64 @@
+/* dungeon-treasures.tsx — static structural styles. Per-marker position
+   (left/top/width/height, computed from TREASURE_POINTS) and the
+   near-dependent inline boxShadow stay inline in the component — those are
+   genuinely dynamic per marker/state. `.pixelated` and `.cursor-pointer`
+   are existing hand-written utilities from app/globals.css, left as-is.
+   Imported once from app/layout.tsx (see components/book/magic-book.css
+   for why). */
+
+.dungeon-treasures__layer {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+}
+
+.dungeon-treasures__marker {
+  pointer-events: auto;
+  position: absolute;
+  border-width: 0;
+  background-color: transparent;
+  padding: 0;
+  scale: 100% 100%;
+  transition-property: scale;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 0.15s;
+}
+
+.dungeon-treasures__marker:hover,
+.dungeon-treasures__marker--near {
+  scale: 110% 110%;
+}
+
+.dungeon-treasures__glow {
+  position: absolute;
+  inset: -0.5rem;
+  border-radius: 3.40282e38px;
+  border-width: 2px;
+  border-style: solid;
+  border-color: #e25822b3;
+  opacity: 0;
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 0.15s;
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .dungeon-treasures__glow {
+    border-color: color-mix(in oklab, var(--color-ops-rust) 70%, transparent);
+  }
+}
+
+.dungeon-treasures__glow--near {
+  opacity: 1;
+  animation: dungeon-treasures-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes dungeon-treasures-pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.dungeon-treasures__icon {
+  position: relative;
+}

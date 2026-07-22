@@ -1,0 +1,62 @@
+/* not-found.tsx — static structural styles. `.section-pad`, `.bg-blueprint`,
+   `.eyebrow`, `.text-gradient-blue` are existing hand-written utilities
+   from app/globals.css, left as-is. Imported once from app/layout.tsx (see
+   components/book/magic-book.css for why). */
+
+.not-found {
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.not-found__backdrop {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: -10;
+  opacity: 0.4;
+  mask-image: radial-gradient(ellipse at center, black, transparent 70%);
+}
+
+.not-found__eyebrow {
+  margin-bottom: 1rem;
+}
+
+.not-found__code {
+  font-size: clamp(3rem, 12vw, 7rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.025em;
+}
+
+.not-found__desc {
+  margin-top: 1rem;
+  max-width: 28rem;
+  color: var(--color-ink-muted);
+}
+
+.not-found__link {
+  margin-top: 2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 3.40282e38px;
+  background-color: var(--color-ink);
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  line-height: 1.42857;
+  font-weight: 500;
+  color: var(--color-canvas);
+  transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 0.15s;
+}
+
+@media (hover: hover) {
+  .not-found__link:hover {
+    background-color: var(--color-ink-soft);
+  }
+}

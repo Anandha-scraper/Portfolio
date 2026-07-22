@@ -308,12 +308,12 @@ export const Particles: React.FC<ParticlesProps> = ({
 
   return (
     <div
-      className={cn("pointer-events-none", className)}
+      className={cn("particles", className)}
       ref={canvasContainerRef}
       aria-hidden="true"
       {...props}
     >
-      <canvas ref={canvasRef} className="size-full" />
+      <canvas ref={canvasRef} className="particles__canvas" />
     </div>
   );
 };

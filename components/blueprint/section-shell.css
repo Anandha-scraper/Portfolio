@@ -1,0 +1,41 @@
+/* section-shell.tsx — static structural styles. `.section-pad` is the
+   existing hand-written utility from app/globals.css, left as-is. Imported
+   once from app/layout.tsx (see components/book/magic-book.css for why). */
+
+.section-shell {
+  position: relative;
+  scroll-margin-top: 6rem;
+  overflow: hidden;
+}
+
+.section-shell--default {
+  padding-block: 5rem;
+}
+
+@media (min-width: 40rem) {
+  .section-shell--default {
+    padding-block: 7rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .section-shell--default {
+    padding-block: 9rem;
+  }
+}
+
+.section-shell--tight {
+  padding-block: 3.5rem;
+}
+
+@media (min-width: 40rem) {
+  .section-shell--tight {
+    padding-block: 5rem;
+  }
+}
+
+.section-shell__inner {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 80rem;
+}

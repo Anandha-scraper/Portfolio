@@ -20,12 +20,13 @@ export function SectionShell({
     <section
       id={id}
       className={cn(
-        "section-pad relative scroll-mt-24 overflow-hidden",
-        spacing === "default" ? "py-20 sm:py-28 lg:py-36" : "py-14 sm:py-20",
+        "section-shell",
+        "section-pad",
+        spacing === "default" ? "section-shell--default" : "section-shell--tight",
         className
       )}
     >
-      <div className="mx-auto w-full max-w-7xl">{children}</div>
+      <div className="section-shell__inner">{children}</div>
     </section>
   );
 }

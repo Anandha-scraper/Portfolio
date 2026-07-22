@@ -1,0 +1,19 @@
+/* ship.tsx — static structural styles. `.animate-ship-bob`/`.pixelated` are
+   existing theme-derived/hand-written utilities, left as-is. Imported once
+   from app/layout.tsx (see components/book/magic-book.css for why). */
+
+.ship {
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ship {
+    animation: none;
+  }
+}
+
+.ship__img {
+  height: auto;
+  -webkit-user-select: none;
+  user-select: none;
+}

@@ -115,9 +115,9 @@ export function NamePatrolSprite({
     <div
       ref={trackRef}
       aria-hidden
-      className={cn("relative", className)}
+      className={cn("name-patrol__track", className)}
     >
-      <div ref={wrapRef} className="absolute left-0 top-1/2 will-change-transform">
+      <div ref={wrapRef} className="name-patrol__sprite-wrap">
         <PixelSprite
           src={frame.src}
           frames={frame.frames}

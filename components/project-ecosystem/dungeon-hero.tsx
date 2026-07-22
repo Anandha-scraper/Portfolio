@@ -41,7 +41,7 @@ export const DungeonHero = forwardRef<HTMLDivElement, DungeonHeroProps>(
       <div
         ref={ref}
         aria-hidden
-        className="absolute left-0 top-0 z-20 will-change-transform"
+        className="dungeon-hero__root"
         style={{ width: HERO_PX, height: HERO_PX }}
       >
         {action === "attack" ? (

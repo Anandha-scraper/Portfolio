@@ -1,0 +1,70 @@
+/* magic-book.tsx — static structural styles only. Genuinely dynamic values
+   (canvas width/height, the fontSize scale, and each line's revealed state)
+   stay as inline `style` in the component; this file covers everything
+   that's identical on every render. Imported once from app/layout.tsx —
+   Next.js's App Router only allows plain global CSS to be imported from the
+   root layout, not from arbitrary component files. */
+
+.magic-book__root {
+  position: relative;
+}
+
+.magic-book__canvas {
+  image-rendering: pixelated;
+}
+
+.magic-book__overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.magic-book__text-box {
+  position: absolute;
+  top: 34%;
+  height: 55%;
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+/* Page 0's left box sits on the clean static "open" frame; every later
+   page settles on turning_pages_left.png's last frame, which draws a seam
+   near x=11% marking the stack of already-turned pages, so it needs extra
+   left clearance. See magic-book.tsx's own comment for the full context. */
+.magic-book__text-box--left-first {
+  left: 10.5%;
+  width: 35%;
+}
+
+.magic-book__text-box--left-rest {
+  left: 13%;
+  width: 32%;
+}
+
+.magic-book__text-box--right {
+  right: 11%;
+  width: 35%;
+}
+
+.magic-book__lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  padding: 0.4em;
+  line-height: 1.4;
+  font-family: var(--font-pixel-readable);
+  color: #4a3420;
+}
+
+.magic-book__line {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 300ms ease, transform 300ms ease;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.magic-book__line--revealed {
+  opacity: 1;
+  transform: translateY(0);
+}

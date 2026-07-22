@@ -1,0 +1,432 @@
+/* master-console.tsx — static structural styles for the dev-only /master
+   content console (see the doc comment at the top of master-console.tsx —
+   never functional on the deployed site). `.ops`/`.font-pixel`/
+   `.font-pixel-readable`/`.font-mono` are existing theme-derived utilities,
+   left as-is. Imported once from app/layout.tsx (see
+   components/book/magic-book.css for why).
+
+   The `master-console__stack--N` classes replicate Tailwind's `space-y-N`
+   (margin between children, skipping the last) as a fixed set of variants
+   rather than one class per spacing value used. Width modifiers on
+   `master-console__input` mirror the exact Tailwind width utilities they
+   replace (w-20, w-24, min-w-32/36/40) rather than inventing new names, to
+   keep the mapping obvious and 1:1. */
+
+.master-console {
+  min-height: 100vh;
+  background-color: var(--color-ops-base);
+  padding: 2rem 1rem;
+}
+
+@media (min-width: 40rem) {
+  .master-console {
+    padding-inline: 2rem;
+  }
+}
+
+.master-console__inner {
+  margin-inline: auto;
+  max-width: 56rem;
+}
+
+.master-console__header {
+  margin-bottom: 1.5rem;
+}
+
+.master-console__title {
+  font-size: 1.125rem;
+  line-height: calc(1.75 / 1.125);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-ops-rust);
+}
+
+.master-console__subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  line-height: 1.42857;
+  color: var(--color-ops-sand-soft);
+}
+
+.master-console__banner {
+  margin-bottom: 1rem;
+  border-radius: 0.25rem;
+  border-width: 1px;
+  border-style: solid;
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.42857;
+}
+
+.master-console__banner--warn {
+  border-color: color-mix(in oklab, var(--color-ops-rust) 60%, transparent);
+  background-color: color-mix(in oklab, var(--color-ops-rust) 10%, transparent);
+}
+
+.master-console__banner--ok {
+  border-color: color-mix(in oklab, var(--color-emerald) 50%, transparent);
+  background-color: color-mix(in oklab, var(--color-emerald) 10%, transparent);
+  color: var(--color-emerald);
+}
+
+.master-console__banner--err {
+  border-color: color-mix(in oklab, var(--color-ops-rust) 60%, transparent);
+  background-color: color-mix(in oklab, var(--color-ops-rust) 10%, transparent);
+  color: var(--color-ops-rust);
+}
+
+.master-console__banner-strong {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-ops-rust);
+}
+
+.master-console__code {
+  color: var(--color-ops-rust);
+}
+
+.master-console__tabs {
+  margin-bottom: 1.25rem;
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--color-ops-line);
+}
+
+.master-console__tab {
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
+  padding: 0.5rem 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.6rem;
+  transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 0.15s;
+  color: var(--color-ops-sand-faint);
+}
+
+@media (hover: hover) {
+  .master-console__tab:hover:not(.master-console__tab--active) {
+    color: var(--color-ops-sand);
+  }
+}
+
+.master-console__tab--active {
+  border-width: 1px;
+  border-bottom-width: 0;
+  border-style: solid;
+  border-color: var(--color-ops-line);
+  background-color: color-mix(in oklab, var(--color-ops-rust) 10%, transparent);
+  color: var(--color-ops-rust);
+}
+
+.master-console__stack--5 > :not(:last-child) {
+  margin-bottom: 1.25rem;
+}
+
+.master-console__stack--4 > :not(:last-child) {
+  margin-bottom: 1rem;
+}
+
+.master-console__stack--3 > :not(:last-child) {
+  margin-bottom: 0.75rem;
+}
+
+.master-console__stack--2 > :not(:last-child) {
+  margin-bottom: 0.5rem;
+}
+
+.master-console__skill-rows {
+  margin-top: 0.75rem;
+}
+
+.master-console__stack--1 > :not(:last-child) {
+  margin-bottom: 0.25rem;
+}
+
+.master-console__section {
+  border-radius: 0.25rem;
+  border: 1px solid var(--color-ops-line);
+  background-color: #0000004d;
+  padding: 1rem;
+}
+
+.master-console__section-head {
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.master-console__section-title {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-ops-sand);
+}
+
+.master-console__meta {
+  font-size: 0.75rem;
+  line-height: calc(1 / 0.75);
+  color: var(--color-ops-sand-faint);
+}
+
+.master-console__label {
+  margin-bottom: 0.25rem;
+  display: block;
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-ops-sand-faint);
+}
+
+.master-console__input {
+  width: 100%;
+  border-radius: 0.25rem;
+  border: 1px solid var(--color-ops-line);
+  background-color: #00000066;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.42857;
+  color: var(--color-ops-sand);
+  outline-style: none;
+  transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 0.15s;
+}
+
+.master-console__input:focus {
+  border-color: color-mix(in oklab, var(--color-ops-rust) 70%, transparent);
+}
+
+.master-console__input--resize {
+  resize: vertical;
+}
+
+.master-console__input--flex {
+  width: auto;
+  flex: 1 1 0%;
+}
+
+.master-console__input--flex-32 {
+  width: auto;
+  flex: 1 1 0%;
+  min-width: 8rem;
+}
+
+.master-console__input--flex-36 {
+  width: auto;
+  flex: 1 1 0%;
+  min-width: 9rem;
+}
+
+.master-console__input--flex-40 {
+  width: auto;
+  flex: 1 1 0%;
+  min-width: 10rem;
+}
+
+.master-console__input--w20 {
+  width: 5rem;
+}
+
+.master-console__input--w24 {
+  width: 6rem;
+}
+
+.master-console__input--dim {
+  opacity: 0.6;
+}
+
+.master-console__input--mono {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: calc(1 / 0.75);
+}
+
+.master-console__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.master-console__remove {
+  padding-inline: 0.25rem;
+  color: var(--color-ops-sand-faint);
+}
+
+@media (hover: hover) {
+  .master-console__remove:hover {
+    color: var(--color-ops-rust);
+  }
+}
+
+.master-console__button {
+  border-radius: 0.25rem;
+  border: 1px solid var(--color-ops-line);
+  padding: 0.375rem 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.6rem;
+  color: var(--color-ops-sand-soft);
+  transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 0.15s;
+}
+
+@media (hover: hover) {
+  .master-console__button:hover {
+    border-color: color-mix(in oklab, var(--color-ops-rust) 60%, transparent);
+    color: var(--color-ops-rust);
+  }
+}
+
+.master-console__button--save {
+  border-color: color-mix(in oklab, var(--color-ops-rust) 60%, transparent);
+  color: var(--color-ops-rust);
+}
+
+.master-console__button--disabled:disabled {
+  opacity: 0.4;
+}
+
+.master-console__projects-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+@media (min-width: 48rem) {
+  .master-console__projects-layout {
+    flex-direction: row;
+  }
+}
+
+.master-console__project-nav {
+  flex-shrink: 0;
+}
+
+@media (min-width: 48rem) {
+  .master-console__project-nav {
+    width: 12rem;
+  }
+}
+
+.master-console__project-item {
+  width: 100%;
+  border-radius: 0.25rem;
+  border-width: 1px;
+  border-style: solid;
+  padding: 0.375rem 0.5rem;
+  text-align: left;
+  font-size: 0.875rem;
+  line-height: 1.42857;
+  transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 0.15s;
+  border-color: var(--color-ops-line);
+  color: var(--color-ops-sand-soft);
+}
+
+@media (hover: hover) {
+  .master-console__project-item:hover:not(.master-console__project-item--active) {
+    color: var(--color-ops-sand);
+  }
+}
+
+.master-console__project-item--active {
+  border-color: color-mix(in oklab, var(--color-ops-rust) 60%, transparent);
+  background-color: color-mix(in oklab, var(--color-ops-rust) 10%, transparent);
+  color: var(--color-ops-rust);
+}
+
+.master-console__empty-hint {
+  font-size: 0.875rem;
+  line-height: 1.42857;
+  color: var(--color-ops-sand-faint);
+}
+
+@media (min-width: 48rem) {
+  .master-console__spacer {
+    display: none;
+  }
+}
+
+.master-console__form {
+  min-width: 0;
+  flex: 1 1 0%;
+}
+
+.master-console__grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (min-width: 40rem) {
+  .master-console__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.master-console__grid-span2 {
+  grid-column: span 1;
+}
+
+@media (min-width: 40rem) {
+  .master-console__grid-span2 {
+    grid-column: span 2 / span 2;
+  }
+}
+
+.master-console__footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.25rem;
+}
+
+.master-console__checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.42857;
+}
+
+.master-console__mt-2 {
+  margin-top: 0.5rem;
+}
+
+.master-console__mt-3 {
+  margin-top: 0.75rem;
+}
+
+.master-console__mt-5 {
+  margin-top: 1.25rem;
+}
+
+.master-console__w-full {
+  width: 100%;
+}
+
+.master-console__import-intro {
+  font-size: 0.875rem;
+  line-height: 1.42857;
+  color: var(--color-ops-sand-soft);
+}
+
+.master-console__button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media (hover: hover) {
+  .master-console__button--danger:hover {
+    border-color: var(--color-ops-rust);
+    color: var(--color-ops-rust);
+  }
+}

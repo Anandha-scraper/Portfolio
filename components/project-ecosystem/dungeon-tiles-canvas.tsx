@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { DUNGEON, MAP_W, MAP_H } from "@/lib/dungeon-layout";
 import { ALL_USED_TILES, tileSrc } from "@/lib/dungeon-tiles";
+import { cn } from "@/lib/utils";
 
 /**
  * DungeonTilesCanvas — bakes the whole floor + wall grid into ONE <canvas>,
@@ -58,7 +59,7 @@ export function DungeonTilesCanvas() {
       width={MAP_W}
       height={MAP_H}
       aria-hidden
-      className="pixelated absolute left-0 top-0"
+      className={cn("dungeon-tiles-canvas", "pixelated")}
     />
   );
 }

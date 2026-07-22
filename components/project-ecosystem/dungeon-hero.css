@@ -1,0 +1,11 @@
+/* dungeon-hero.tsx — static structural style. width/height stay inline
+   (HERO_PX is computed from sprite art config, not a fixed constant).
+   Imported once from app/layout.tsx (see magic-book.css for why). */
+
+.dungeon-hero__root {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 20;
+  will-change: transform;
+}

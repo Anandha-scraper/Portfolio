@@ -21,25 +21,19 @@ export function SectionHeading({
 }: SectionHeadingProps) {
   return (
     <Reveal
-      className={cn(
-        "flex flex-col gap-4",
-        align === "center" && "items-center text-center",
-        className
-      )}
+      className={cn("section-heading", align === "center" && "section-heading--center", className)}
     >
-      <div className="flex items-center gap-3">
-        <span className="font-mono text-xs text-ink-faint">{index}</span>
-        <span className="h-px w-8 bg-hairline" />
+      <div className="section-heading__meta">
+        <span className={cn("section-heading__index", "font-mono")}>{index}</span>
+        <span className="section-heading__rule" />
         <span className="eyebrow">{eyebrow}</span>
       </div>
-      <h2 className="max-w-3xl text-balance text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-        {title}
-      </h2>
+      <h2 className="section-heading__title">{title}</h2>
       {description && (
         <p
           className={cn(
-            "max-w-2xl text-pretty text-base text-ink-muted sm:text-lg",
-            align === "center" && "mx-auto"
+            "section-heading__description",
+            align === "center" && "section-heading__description--center"
           )}
         >
           {description}

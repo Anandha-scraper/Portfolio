@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type MutableRefObject } from "react";
+import { cn } from "@/lib/utils";
 
 /**
  * DungeonTouchControls — virtual joystick + action button overlay for the
@@ -104,14 +105,10 @@ export function DungeonTouchControls({
       <div
         ref={baseRef}
         role="presentation"
-        className="absolute bottom-5 left-5 z-50 flex items-center justify-center rounded-full border-2 border-ops-line bg-ops-base/70 backdrop-blur-sm"
+        className="touch-controls__base"
         style={{ width: PAD, height: PAD, touchAction: "none" }}
       >
-        <div
-          ref={knobRef}
-          className="rounded-full border-2 border-ops-line bg-ops-sand-soft/30"
-          style={{ width: KNOB, height: KNOB }}
-        />
+        <div ref={knobRef} className="touch-controls__knob" style={{ width: KNOB, height: KNOB }} />
       </div>
 
       {/* action button */}
@@ -119,12 +116,7 @@ export function DungeonTouchControls({
         type="button"
         aria-label="Open nearby treasure"
         onClick={onInteract}
-        className={
-          "absolute bottom-8 right-6 z-50 flex h-16 w-16 items-center justify-center rounded-full border-2 font-pixel text-xl transition-all " +
-          (interactReady
-            ? "border-ops-rust bg-ops-rust/25 text-ops-sand shadow-[0_0_14px_rgba(226,88,34,0.5)]"
-            : "border-ops-line bg-ops-base/70 text-ops-sand-faint")
-        }
+        className={cn("touch-controls__action", "font-pixel", interactReady && "touch-controls__action--ready")}
         style={{ touchAction: "none" }}
       >
         ⚔

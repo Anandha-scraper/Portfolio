@@ -1,6 +1,7 @@
 "use client";
 
 import { memo } from "react";
+import type { CSSProperties } from "react";
 import { Icon } from "@/components/ui/icon";
 import { ACCENTS } from "@/lib/accents";
 import { cn } from "@/lib/utils";
@@ -56,17 +57,11 @@ function IslandNodeComponent({
       onMouseLeave={() => onHover(null)}
       onFocus={() => onHover(index)}
       onBlur={() => onHover(null)}
-      className={cn(
-        "group absolute -translate-x-1/2 -translate-y-1/2 select-none outline-none",
-        active ? "z-30" : "z-20"
-      )}
+      className={cn("island-node", active && "island-node--active")}
       style={{ left: `${slot.xPct}%`, top: `${slot.yPct}%`, width }}
     >
       <span
-        className={cn(
-          "block animate-ship-bob will-change-transform motion-reduce:animate-none",
-          "transition-[filter,transform] duration-300 group-hover:-translate-y-1 group-focus-visible:-translate-y-1"
-        )}
+        className={cn("island-node__art-wrap", "animate-ship-bob")}
         style={{
           filter: active
             ? `drop-shadow(0 0 12px ${accent.hex}) drop-shadow(0 10px 14px rgba(0,0,0,0.55))`
@@ -82,10 +77,7 @@ function IslandNodeComponent({
           }
           alt=""
           aria-hidden
-          className={cn(
-            "pixelated h-auto w-full origin-center transition-transform duration-500 ease-out",
-            atShip && "scale-150"
-          )}
+          className={cn("island-node__art", "pixelated", atShip && "island-node__art--docked")}
           draggable={false}
         />
       </span>
@@ -95,21 +87,14 @@ function IslandNodeComponent({
           ship is docked / sailing here. A second line surfaces the category's
           depth (skill count + honest average proficiency) right on the map. */}
       <span
-        className={cn(
-          "font-pixel mx-auto mt-1.5 flex flex-col items-center justify-center gap-1 rounded-sm border bg-black/70 px-2.5 py-1.5 uppercase leading-none backdrop-blur-sm transition-transform duration-300",
-          active
-            ? "scale-110 border-2 group-hover:scale-110"
-            : "border group-hover:scale-105",
-          accent.border,
-          accent.text
-        )}
-        style={{ textShadow: "0 1px 3px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.7)" }}
+        className={cn("island-node__caption", "font-pixel", active && "island-node__caption--active")}
+        style={{ "--accent": accent.hex } as CSSProperties}
       >
-        <span className="flex items-center gap-1.5 whitespace-nowrap text-[0.6rem] sm:text-[0.7rem]">
+        <span className="island-node__caption-line">
           <Icon name={category.icon} size={13} />
           {category.label}
         </span>
-        <span className="whitespace-nowrap text-[0.5rem] normal-case tracking-wide text-ops-sand-soft">
+        <span className="island-node__caption-meta">
           {category.skills.length} skills · avg {avgLevel}%
         </span>
       </span>

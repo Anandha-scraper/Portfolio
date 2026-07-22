@@ -1,0 +1,223 @@
+/* mission-control.tsx — static structural styles. Arbitrary inline
+   gradients/heights that were already literal Tailwind arbitrary values
+   are carried over as literal CSS. Hand-written/theme-derived utilities
+   already in app/globals.css (`.ops`, `.ops-scanlines`, `.section-pad`,
+   `.font-pixel`, `.font-pixel-readable`, `.text-ops-gradient`,
+   `.pixelated`) are left as-is — already uniquely-named, nothing to
+   migrate. Imported once from app/layout.tsx (see
+   components/book/magic-book.css for why). */
+
+.mission-control__photo-reveal {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background-color: #000;
+}
+
+.mission-control__photo-image {
+  object-fit: contain;
+}
+
+.mission-control__section {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.mission-control__wash {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image: linear-gradient(
+    180deg,
+    rgba(20, 17, 12, 0.94),
+    rgba(20, 17, 12, 0.5) 42%,
+    rgba(20, 17, 12, 0.18) 70%,
+    rgba(20, 17, 12, 0.74)
+  );
+}
+
+.mission-control__grid {
+  position: relative;
+  z-index: 10;
+  margin-inline: auto;
+  display: grid;
+  min-height: 100dvh;
+  max-width: 80rem;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  align-items: start;
+  gap: 3rem;
+  padding-bottom: 4rem;
+  padding-top: 5rem;
+}
+
+@media (min-width: 48rem) {
+  .mission-control__grid {
+    padding-top: 6rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .mission-control__grid {
+    grid-template-columns: 1fr 1.6fr;
+    align-items: start;
+    gap: 4rem;
+    padding-left: 2rem;
+  }
+}
+
+.mission-control__context {
+  display: flex;
+  flex-direction: column;
+}
+
+.mission-control__name {
+  margin-top: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: clamp(1.4rem, 6vw, 3.1rem);
+  line-height: 1.2;
+}
+
+@media (min-width: 64rem) {
+  .mission-control__name {
+    margin-left: -1rem;
+  }
+}
+
+.mission-control__name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mission-control__name-word {
+  white-space: nowrap;
+  color: var(--color-ops-sand);
+}
+
+.mission-control__patrol-track {
+  height: 2rem;
+  min-width: 4rem;
+  flex: 1 1 0%;
+  max-width: 6rem;
+}
+
+@media (min-width: 40rem) {
+  .mission-control__patrol-track {
+    height: 2.5rem;
+    max-width: 9rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .mission-control__patrol-track {
+    height: 3rem;
+    max-width: 12rem;
+  }
+}
+
+.mission-control__tagline {
+  margin-top: 1.25rem;
+  max-width: 36rem;
+  font-size: 1.5rem;
+  line-height: 1.375;
+  color: var(--color-ops-sand);
+}
+
+.mission-control__tagline-title {
+  color: var(--color-ops-rust);
+}
+
+.mission-control__space-card {
+  margin-inline: auto;
+}
+
+@media (min-width: 64rem) {
+  .mission-control__space-card {
+    margin-left: auto;
+  }
+}
+
+.mission-control__space-inner {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background-color: #000;
+}
+
+.mission-control__particles {
+  position: absolute;
+  inset: 0;
+}
+
+.mission-control__word-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 1.5rem;
+}
+
+.mission-control__word {
+  height: 3rem;
+  font-size: 1.5rem;
+  line-height: 1.33333;
+  font-weight: 400;
+  color: var(--color-ops-sand);
+}
+
+@media (min-width: 48rem) {
+  .mission-control__word {
+    height: 3.5rem;
+    font-size: 1.875rem;
+    line-height: 1.2;
+  }
+}
+
+@media (min-width: 64rem) {
+  .mission-control__word {
+    font-size: 2.25rem;
+    line-height: 1.11111;
+  }
+}
+
+.mission-control__scene {
+  pointer-events: none;
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 2;
+  margin-inline: auto;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.mission-control__scene-img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  object-position: bottom;
+}
+
+.mission-control__scene-melt {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 50%;
+  background-image: linear-gradient(180deg, rgba(20, 17, 12, 1), rgba(20, 17, 12, 0.55) 45%, transparent);
+}
+
+.mission-control__fade {
+  pointer-events: none;
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 3;
+  height: 7rem;
+  background-image: linear-gradient(to bottom in oklab, transparent 0%, var(--color-canvas) 100%);
+}

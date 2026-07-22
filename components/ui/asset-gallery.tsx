@@ -270,43 +270,23 @@ const GROUPS: Group[] = [
     ],
   })),
   {
-    // Codex/inventory book chrome (see SPRITE_CONTROL.book) — Crusenho's free
-    // "TravelBook Lite" pack, credited in lib/sprite-control.ts. Drives the
-    // components/book/ demo (placeholder-content toggle in app/layout.tsx).
+    // Animated magic book (see SPRITE_CONTROL.book) — CraftPix's free
+    // "Animated Magic Book" pixel-art pack. Drives
+    // components/book/magic-book.tsx, mounted in the Project Dungeon panel.
     label: "Book",
     assets: [
-      { kind: "image", name: "cover", src: "/sprites/book/cover.png", w: 96 },
-      { kind: "image", name: "page left", src: "/sprites/book/page_left.png", w: 60 },
-      { kind: "image", name: "page right", src: "/sprites/book/page_right.png", w: 60 },
-      { kind: "image", name: "row", src: "/sprites/book/row_bg.png", w: 80 },
-      { kind: "image", name: "row hover", src: "/sprites/book/row_bg_hover.png", w: 80 },
-      { kind: "image", name: "row active", src: "/sprites/book/row_bg_active.png", w: 80 },
-      { kind: "image", name: "panel", src: "/sprites/book/panel_bg.png", w: 80 },
-      { kind: "image", name: "slot", src: "/sprites/book/slot.png", w: 40 },
-      { kind: "image", name: "slot hover", src: "/sprites/book/slot_hover.png", w: 40 },
-      { kind: "image", name: "slot disabled", src: "/sprites/book/slot_disabled.png", w: 40 },
-      { kind: "image", name: "select corners", src: "/sprites/book/select_corners.png", w: 40 },
-      { kind: "image", name: "tab", src: "/sprites/book/tab.png", w: 32 },
-      { kind: "image", name: "icon home", src: "/sprites/book/icon_home.png", w: 24 },
-      { kind: "image", name: "icon gear", src: "/sprites/book/icon_gear.png", w: 24 },
-      { kind: "image", name: "icon tick", src: "/sprites/book/icon_tick.png", w: 24 },
-      { kind: "image", name: "icon cross", src: "/sprites/book/icon_cross.png", w: 24 },
-      { kind: "image", name: "icon arrow", src: "/sprites/book/icon_arrow.png", w: 24 },
-      { kind: "image", name: "icon coin", src: "/sprites/book/icon_coin.png", w: 24 },
-      { kind: "image", name: "icon play", src: "/sprites/book/icon_play.png", w: 24 },
-      { kind: "image", name: "icon pause", src: "/sprites/book/icon_pause.png", w: 24 },
-      { kind: "image", name: "icon restart", src: "/sprites/book/icon_restart.png", w: 24 },
-      { kind: "image", name: "star full", src: "/sprites/book/icon_star_full.png", w: 24 },
-      { kind: "image", name: "star mid", src: "/sprites/book/icon_star_mid.png", w: 24 },
-      { kind: "image", name: "star empty", src: "/sprites/book/icon_star_empty.png", w: 24 },
+      { kind: "image", name: "open", src: "/sprites/book/open_book.png", w: 96 },
+      { kind: "image", name: "close", src: "/sprites/book/close_book.png", w: 96 },
+      { kind: "image", name: "turn left", src: "/sprites/book/turning_pages_left.png", w: 96 },
+      { kind: "image", name: "turn right", src: "/sprites/book/turning_pages_right.png", w: 96 },
     ],
   },
 ];
 
 function Thumb({ asset }: { asset: Asset }) {
   return (
-    <div className="flex flex-col items-center gap-1.5">
-      <div className="flex h-16 w-full items-center justify-center rounded-sm border border-ops-line bg-ops-base/60 p-1">
+    <div className="asset-gallery__thumb">
+      <div className="asset-gallery__thumb-frame">
         {asset.kind === "sprite" ? (
           <PixelSprite
             src={asset.src}
@@ -325,16 +305,15 @@ function Thumb({ asset }: { asset: Asset }) {
             alt={asset.name}
             width={asset.w}
             className={cn(
-              "pixelated max-h-14 object-contain",
-              asset.flicker && "animate-sprite-flicker motion-reduce:animate-none",
-              asset.bob && "animate-ship-bob motion-reduce:animate-none"
+              "asset-gallery__thumb-img",
+              "pixelated",
+              asset.flicker && "animate-sprite-flicker",
+              asset.bob && "animate-ship-bob"
             )}
           />
         )}
       </div>
-      <span className="font-pixel-readable text-center text-base leading-none text-ops-sand-soft">
-        {asset.name}
-      </span>
+      <span className={cn("asset-gallery__thumb-label", "font-pixel-readable")}>{asset.name}</span>
     </div>
   );
 }
@@ -364,7 +343,7 @@ export function AssetGallery() {
   }, [open]);
 
   return (
-    <div className="hidden md:block">
+    <div className="asset-gallery__root">
       <button
         ref={btnRef}
         type="button"
@@ -372,7 +351,7 @@ export function AssetGallery() {
         aria-label={open ? "Hide asset gallery" : "Show asset gallery"}
         aria-expanded={open}
         aria-controls={panelId}
-        className="fixed right-4 top-4 z-[80] flex h-9 w-9 items-center justify-center rounded-md border border-ops-line bg-ops-surface/80 text-ops-sand backdrop-blur-md transition-colors hover:border-ops-rust/50 hover:text-ops-rust"
+        className="asset-gallery__toggle"
       >
         <Icon name="Info" size={18} />
       </button>
@@ -386,23 +365,17 @@ export function AssetGallery() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.26, ease: "easeOut" }}
-            className="fixed right-4 top-[3.75rem] z-[78] w-[320px]"
+            className="asset-gallery__panel"
           >
-            <DungeonFrame wall={24} className="font-pixel-readable text-ops-sand">
-              <div className="max-h-[78vh] overflow-y-auto p-3">
-                <p className="font-pixel mb-1 text-[0.5rem] uppercase tracking-widest text-ops-rust">
-                  Asset registry
-                </p>
-                <p className="mb-3 text-base leading-snug text-ops-sand-soft">
-                  Pixel-art assets running across this site.
-                </p>
+            <DungeonFrame wall={24} className={cn("asset-gallery__frame", "font-pixel-readable")}>
+              <div className="asset-gallery__panel-scroll">
+                <p className={cn("asset-gallery__panel-title", "font-pixel")}>Asset registry</p>
+                <p className="asset-gallery__panel-intro">Pixel-art assets running across this site.</p>
 
                 {GROUPS.map((group) => (
-                  <div key={group.label} className="mb-4 last:mb-0">
-                    <p className="font-pixel mb-2 text-[0.45rem] uppercase tracking-widest text-ops-olive">
-                      {group.label}
-                    </p>
-                    <div className="grid grid-cols-3 gap-3">
+                  <div key={group.label} className="asset-gallery__group">
+                    <p className={cn("asset-gallery__group-title", "font-pixel")}>{group.label}</p>
+                    <div className="asset-gallery__group-grid">
                       {group.assets.map((a) => (
                         <Thumb key={a.name} asset={a} />
                       ))}

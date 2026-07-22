@@ -1,0 +1,24 @@
+/* scroll-progress.tsx — static structural styles. borderImageSource/Slice
+   and imageRendering stay inline (already a `style` object in the
+   component, tied to the sprite asset). `.pixelated` is the existing
+   hand-written utility from app/globals.css, left as-is. Imported once
+   from app/layout.tsx (see components/book/magic-book.css for why). */
+
+.scroll-progress__track {
+  pointer-events: none;
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 80;
+  height: 0.75rem;
+  border-width: 3px;
+  border-style: solid;
+  border-color: transparent;
+}
+
+.scroll-progress__fill {
+  height: 100%;
+  width: 100%;
+  transform-origin: 0;
+  object-fit: fill;
+}

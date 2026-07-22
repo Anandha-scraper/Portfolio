@@ -1,0 +1,9 @@
+/* dungeon-tiles-canvas.tsx — static structural style. `.pixelated` is the
+   existing hand-written utility from app/globals.css, left as-is. Imported
+   once from app/layout.tsx (see components/book/magic-book.css for why). */
+
+.dungeon-tiles-canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+}

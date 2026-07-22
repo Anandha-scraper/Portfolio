@@ -1,0 +1,115 @@
+/* terminal.tsx — static structural styles. `.ops`/`.font-mono` are existing
+   theme-derived utilities, left as-is (font-mono maps to this project's own
+   --font-mono token, declared permanently in app/globals.css). Imported
+   once from app/layout.tsx (see components/book/magic-book.css for why). */
+
+.terminal {
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-ops-line);
+  background-color: var(--color-ops-base);
+  box-shadow: 0 24px 60px -20px rgba(226, 88, 34, 0.22), 0 8px 24px -12px rgba(0, 0, 0, 0.45);
+}
+
+.terminal__chrome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--color-ops-line);
+  background-color: #1f1a12e6;
+  padding: 0.625rem 1rem;
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .terminal__chrome {
+    background-color: color-mix(in oklab, var(--color-ops-surface) 90%, transparent);
+  }
+}
+
+.terminal__dots {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.terminal__dot {
+  height: 0.625rem;
+  width: 0.625rem;
+  border-radius: 3.40282e38px;
+}
+
+.terminal__dot--rust {
+  background-color: var(--color-ops-rust);
+}
+
+.terminal__dot--sand {
+  background-color: var(--color-ops-sand-soft);
+}
+
+.terminal__dot--olive {
+  background-color: var(--color-ops-olive);
+}
+
+.terminal__chrome-title {
+  font-size: 0.7rem;
+  color: var(--color-ops-sand-soft);
+}
+
+.terminal__chrome-spacer {
+  width: 3rem;
+}
+
+.terminal__body {
+  height: 18rem;
+  overflow-y: auto;
+  padding: 0.75rem 1rem;
+  font-size: 0.8rem;
+  line-height: 1.625;
+}
+
+@media (min-width: 40rem) {
+  .terminal__body {
+    font-size: 0.875rem;
+    line-height: 1.42857;
+  }
+}
+
+.terminal__line {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.terminal__prompt-glyph {
+  color: var(--color-ops-rust);
+}
+
+.terminal__prompt-tilde {
+  color: var(--color-ops-olive);
+}
+
+.terminal__text {
+  color: var(--color-ops-sand);
+}
+
+.terminal__text--system {
+  color: var(--color-ops-sand-faint);
+}
+
+.terminal__input-row {
+  display: flex;
+  align-items: center;
+}
+
+.terminal__input-tilde {
+  margin-left: 0.5rem;
+  color: var(--color-ops-olive);
+}
+
+.terminal__input {
+  margin-left: 0.5rem;
+  flex: 1 1 0%;
+  background-color: transparent;
+  color: var(--color-ops-sand);
+  caret-color: var(--color-ops-rust);
+  outline-style: none;
+}

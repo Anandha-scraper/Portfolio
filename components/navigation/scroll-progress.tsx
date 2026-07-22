@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useScroll, useSpring } from "motion/react";
+import { cn } from "@/lib/utils";
 
 /**
  * ScrollProgress — pixel-art reading-progress bar pinned to the top of the
@@ -26,7 +27,7 @@ export function ScrollProgress() {
         borderImageSlice: "2 fill",
         imageRendering: "pixelated",
       }}
-      className="pointer-events-none fixed inset-x-0 top-0 z-[80] h-3 border-[3px] border-solid border-transparent"
+      className="scroll-progress__track"
     >
       {/* Solid gold fill, scaled from the left edge so the gold tracks scroll
           progress exactly. */}
@@ -35,7 +36,7 @@ export function ScrollProgress() {
         src="/sprites/ui/barfill_gold.png"
         alt=""
         style={{ scaleX }}
-        className="pixelated h-full w-full origin-left object-fill"
+        className={cn("scroll-progress__fill", "pixelated")}
       />
     </div>
   );

@@ -3,8 +3,46 @@ import { Pixelify_Sans } from "next/font/google";
 import { BackgroundEnvironment } from "@/components/blueprint/background-environment";
 import { SkeletonCompanion } from "@/components/companion/skeleton-companion";
 import { AssetGallery } from "@/components/ui/asset-gallery";
-import { BookToggle } from "@/components/book/book-toggle";
 import "./globals.css";
+// Per-component plain CSS files, migrated off Tailwind utility classes.
+// Next.js's App Router only allows non-Module global CSS to be imported
+// from the root layout, so every component's own .css file (co-located
+// next to its .tsx) is wired in centrally here rather than self-imported —
+// see the doc comment at the top of each file for why.
+import "./layout.css";
+import "@/components/book/magic-book.css";
+import "@/components/project-ecosystem/master.css";
+import "@/components/project-ecosystem/project-preview-frame.css";
+import "@/components/project-ecosystem/project-dungeon-panel.css";
+import "@/components/project-ecosystem/dungeon-map.css";
+import "@/components/project-ecosystem/dungeon-hero.css";
+import "@/components/project-ecosystem/dungeon-slideshow-controls.css";
+import "@/components/project-ecosystem/dungeon-tiles-canvas.css";
+import "@/components/project-ecosystem/dungeon-touch-controls.css";
+import "@/components/project-ecosystem/dungeon-treasures.css";
+import "@/components/project-ecosystem/project-ecosystem.css";
+import "@/components/navigation/chest-sidebar.css";
+import "@/components/navigation/scroll-progress.css";
+import "@/components/mission-control/mission-control.css";
+import "@/components/mission-control/name-patrol-sprite.css";
+import "@/components/capability-network/capability-network.css";
+import "@/components/capability-network/chart-map.css";
+import "@/components/capability-network/island-node.css";
+import "@/components/contact/contact-studio.css";
+import "@/components/contact/terminal.css";
+import "@/components/blueprint/background-environment.css";
+import "@/components/blueprint/section-heading.css";
+import "@/components/blueprint/section-shell.css";
+import "@/components/companion/skeleton-companion.css";
+import "@/components/ui/asset-gallery.css";
+import "@/components/ui/dungeon-frame.css";
+import "@/components/ui/morphing-text.css";
+import "@/components/ui/particles.css";
+import "@/components/ui/ship.css";
+import "./loading.css";
+import "./not-found.css";
+import "./page.css";
+import "./master/master-console.css";
 
 // Global pixel typeface. next/font self-hosts the files at build time, so this
 // stays compatible with the static export (no runtime fetch to Google).
@@ -67,17 +105,14 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning className={pixelify.variable}>
-      <body className="relative min-h-dvh antialiased">
+      <body className="root-body">
         <BackgroundEnvironment />
         {/* Cursor companion. mode: "chase" | "rest" | "wander";
             idleDelayMs: 1000 | 2000 | 3000; set debug to tune live. */}
         <SkeletonCompanion mode="chase" idleDelayMs={3000} debug={false} />
         {/* Top-right info panel cataloguing every pixel-art asset on the site. */}
         <AssetGallery />
-        {/* Placeholder demo mount for the new codex/book UI — remove or
-            relocate once it has a permanent home and real content. */}
-        <BookToggle />
-        <div className="relative z-10">{children}</div>
+        <div className="root-content">{children}</div>
       </body>
     </html>
   );

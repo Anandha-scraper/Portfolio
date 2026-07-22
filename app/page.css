@@ -1,0 +1,12 @@
+/* page.tsx — static structural style. Imported once from app/layout.tsx
+   (see components/book/magic-book.css for why). */
+
+.home-main {
+  padding-bottom: 6rem;
+}
+
+@media (min-width: 48rem) {
+  .home-main {
+    padding-bottom: 7rem;
+  }
+}

@@ -1,0 +1,16 @@
+/* layout.tsx — static structural styles for the root shell. Imported
+   directly below (this is the root layout itself — see
+   components/book/magic-book.css for why every other component's CSS is
+   also centralized here rather than self-imported). */
+
+.root-body {
+  position: relative;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.root-content {
+  position: relative;
+  z-index: 10;
+}

@@ -29,10 +29,7 @@ export function Ship({
   const n = (frames as readonly number[]).includes(frame) ? frame : frames[0];
   return (
     <div
-      className={cn(
-        "animate-ship-bob will-change-transform motion-reduce:animate-none",
-        className
-      )}
+      className={cn("ship", "animate-ship-bob", className)}
       style={{ transform: flip ? "scaleX(-1)" : undefined }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -41,7 +38,7 @@ export function Ship({
         alt=""
         aria-hidden
         width={width ?? dwidth}
-        className="pixelated h-auto select-none"
+        className={cn("ship__img", "pixelated")}
         draggable={false}
       />
     </div>

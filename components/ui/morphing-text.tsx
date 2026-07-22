@@ -117,14 +117,8 @@ const Texts: React.FC<Pick<MorphingTextProps, "texts"> & { active: boolean }> = 
   const { text1Ref, text2Ref } = useMorphingText(texts, active);
   return (
     <>
-      <span
-        className="absolute inset-x-0 top-0 m-auto inline-block w-full"
-        ref={text1Ref}
-      />
-      <span
-        className="absolute inset-x-0 top-0 m-auto inline-block w-full"
-        ref={text2Ref}
-      />
+      <span className="morphing-text__layer" ref={text1Ref} />
+      <span className="morphing-text__layer" ref={text2Ref} />
     </>
   );
 };
@@ -132,7 +126,7 @@ const Texts: React.FC<Pick<MorphingTextProps, "texts"> & { active: boolean }> = 
 const SvgFilters: React.FC = () => (
   <svg
     id="filters"
-    className="fixed h-0 w-0"
+    className="morphing-text__filters"
     preserveAspectRatio="xMidYMid slice"
   >
     <defs>
@@ -161,10 +155,7 @@ export const MorphingText: React.FC<MorphingTextProps> = ({
   return (
     <div
       ref={containerRef}
-      className={cn(
-        "relative mx-auto h-16 w-full max-w-screen-md text-center font-sans text-[40pt] leading-none font-bold [filter:url(#threshold)_blur(0.6px)] md:h-24 lg:text-[6rem]",
-        className,
-      )}
+      className={cn("morphing-text", "font-sans", className)}
     >
       <Texts texts={texts} active={inView && !reduceMotion} />
       <SvgFilters />

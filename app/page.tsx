@@ -17,7 +17,7 @@ export default function Home() {
   return (
     <>
       <Navigation />
-      <main className="pb-24 md:pb-28">
+      <main className="home-main">
         <MissionControl />
         <ProjectEcosystem />
         <CapabilityNetwork />

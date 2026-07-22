@@ -93,7 +93,7 @@ export function ChestSidebar() {
         aria-label={open ? "Close menu" : "Open menu"}
         aria-expanded={open}
         aria-controls={panelId}
-        className="fixed left-4 top-4 z-[80] flex items-center justify-center rounded-md border border-ops-line bg-ops-surface/80 p-1.5 backdrop-blur-md transition-colors hover:border-ops-rust/50"
+        className="chest-sidebar__toggle"
       >
         <PixelSprite
           src={chest.src}
@@ -117,7 +117,7 @@ export function ChestSidebar() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: reduceMotion ? 0 : -24 }}
             transition={{ duration: 0.28, ease: "easeOut" }}
-            className="fixed left-4 z-[75] flex flex-col gap-3"
+            className="chest-sidebar__panel"
             style={{
               top: SIDEBAR.top,
               bottom: SIDEBAR.bottom,
@@ -125,14 +125,9 @@ export function ChestSidebar() {
             }}
           >
             {/* Nav — fills the full drawer height. */}
-            <DungeonFrame
-              wall={26}
-              className="flex min-h-0 flex-1 flex-col font-pixel-readable text-ops-sand"
-            >
-              <div className="relative flex h-full min-h-0 flex-col gap-1 p-3">
-                <p className="font-pixel mb-2 text-[0.5rem] uppercase tracking-widest text-ops-sand-soft">
-                  Navigate
-                </p>
+            <DungeonFrame wall={26} className={cn("chest-sidebar__frame", "font-pixel-readable")}>
+              <div className="chest-sidebar__body">
+                <p className={cn("chest-sidebar__label", "font-pixel")}>Navigate</p>
 
                 {NAV_ITEMS.map((item) => {
                   const isActive = active === item.id;
@@ -141,22 +136,17 @@ export function ChestSidebar() {
                       key={item.id}
                       type="button"
                       onClick={() => go(item.id)}
-                      className={cn(
-                        "flex items-center gap-3 rounded-sm px-2 py-1.5 text-left text-xl leading-none transition-colors",
-                        isActive
-                          ? "bg-ops-rust/15 text-ops-rust"
-                          : "text-ops-sand hover:bg-ops-surface-2/60 hover:text-ops-olive-bright"
-                      )}
+                      className={cn("chest-sidebar__nav-item", isActive && "chest-sidebar__nav-item--active")}
                     >
-                      <Icon name={item.icon} size={18} className="shrink-0" />
+                      <Icon name={item.icon} size={18} className="chest-sidebar__nav-icon" />
                       <span>{item.label}</span>
                     </button>
                   );
                 })}
 
-                <div className="my-2 h-px bg-ops-line-strong" />
+                <div className="chest-sidebar__divider" />
 
-                <div className="flex items-center gap-2 px-2">
+                <div className="chest-sidebar__socials">
                   {DOCK_SOCIALS.map((s) => (
                     <a
                       key={s.label}
@@ -164,7 +154,7 @@ export function ChestSidebar() {
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={s.label}
-                      className="flex h-8 w-8 items-center justify-center rounded-sm border border-ops-line text-ops-sand-soft transition-colors hover:border-ops-rust/50 hover:text-ops-sand"
+                      className="chest-sidebar__social-link"
                     >
                       <Icon name={s.icon} size={16} />
                     </a>
@@ -172,11 +162,8 @@ export function ChestSidebar() {
                 </div>
 
                 {/* Tall dungeon floor — ambient dwellers roam here. */}
-                <div
-                  aria-hidden
-                  className="relative mt-auto min-h-0 flex-1 overflow-hidden"
-                >
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-ops-line-strong" />
+                <div aria-hidden className="chest-sidebar__floor">
+                  <div className="chest-sidebar__floor-line" />
                   <FloorRoamers reduceMotion={!!reduceMotion} />
                 </div>
               </div>
@@ -294,7 +281,7 @@ function FloorRoamers({ reduceMotion }: { reduceMotion: boolean }) {
           ref={(el) => {
             wrapRefs.current[i] = el;
           }}
-          className="absolute will-change-transform"
+          className="chest-sidebar__roamer"
         >
           <PixelSprite
             src={char.src}

@@ -22,7 +22,7 @@ export function DungeonTreasures({
   highlightSector?: string | null;
 }) {
   return (
-    <div className="pointer-events-none absolute inset-0">
+    <div className="dungeon-treasures__layer">
       {TREASURE_POINTS.map(({ sector, treasure, x, y }) => {
         const near = highlightSector === sector;
         return (
@@ -30,20 +30,14 @@ export function DungeonTreasures({
             key={sector}
             type="button"
             aria-label={`Open sector ${sector} treasure`}
-            className={cn(
-              "pointer-events-auto absolute cursor-pointer border-0 bg-transparent p-0 transition-transform hover:scale-110",
-              near && "scale-110"
-            )}
+            className={cn("dungeon-treasures__marker", "cursor-pointer", near && "dungeon-treasures__marker--near")}
             style={{ left: x - SIZE / 2, top: y - SIZE / 2, width: SIZE, height: SIZE }}
             onClick={() => onSectorClick(sector)}
           >
             {/* proximity glow ring */}
             <span
               aria-hidden
-              className={cn(
-                "absolute -inset-2 rounded-full border-2 border-ops-rust/70 transition-opacity",
-                near ? "animate-pulse opacity-100" : "opacity-0"
-              )}
+              className={cn("dungeon-treasures__glow", near && "dungeon-treasures__glow--near")}
               style={{ boxShadow: near ? "0 0 18px rgba(226,88,34,0.45)" : undefined }}
             />
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -51,7 +45,7 @@ export function DungeonTreasures({
               src={`/sprites/treasure/treasure_${String(treasure).padStart(2, "0")}.png`}
               alt=""
               width={SIZE}
-              className="pixelated relative"
+              className={cn("dungeon-treasures__icon", "pixelated")}
             />
           </button>
         );

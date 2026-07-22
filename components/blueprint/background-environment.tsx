@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 /**
  * BackgroundEnvironment — the shared "living" atmosphere mounted once
  * behind all content. Four layers, all pointer-events:none, all pure CSS
@@ -9,22 +11,19 @@
  */
 export function BackgroundEnvironment() {
   return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
-    >
+    <div aria-hidden="true" className="background-environment">
       {/* Layer 1 — radial gradient washes */}
-      <div className="absolute inset-0">
-        <div className="absolute -left-[10%] -top-[10%] h-[55vh] w-[55vh] rounded-full bg-[radial-gradient(circle,rgba(226,88,34,0.10),transparent_70%)] blur-2xl" />
-        <div className="absolute right-[-8%] top-[18%] h-[50vh] w-[50vh] rounded-full bg-[radial-gradient(circle,rgba(163,177,138,0.08),transparent_70%)] blur-2xl" />
-        <div className="absolute bottom-[-12%] left-[30%] h-[45vh] w-[45vh] rounded-full bg-[radial-gradient(circle,rgba(217,164,65,0.07),transparent_70%)] blur-2xl" />
+      <div className="background-environment__washes">
+        <div className="background-environment__wash background-environment__wash--coral" />
+        <div className="background-environment__wash background-environment__wash--olive" />
+        <div className="background-environment__wash background-environment__wash--amber" />
       </div>
 
       {/* Layer 2 — global boxed-line grid (ref.txt #1), the one backdrop for every page */}
-      <div className="bg-grid-global absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_95%)] opacity-80" />
+      <div className={cn("background-environment__grid", "bg-grid-global")} />
 
       {/* Layer 3 — noise texture */}
-      <div className="noise-overlay absolute inset-0 opacity-[0.025] mix-blend-multiply" />
+      <div className={cn("background-environment__noise", "noise-overlay")} />
     </div>
   );
 }

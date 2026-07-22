@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "motion/react";
 import { SPRITE_CONTROL } from "@/lib/sprite-control";
 import { openChestSidebar } from "@/components/navigation/chest-sidebar";
+import { cn } from "@/lib/utils";
 
 /**
  * SkeletonCompanion — a pixel-art skeleton that lives over the whole portfolio
@@ -275,10 +276,7 @@ export function SkeletonCompanion({
   // Reduced motion: a static idle skeleton parked in the corner, no chasing.
   if (reduceMotion) {
     return (
-      <div
-        aria-hidden
-        className="pointer-events-none fixed bottom-4 left-4 z-[35]"
-      >
+      <div aria-hidden className="skeleton-companion--reduced">
         <div
           className="pixelated"
           style={{
@@ -296,13 +294,10 @@ export function SkeletonCompanion({
 
   return (
     <>
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 z-[35] overflow-hidden"
-      >
+      <div aria-hidden className="skeleton-companion__layer">
         <div
           ref={wrapRef}
-          className="absolute left-0 top-0 will-change-transform"
+          className="skeleton-companion__wrap"
           style={{
             opacity: 0,
             transition: "opacity 450ms ease-out",
@@ -338,38 +333,35 @@ function DebugPanel({
   cfg: { mode: Mode; idleDelayMs: number };
   onChange: (c: { mode: Mode; idleDelayMs: number }) => void;
 }) {
-  const chip =
-    "rounded px-2 py-1 text-xs capitalize transition-colors border";
-  const active = "bg-ink text-canvas border-ink";
-  const idle = "bg-surface/80 text-ink border-hairline hover:border-blue/50";
-
   return (
-    <div className="fixed right-3 top-3 z-[60] flex flex-col gap-2 rounded-lg border border-hairline bg-surface/90 p-3 text-ink shadow-float backdrop-blur">
-      <div className="text-[10px] font-medium uppercase tracking-wide opacity-60">
-        Skeleton · mode
-      </div>
-      <div className="flex gap-1">
+    <div className="skeleton-companion__debug">
+      <div className="skeleton-companion__debug-label">Skeleton · mode</div>
+      <div className="skeleton-companion__debug-row">
         {MODES.map((m) => (
           <button
             key={m}
             type="button"
             onClick={() => onChange({ ...cfg, mode: m })}
-            className={`${chip} ${cfg.mode === m ? active : idle}`}
+            className={cn(
+              "skeleton-companion__chip",
+              cfg.mode === m ? "skeleton-companion__chip--active" : "skeleton-companion__chip--idle"
+            )}
           >
             {m}
           </button>
         ))}
       </div>
-      <div className="text-[10px] font-medium uppercase tracking-wide opacity-60">
-        Idle delay
-      </div>
-      <div className="flex gap-1">
+      <div className="skeleton-companion__debug-label">Idle delay</div>
+      <div className="skeleton-companion__debug-row">
         {DELAYS.map((d) => (
           <button
             key={d}
             type="button"
             onClick={() => onChange({ ...cfg, idleDelayMs: d })}
-            className={`${chip} ${cfg.idleDelayMs === d ? active : idle}`}
+            className={cn(
+              "skeleton-companion__chip",
+              cfg.idleDelayMs === d ? "skeleton-companion__chip--active" : "skeleton-companion__chip--idle"
+            )}
           >
             {d / 1000}s
           </button>

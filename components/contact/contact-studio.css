@@ -1,0 +1,46 @@
+/* contact-studio.tsx — static structural styles. `.text-gradient-blue` is
+   the existing hand-written utility from app/globals.css, left as-is.
+   Imported once from app/layout.tsx (see components/book/magic-book.css
+   for why). */
+
+.contact-studio__shell {
+  min-height: 100vh;
+  scroll-margin-top: 0;
+  padding-bottom: 2.5rem;
+}
+
+@media (min-width: 40rem) {
+  .contact-studio__shell {
+    padding-bottom: 3.5rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .contact-studio__shell {
+    padding-bottom: 4rem;
+  }
+}
+
+.contact-studio__terminal-wrap {
+  margin-inline: auto;
+  margin-top: 3rem;
+  width: 100%;
+  max-width: 42rem;
+}
+
+.contact-studio__footer {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  border-top: 1px solid var(--color-hairline);
+  padding-top: 1rem;
+  text-align: center;
+}
+
+.contact-studio__footer-text {
+  font-size: 0.75rem;
+  line-height: calc(1 / 0.75);
+  color: var(--color-ink-muted);
+}

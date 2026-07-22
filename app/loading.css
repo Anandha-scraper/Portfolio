@@ -1,0 +1,57 @@
+/* loading.tsx — static structural styles. `.font-mono` is the existing
+   theme-derived utility, left as-is. Imported once from app/layout.tsx (see
+   components/book/magic-book.css for why). */
+
+.loading {
+  display: flex;
+  min-height: 100dvh;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading__group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.loading__spinner {
+  position: relative;
+  height: 3rem;
+  width: 3rem;
+}
+
+.loading__spinner-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 3.40282e38px;
+  border-width: 2px;
+  border-style: solid;
+  border-color: var(--color-hairline);
+}
+
+.loading__spinner-arc {
+  position: absolute;
+  inset: 0;
+  animation: loading-spin 1s linear infinite;
+  border-radius: 3.40282e38px;
+  border-width: 2px;
+  border-style: solid;
+  border-color: transparent;
+  border-top-color: var(--color-blue);
+}
+
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading__label {
+  font-size: 0.75rem;
+  line-height: calc(1 / 0.75);
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--color-ink-muted);
+}

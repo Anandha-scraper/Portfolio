@@ -1,14 +1,14 @@
+import { cn } from "@/lib/utils";
+
 export default function Loading() {
   return (
-    <div className="flex min-h-dvh items-center justify-center">
-      <div className="flex flex-col items-center gap-4">
-        <div className="relative h-12 w-12">
-          <div className="absolute inset-0 rounded-full border-2 border-hairline" />
-          <div className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-blue" />
+    <div className="loading">
+      <div className="loading__group">
+        <div className="loading__spinner">
+          <div className="loading__spinner-track" />
+          <div className="loading__spinner-arc" />
         </div>
-        <span className="font-mono text-xs uppercase tracking-[0.3em] text-ink-muted">
-          Drawing blueprint…
-        </span>
+        <span className={cn("loading__label", "font-mono")}>Drawing blueprint…</span>
       </div>
     </div>
   );

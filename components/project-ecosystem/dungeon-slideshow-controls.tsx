@@ -32,15 +32,7 @@ export function DungeonSlideshowControls({
 }) {
   const showingPlay = walking || !playing;
   return (
-    <div
-      className={cn(
-        // Mobile: a full-width, centered top navbar with its own bar chrome
-        // so it reads as a strip instead of floating circles over content.
-        "absolute inset-x-0 top-0 z-50 flex items-center justify-center gap-3 border-b border-ops-line bg-ops-base/90 py-2 backdrop-blur-sm",
-        // Desktop: cancel the bar chrome, back to the small floating cluster.
-        "lg:inset-x-auto lg:right-3 lg:top-3 lg:justify-start lg:gap-1.5 lg:border-0 lg:bg-transparent lg:py-0 lg:backdrop-blur-none"
-      )}
-    >
+    <div className="slideshow-controls__bar">
       <ControlButton label="Previous project" onClick={onPrev}>
         <Icon name="SkipBack" size={16} />
       </ControlButton>
@@ -82,12 +74,7 @@ function ControlButton({
       onClick={onClick}
       aria-label={label}
       title={label}
-      className={cn(
-        "flex h-11 w-11 items-center justify-center rounded-full border-2 transition-all",
-        lit
-          ? "border-ops-rust bg-ops-rust/25 text-ops-sand shadow-[0_0_14px_rgba(226,88,34,0.5)]"
-          : "border-ops-line bg-ops-base/70 text-ops-sand-soft backdrop-blur-sm hover:border-ops-rust/50 hover:text-ops-sand"
-      )}
+      className={cn("slideshow-controls__btn", lit && "slideshow-controls__btn--lit")}
     >
       {children}
     </button>

@@ -8,7 +8,7 @@ import { Terminal } from "@/components/contact/terminal";
 
 export function ContactStudio() {
   return (
-    <SectionShell id="contact" className="min-h-screen scroll-mt-0 pb-10 sm:pb-14 lg:pb-16">
+    <SectionShell id="contact" className="contact-studio__shell">
       <SectionHeading
         index="07"
         eyebrow="Contact Studio"
@@ -21,12 +21,12 @@ export function ContactStudio() {
         description="Talk to the terminal — type 'help' to list commands. However you reach out, I read everything."
       />
 
-      <Reveal className="mx-auto mt-12 w-full max-w-2xl">
+      <Reveal className="contact-studio__terminal-wrap">
         <Terminal />
       </Reveal>
 
-      <footer className="mt-8 flex flex-col items-center gap-1.5 border-t border-hairline pt-4 text-center">
-        <p className="text-xs text-ink-muted">
+      <footer className="contact-studio__footer">
+        <p className="contact-studio__footer-text">
           Designed & engineered by {profile.name} — built as a living blueprint.
         </p>
       </footer>

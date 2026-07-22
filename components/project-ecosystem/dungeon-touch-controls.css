@@ -1,0 +1,83 @@
+/* dungeon-touch-controls.tsx — static structural styles. width/height on
+   the joystick base/knob stay inline (PAD/KNOB constants, already dynamic
+   in the component). Imported once from app/layout.tsx (see
+   components/book/magic-book.css for why). */
+
+.touch-controls__base {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 1.25rem;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3.40282e38px;
+  border-width: 2px;
+  border-style: solid;
+  border-color: var(--color-ops-line);
+  background-color: #14110cb3;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .touch-controls__base {
+    background-color: color-mix(in oklab, var(--color-ops-base) 70%, transparent);
+  }
+}
+
+.touch-controls__knob {
+  border-radius: 3.40282e38px;
+  border-width: 2px;
+  border-style: solid;
+  border-color: var(--color-ops-line);
+  background-color: #a99f824d;
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .touch-controls__knob {
+    background-color: color-mix(in oklab, var(--color-ops-sand-soft) 30%, transparent);
+  }
+}
+
+.touch-controls__action {
+  position: absolute;
+  bottom: 2rem;
+  right: 1.5rem;
+  z-index: 50;
+  display: flex;
+  height: 4rem;
+  width: 4rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3.40282e38px;
+  border-width: 2px;
+  border-style: solid;
+  font-size: 1.25rem;
+  line-height: calc(1.75 / 1.25);
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 0.15s;
+  border-color: var(--color-ops-line);
+  background-color: #14110cb3;
+  color: var(--color-ops-sand-faint);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .touch-controls__action {
+    background-color: color-mix(in oklab, var(--color-ops-base) 70%, transparent);
+  }
+}
+
+.touch-controls__action--ready {
+  border-color: var(--color-ops-rust);
+  background-color: #e2582240;
+  color: var(--color-ops-sand);
+  box-shadow: 0 0 14px rgba(226, 88, 34, 0.5);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .touch-controls__action--ready {
+    background-color: color-mix(in oklab, var(--color-ops-rust) 25%, transparent);
+  }
+}

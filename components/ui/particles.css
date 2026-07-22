@@ -1,0 +1,11 @@
+/* particles.tsx — static structural styles. Imported once from
+   app/layout.tsx (see components/book/magic-book.css for why). */
+
+.particles {
+  pointer-events: none;
+}
+
+.particles__canvas {
+  width: 100%;
+  height: 100%;
+}

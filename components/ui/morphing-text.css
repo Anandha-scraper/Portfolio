@@ -1,0 +1,44 @@
+/* morphing-text.tsx — static structural styles. `.font-sans` is the
+   existing theme-derived utility (maps to this project's own font stack),
+   left as-is. Imported once from app/layout.tsx (see
+   components/book/magic-book.css for why). */
+
+.morphing-text__layer {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  margin: auto;
+  display: inline-block;
+  width: 100%;
+}
+
+.morphing-text__filters {
+  position: fixed;
+  height: 0;
+  width: 0;
+}
+
+.morphing-text {
+  position: relative;
+  margin-inline: auto;
+  height: 4rem;
+  width: 100%;
+  max-width: 48rem;
+  text-align: center;
+  font-size: 40pt;
+  line-height: 1;
+  font-weight: 700;
+  filter: url(#threshold) blur(0.6px);
+}
+
+@media (min-width: 48rem) {
+  .morphing-text {
+    height: 6rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .morphing-text {
+    font-size: 6rem;
+  }
+}

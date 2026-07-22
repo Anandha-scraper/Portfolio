@@ -407,44 +407,18 @@ export const SPRITE_CONTROL = {
     interactRadius: 110,
   },
 
-  /** Codex/inventory "book" chrome — a curated subset of the free "TravelBook
-   *  Lite" tier of Crusenho's Complete UI Book Styles Pack
-   *  (https://crusenho.itch.io/complete-ui-book-styles-pack, used under its
-   *  free/commercial-friendly license, credit required), sliced straight from
-   *  the pack's pre-cut `Sprites/` export (no extraction script needed — the
-   *  pack ships individually named PNGs already) into /sprites/book.
-   *
-   *  Drives `components/book/` (BookPanel + BookPage): a two-page spread with
-   *  a right-edge tab column and a list+description layout, currently mounted
-   *  as a placeholder demo (see the AssetGallery-style toggle in
-   *  app/layout.tsx) with generic content — not yet wired to real site data. */
+  /** Animated magic book — 4 sprite sheets from CraftPix's free "Animated
+   *  Magic Book" pixel-art pack, each a 272×272-cell grid (open/close: 4×3,
+   *  12 frames; page turns: 4×4, 15 frames). Drives
+   *  `components/book/magic-book.tsx` (canvas-blitted open/close/turn
+   *  animations) via `components/project-ecosystem/master.tsx`, mounted in
+   *  the Project Dungeon panel
+   *  (components/project-ecosystem/project-dungeon-panel.tsx). */
   book: {
-    cover: "/sprites/book/cover.png", // 224×160 closed-book cover
-    pageLeft: "/sprites/book/page_left.png", // 104×147
-    pageRight: "/sprites/book/page_right.png", // 104×147
-    rowBg: "/sprites/book/row_bg.png", // 62×14 plain list row / header bar
-    rowBgHover: "/sprites/book/row_bg_hover.png", // 62×14 hovered row
-    rowBgActive: "/sprites/book/row_bg_active.png", // 62×14 selected row (bordered)
-    panelBg: "/sprites/book/panel_bg.png", // 62×30 description panel, dog-eared corner
-    slot: "/sprites/book/slot.png", // 30×30 icon slot
-    slotHover: "/sprites/book/slot_hover.png",
-    slotDisabled: "/sprites/book/slot_disabled.png",
-    selectCorners: "/sprites/book/select_corners.png", // 4-corner selection reticle overlay
-    tab: "/sprites/book/tab.png", // small rounded bookmark tag — the right-edge tab shape
-    icons: {
-      home: "/sprites/book/icon_home.png",
-      gear: "/sprites/book/icon_gear.png",
-      tick: "/sprites/book/icon_tick.png",
-      cross: "/sprites/book/icon_cross.png",
-      arrow: "/sprites/book/icon_arrow.png",
-      coin: "/sprites/book/icon_coin.png",
-      play: "/sprites/book/icon_play.png",
-      pause: "/sprites/book/icon_pause.png",
-      restart: "/sprites/book/icon_restart.png",
-      starFull: "/sprites/book/icon_star_full.png",
-      starMid: "/sprites/book/icon_star_mid.png",
-      starEmpty: "/sprites/book/icon_star_empty.png",
-    },
+    open: "/sprites/book/open_book.png", // 1088×816, 4×3 grid, 12 frames
+    close: "/sprites/book/close_book.png", // 1088×816, 4×3 grid, 12 frames
+    turnLeft: "/sprites/book/turning_pages_left.png", // 1088×1088, 4×4 grid, 15 frames
+    turnRight: "/sprites/book/turning_pages_right.png", // 1088×1088, 4×4 grid, 15 frames
   },
 
 } as const;
