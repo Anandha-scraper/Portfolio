@@ -269,6 +269,38 @@ const GROUPS: Group[] = [
       { kind: "image" as const, name: "land", src: `/sprites/maps/map_${n}_land.png`, w: 96 },
     ],
   })),
+  {
+    // Codex/inventory book chrome (see SPRITE_CONTROL.book) — Crusenho's free
+    // "TravelBook Lite" pack, credited in lib/sprite-control.ts. Drives the
+    // components/book/ demo (placeholder-content toggle in app/layout.tsx).
+    label: "Book",
+    assets: [
+      { kind: "image", name: "cover", src: "/sprites/book/cover.png", w: 96 },
+      { kind: "image", name: "page left", src: "/sprites/book/page_left.png", w: 60 },
+      { kind: "image", name: "page right", src: "/sprites/book/page_right.png", w: 60 },
+      { kind: "image", name: "row", src: "/sprites/book/row_bg.png", w: 80 },
+      { kind: "image", name: "row hover", src: "/sprites/book/row_bg_hover.png", w: 80 },
+      { kind: "image", name: "row active", src: "/sprites/book/row_bg_active.png", w: 80 },
+      { kind: "image", name: "panel", src: "/sprites/book/panel_bg.png", w: 80 },
+      { kind: "image", name: "slot", src: "/sprites/book/slot.png", w: 40 },
+      { kind: "image", name: "slot hover", src: "/sprites/book/slot_hover.png", w: 40 },
+      { kind: "image", name: "slot disabled", src: "/sprites/book/slot_disabled.png", w: 40 },
+      { kind: "image", name: "select corners", src: "/sprites/book/select_corners.png", w: 40 },
+      { kind: "image", name: "tab", src: "/sprites/book/tab.png", w: 32 },
+      { kind: "image", name: "icon home", src: "/sprites/book/icon_home.png", w: 24 },
+      { kind: "image", name: "icon gear", src: "/sprites/book/icon_gear.png", w: 24 },
+      { kind: "image", name: "icon tick", src: "/sprites/book/icon_tick.png", w: 24 },
+      { kind: "image", name: "icon cross", src: "/sprites/book/icon_cross.png", w: 24 },
+      { kind: "image", name: "icon arrow", src: "/sprites/book/icon_arrow.png", w: 24 },
+      { kind: "image", name: "icon coin", src: "/sprites/book/icon_coin.png", w: 24 },
+      { kind: "image", name: "icon play", src: "/sprites/book/icon_play.png", w: 24 },
+      { kind: "image", name: "icon pause", src: "/sprites/book/icon_pause.png", w: 24 },
+      { kind: "image", name: "icon restart", src: "/sprites/book/icon_restart.png", w: 24 },
+      { kind: "image", name: "star full", src: "/sprites/book/icon_star_full.png", w: 24 },
+      { kind: "image", name: "star mid", src: "/sprites/book/icon_star_mid.png", w: 24 },
+      { kind: "image", name: "star empty", src: "/sprites/book/icon_star_empty.png", w: 24 },
+    ],
+  },
 ];
 
 function Thumb({ asset }: { asset: Asset }) {
