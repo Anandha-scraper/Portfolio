@@ -10,13 +10,6 @@ export interface NavItem {
   icon: string; // lucide icon name
 }
 
-export interface Stat {
-  label: string;
-  value: number;
-  suffix?: string;
-  prefix?: string;
-}
-
 export interface Profile {
   name: string;
   shortName: string;
@@ -25,11 +18,7 @@ export interface Profile {
   location: string;
   email: string;
   phone: string;
-  currentFocus: string;
-  availability: "open" | "selective" | "closed";
-  availabilityLabel: string;
   summary: string;
-  stats: Stat[];
 }
 
 export type SkillCategoryId =
