@@ -11,33 +11,33 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 3.40282e38px;
-  border-width: 2px;
-  border-style: solid;
-  border-color: var(--color-ops-line);
-  background-color: #14110cb3;
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
 }
 
-@supports (color: color-mix(in lab, red, red)) {
-  .touch-controls__base {
-    background-color: color-mix(in oklab, var(--color-ops-base) 70%, transparent);
-  }
+.touch-controls__base-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
 .touch-controls__knob {
-  border-radius: 3.40282e38px;
-  border-width: 2px;
-  border-style: solid;
-  border-color: var(--color-ops-line);
-  background-color: #a99f824d;
+  position: relative;
+  transition: filter 100ms ease;
 }
 
-@supports (color: color-mix(in lab, red, red)) {
-  .touch-controls__knob {
-    background-color: color-mix(in oklab, var(--color-ops-sand-soft) 30%, transparent);
-  }
+.touch-controls__knob-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
 .touch-controls__action {
@@ -46,38 +46,37 @@
   right: 1.5rem;
   z-index: 50;
   display: flex;
-  height: 4rem;
-  width: 4rem;
+  height: 4.5rem;
+  width: 4.5rem;
   align-items: center;
   justify-content: center;
-  border-radius: 3.40282e38px;
-  border-width: 2px;
-  border-style: solid;
-  font-size: 1.25rem;
-  line-height: calc(1.75 / 1.25);
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 0.15s;
-  border-color: var(--color-ops-line);
-  background-color: #14110cb3;
-  color: var(--color-ops-sand-soft);
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 150ms ease;
 }
 
-@supports (color: color-mix(in lab, red, red)) {
-  .touch-controls__action {
-    background-color: color-mix(in oklab, var(--color-ops-base) 70%, transparent);
-  }
+.touch-controls__action-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
-.touch-controls__action--ready {
-  border-color: var(--color-ops-rust);
-  background-color: #e2582240;
-  color: var(--color-ops-sand);
-  box-shadow: 0 0 14px rgba(226, 88, 34, 0.5);
+.touch-controls__action-img--lit {
+  opacity: 0;
+  transition: opacity 150ms ease;
 }
 
-@supports (color: color-mix(in lab, red, red)) {
-  .touch-controls__action--ready {
-    background-color: color-mix(in oklab, var(--color-ops-rust) 25%, transparent);
-  }
+.touch-controls__action--ready .touch-controls__action-img--lit {
+  opacity: 1;
+}
+
+.touch-controls__action:active {
+  transform: scale(0.92);
 }

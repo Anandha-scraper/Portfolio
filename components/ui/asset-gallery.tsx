@@ -236,6 +236,28 @@ const GROUPS: Group[] = [
     ],
   },
   {
+    // Transport bar, joystick, and attack-button coins (feed/extract_ui_assets.py,
+    // from feed/ui-source) — each an off/lit pair, wired into
+    // DungeonSlideshowControls and DungeonTouchControls.
+    label: "Dungeon Controls",
+    assets: [
+      { kind: "image", name: "prev (off)", src: "/sprites/ui/btn_prev_off.png", w: 56 },
+      { kind: "image", name: "prev (lit)", src: "/sprites/ui/btn_prev_lit.png", w: 56 },
+      { kind: "image", name: "play (off)", src: "/sprites/ui/btn_play_off.png", w: 56 },
+      { kind: "image", name: "pause (lit)", src: "/sprites/ui/btn_pause_lit.png", w: 56 },
+      { kind: "image", name: "next (off)", src: "/sprites/ui/btn_next_off.png", w: 56 },
+      { kind: "image", name: "next (lit)", src: "/sprites/ui/btn_next_lit.png", w: 56 },
+      { kind: "image", name: "playground (off)", src: "/sprites/ui/btn_playground_off.png", w: 56 },
+      { kind: "image", name: "playground (lit)", src: "/sprites/ui/btn_playground_lit.png", w: 56 },
+      { kind: "image", name: "joystick outer", src: "/sprites/ui/joystick_outer_off.png", w: 64 },
+      { kind: "image", name: "joystick outer (lit)", src: "/sprites/ui/joystick_outer_lit.png", w: 64 },
+      { kind: "image", name: "joystick inner", src: "/sprites/ui/joystick_inner_off.png", w: 44 },
+      { kind: "image", name: "joystick inner (lit)", src: "/sprites/ui/joystick_inner_lit.png", w: 44 },
+      { kind: "image", name: "attack (off)", src: "/sprites/ui/attack_off.png", w: 56 },
+      { kind: "image", name: "attack (lit)", src: "/sprites/ui/attack_lit.png", w: 56 },
+    ],
+  },
+  {
     // Dungeon tileset — the structural tiles the Projects dungeon actually uses:
     // the inner wall (tile_1) and four floor-sand variants (tile_2–5). The rest
     // of the Kenney catalogue was removed.
