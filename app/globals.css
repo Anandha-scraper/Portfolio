@@ -53,8 +53,6 @@
 
   /* Motion keyframe hooks */
   --animate-sprite-flicker: sprite-flicker 0.45s steps(3, end) infinite;
-  --animate-ship-bob: ship-bob 4.5s ease-in-out infinite;
-  --animate-route-march: route-march 0.9s linear infinite;
 }
 
 /* ------------------------------------------------------------------ */
@@ -203,17 +201,6 @@
 @keyframes sprite-bob {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-2px); }
-}
-
-/* Slow buoyant rise-fall + slight roll for the pirate ship "live" asset. */
-@keyframes ship-bob {
-  0%, 100% { transform: translateY(0) rotate(-1deg); }
-  50%      { transform: translateY(-6px) rotate(1deg); }
-}
-
-/* Marching-ants for the active sea route on the Capabilities chart. */
-@keyframes route-march {
-  to { stroke-dashoffset: -24; }
 }
 
 /* Restless flicker for single-frame flame art (no frame pairs in the source). */

@@ -362,23 +362,6 @@ export const SPRITE_CONTROL = {
     count: 11,
   },
 
-  /** Pirate ship — only three angles survive (the rest were culled): 3 is the
-   *  bow-on / top-down hull used as the centre turret in the Capabilities scene,
-   *  4 is a three-quarter, 5 a left→right broadside. Static painted tiles brought
-   *  to life with the `ship-bob` float (see components/ui/ship.tsx). */
-  ship: {
-    dir: "/sprites/ship",
-    frames: [3, 4, 5] as const,
-    width: 150,
-  },
-
-  /** Eight painted islands from feed/island.png + feed/island2.png, sliced by
-   *  feed/extract_islands.py — the targets in the Capabilities "Island Siege". */
-  islands: {
-    dir: "/sprites/islands",
-    count: 8,
-  },
-
   /** One chain arrangement ([drape]--chain--[skull]--chain--[drape]); kept for
    *  use as a flow-diagram connector tile (registry only for now). */
   chain: {

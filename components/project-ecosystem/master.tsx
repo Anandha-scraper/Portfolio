@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { ProjectPreviewFrame } from "@/components/project-ecosystem/project-preview-frame";
 import { Icon } from "@/components/ui/icon";
-import type { MagicBookPage } from "@/components/book/magic-book";
+import type { MagicBookLine, MagicBookPage } from "@/components/book/magic-book";
 import type { Project } from "@/types";
 
 const MagicBook = dynamic(() => import("@/components/book/magic-book"), { ssr: false });
@@ -55,21 +55,36 @@ function buildPages(project: Project): MagicBookPage[] {
     project.links.live ? `Live: ${project.links.live}` : null,
   ].filter((line): line is string => Boolean(line));
 
-  const leftLines = [
-    project.name,
-    project.tagline,
-    `${project.status} · ${project.year} · ${project.category}`,
-    "",
-    ...splitOverview(project.overview),
+  const line = (text: string, kind?: MagicBookLine["kind"]): MagicBookLine => ({ text, kind });
+
+  const leftLines: MagicBookLine[] = [
+    line(project.name, "title"),
+    line(project.tagline, "meta"),
+    line(`${project.status} · ${project.year} · ${project.category}`, "meta"),
+    line(""),
+    line("Overview", "label"),
+    ...splitOverview(project.overview).map((s) => line(s, "body")),
   ];
-  const rightLines = [
-    ...project.highlights.map((h) => `• ${h}`),
-    `Stack: ${project.stack.join(", ")}`,
-    ...project.metrics.map(
-      (m) => `${m.prefix ?? ""}${m.value}${m.suffix ?? ""} — ${m.label}`
-    ),
-    ...(links.length ? ["", ...links] : []),
-  ];
+
+  const rightLines: MagicBookLine[] = [];
+  if (project.highlights.length) {
+    rightLines.push(line("Highlights", "label"), ...project.highlights.map((h) => line(`• ${h}`, "bullet")));
+  }
+  if (project.stack.length) {
+    if (rightLines.length) rightLines.push(line(""));
+    rightLines.push(line("Stack", "label"), line(project.stack.join(", "), "body"));
+  }
+  if (project.metrics.length) {
+    if (rightLines.length) rightLines.push(line(""));
+    rightLines.push(
+      line("Metrics", "label"),
+      ...project.metrics.map((m) => line(`${m.prefix ?? ""}${m.value}${m.suffix ?? ""} — ${m.label}`, "bullet"))
+    );
+  }
+  if (links.length) {
+    if (rightLines.length) rightLines.push(line(""));
+    rightLines.push(line("Links", "label"), ...links.map((l) => line(l, "bullet")));
+  }
 
   const leftChunks = chunk(leftLines, LINES_PER_PAGE);
   const rightChunks = chunk(rightLines, LINES_PER_PAGE);

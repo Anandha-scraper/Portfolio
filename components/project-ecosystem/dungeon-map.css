@@ -31,11 +31,17 @@
 
 .dungeon-map__viewport {
   position: relative;
-  height: clamp(520px, 82vh, 1000px);
+  height: clamp(420px, 82vh, 1000px);
   width: 100%;
   overflow: hidden;
   background-color: var(--color-ops-base);
   outline-style: none;
+}
+
+@media (min-width: 40rem) {
+  .dungeon-map__viewport {
+    height: clamp(520px, 82vh, 1000px);
+  }
 }
 
 .dungeon-map__viewport--aiming {

@@ -16,11 +16,19 @@ const SHEETS = SPRITE_CONTROL.book;
 type SheetKey = keyof typeof SHEETS;
 type AnimEvent = "opened" | "closed" | "flipped";
 
+export interface MagicBookLine {
+  text: string;
+  /** Visual role — styled distinctly so a page's topic labels (e.g.
+   *  "Overview", "Highlights") read apart from their body content.
+   *  Defaults to "body". */
+  kind?: "title" | "meta" | "label" | "body" | "bullet";
+}
+
 export interface MagicBookPage {
-  /** Lines of text revealed one at a time on the left page. */
-  left?: string[];
-  /** Lines of text revealed one at a time on the right page. */
-  right?: string[];
+  /** Lines revealed one at a time on the left page. */
+  left?: MagicBookLine[];
+  /** Lines revealed one at a time on the right page. */
+  right?: MagicBookLine[];
 }
 
 export interface MagicBookProps {
@@ -289,13 +297,21 @@ export default function MagicBook({
   // View-only: lines are rendered as plain text, never contentEditable —
   // the reveal effect resets/rewrites the DOM on every page turn, which
   // would fight a contentEditable caret.
-  const renderLines = (lines: string[]) => (
+  const renderLines = (lines: MagicBookLine[]) => (
     <div className="magic-book__lines" style={{ fontSize: resolvedFontSize }}>
       {lines.map((line, i) => {
         const revealed = i < revealedCount;
+        const kind = line.kind ?? "body";
         return (
-          <div key={i} className={cn("magic-book__line", revealed && "magic-book__line--revealed")}>
-            {line}
+          <div
+            key={i}
+            className={cn(
+              "magic-book__line",
+              `magic-book__line--${kind}`,
+              revealed && "magic-book__line--revealed"
+            )}
+          >
+            {line.text}
           </div>
         );
       })}
