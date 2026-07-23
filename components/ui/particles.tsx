@@ -8,6 +8,7 @@ import {
   type ComponentPropsWithoutRef,
 } from "react";
 
+import { useInViewport } from "@/hooks/use-in-viewport";
 import { cn } from "@/lib/utils";
 
 interface ParticlesProps extends ComponentPropsWithoutRef<"div"> {
@@ -66,6 +67,7 @@ export const Particles: React.FC<ParticlesProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
+  const inViewport = useInViewport(canvasContainerRef, "96px");
   const context = useRef<CanvasRenderingContext2D | null>(null);
   const circles = useRef<Circle[]>([]);
   const mouse = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -272,12 +274,9 @@ export const Particles: React.FC<ParticlesProps> = ({
     };
 
     // The loop (and its global mousemove listener) only runs while the canvas
-    // is near the viewport; under reduced motion the static first paint stays.
-    const io = new IntersectionObserver(
-      ([entry]) => (entry.isIntersecting ? start() : stop()),
-      { rootMargin: "96px" },
-    );
-    if (canvasContainerRef.current) io.observe(canvasContainerRef.current);
+    // is near the viewport (see useInViewport above); under reduced motion
+    // the static first paint stays.
+    if (inViewport) start();
 
     const handleResize = () => {
       if (resizeTimeout.current) {
@@ -291,7 +290,6 @@ export const Particles: React.FC<ParticlesProps> = ({
     window.addEventListener("resize", handleResize);
 
     return () => {
-      io.disconnect();
       stop();
       if (resizeTimeout.current) {
         clearTimeout(resizeTimeout.current);
@@ -299,7 +297,7 @@ export const Particles: React.FC<ParticlesProps> = ({
       window.removeEventListener("resize", handleResize);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [color]);
+  }, [color, inViewport]);
 
   useEffect(() => {
     initCanvas();

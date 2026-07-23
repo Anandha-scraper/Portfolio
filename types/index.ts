@@ -83,7 +83,7 @@ export interface Project {
   // of the full detail view when this is set.
   updating?: boolean;
   // Screenshots for the treasure-book preview panel
-  // (components/project-ecosystem/project-preview-panel.tsx). Drop files under
+  // (components/project-ecosystem/project-preview-frame.tsx). Drop files under
   // public/projects/<id>/ and reference them here — renders a placeholder
   // card until populated.
   previewImages?: string[];

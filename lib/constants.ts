@@ -1,5 +1,8 @@
 import type { NavItem, SectionId } from "@/types";
 
+/** Canonical production URL — shared by layout metadata, robots.ts, and sitemap.ts. */
+export const SITE_URL = "https://anandhakumaran.dev";
+
 export const NAV_ITEMS: NavItem[] = [
   { id: "mission-control", label: "Mission Control", icon: "Compass" },
   { id: "ecosystem", label: "Projects", icon: "Boxes" },

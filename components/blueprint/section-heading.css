@@ -22,7 +22,7 @@
 .section-heading__index {
   font-size: 0.75rem;
   line-height: calc(1 / 0.75);
-  color: var(--color-ink-faint);
+  color: var(--color-ink-muted);
 }
 
 .section-heading__rule {

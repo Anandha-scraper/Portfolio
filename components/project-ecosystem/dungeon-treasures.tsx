@@ -10,6 +10,7 @@
  */
 
 import { TREASURE_POINTS } from "@/lib/dungeon-treasure-points";
+import { SPRITE_CONTROL } from "@/lib/sprite-control";
 import { cn } from "@/lib/utils";
 
 const SIZE = 60;
@@ -42,7 +43,7 @@ export function DungeonTreasures({
             />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`/sprites/treasure/treasure_${String(treasure).padStart(2, "0")}.png`}
+              src={`${SPRITE_CONTROL.treasureIcons.dir}/treasure_${String(treasure).padStart(2, "0")}.png`}
               alt=""
               width={SIZE}
               className={cn("dungeon-treasures__icon", "pixelated")}

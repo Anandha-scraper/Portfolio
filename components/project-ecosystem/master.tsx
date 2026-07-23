@@ -26,12 +26,11 @@ const MagicBook = dynamic(() => import("@/components/book/magic-book"), { ssr: f
 
 // ── Layout knobs — the only place these are set ──────────────────────
 const ROW_BREAKPOINT_PX = 1024; // matches Tailwind's `lg:` — below this, stack
-const BOOK_COLUMN_RATIO = 1 / 3;
-const PREVIEW_COLUMN_RATIO = 2 / 3;
-const COLUMN_GAP_PX = 24; // space between book column and preview column
-const PREVIEW_TOP_GAP_PX = 40; // reserved empty space above the preview card
-const BOOK_MIN_PX = 260;
-const BOOK_MAX_PX = 620;
+const BOOK_COLUMN_RATIO = 1 / 2;
+const PREVIEW_COLUMN_RATIO = 1 / 2;
+const COLUMN_GAP_PX = 12; // minimal space between book column and preview column
+const BOOK_MIN_PX = 320;
+const BOOK_MAX_PX = 800;
 const OPEN_DELAY_MS = 200;
 const SWIPE_THRESHOLD_PX = 40;
 const LINES_PER_PAGE = 6;
@@ -229,7 +228,6 @@ export function Master({ project }: { project: Project }) {
           flex: isRow ? `0 0 ${PREVIEW_COLUMN_RATIO * 100}%` : "0 0 auto",
           width: "100%",
           minWidth: 0,
-          marginTop: isRow ? PREVIEW_TOP_GAP_PX : 0,
         }}
       >
         <ProjectPreviewFrame project={project} />

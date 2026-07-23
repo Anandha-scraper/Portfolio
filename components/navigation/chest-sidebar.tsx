@@ -9,6 +9,7 @@ import { NAV_ITEMS, SECTION_IDS } from "@/lib/constants";
 import { socials } from "@/data/socials";
 import { SPRITE_CONTROL } from "@/lib/sprite-control";
 import { useActiveSection } from "@/hooks/use-active-section";
+import { useClickOutside } from "@/hooks/use-click-outside";
 import { scrollToSection } from "@/lib/scroll";
 import { cn } from "@/lib/utils";
 
@@ -37,7 +38,7 @@ export function ChestSidebar() {
   const panelId = useId();
 
   const chestRef = useRef<HTMLButtonElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
 
   // Open/close imperatively (e.g. the idle companion opens; the Capabilities idle
   // timer closes).
@@ -58,23 +59,7 @@ export function ChestSidebar() {
     window.dispatchEvent(new Event(open ? "chest-sidebar-open" : "chest-sidebar-close"));
   }, [open]);
 
-  useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (e: MouseEvent) => {
-      const t = e.target as Node;
-      if (chestRef.current?.contains(t) || panelRef.current?.contains(t)) return;
-      setOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("mousedown", onPointerDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onPointerDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
+  useClickOutside(open, [chestRef, panelRef], () => setOpen(false));
 
   const go = (id: (typeof NAV_ITEMS)[number]["id"]) => {
     scrollToSection(id);
@@ -108,10 +93,9 @@ export function ChestSidebar() {
 
       <AnimatePresence>
         {open && (
-          <motion.div
+          <motion.nav
             ref={panelRef}
             id={panelId}
-            role="navigation"
             aria-label="Primary"
             initial={{ opacity: 0, x: reduceMotion ? 0 : -24 }}
             animate={{ opacity: 1, x: 0 }}
@@ -168,7 +152,7 @@ export function ChestSidebar() {
                 </div>
               </div>
             </DungeonFrame>
-          </motion.div>
+          </motion.nav>
         )}
       </AnimatePresence>
     </div>

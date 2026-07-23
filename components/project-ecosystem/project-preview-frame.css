@@ -1,26 +1,35 @@
 /* project-preview-frame.tsx — static styles. Layout (margin/width/height)
    still comes from the `style` prop master.tsx passes in; this file covers
-   everything else that was a Tailwind className. Imported once from
-   app/layout.tsx (see magic-book.css for why). Color values below are the
-   literal computed output of the Tailwind utilities they replace (hex
-   fallback + a color-mix enhancement, matching Tailwind's own two-step
-   pattern) so opacity-blended colors render identically. */
+   everything else. Imported once from app/layout.tsx (see magic-book.css
+   for why).
+
+   The card is the /project-preview.webp pixel-art window-chrome, stretched
+   to fill via backgroundSize: 100% 100% (same sprite-compositing technique
+   used everywhere else on this site). The screenshot content sits in
+   `.preview-frame__viewport`, inset at the exact percentages measured off
+   that PNG via a flood-fill from its center out to the frame's border
+   (top: 23.53%, bottom: 10.43%, left/right: 4.42%) — re-measure if that
+   asset is ever replaced. The switcher controls are positioned relative to
+   that inset viewport (not the outer card), so they sit over the actual
+   screenshot instead of colliding with the ornate frame border. */
 
 .preview-frame__card {
   position: relative;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 1402 / 1122;
   width: 100%;
   overflow: hidden;
-  border-radius: 0.375rem;
-  border: 1px solid var(--color-ops-line);
-  background-color: #1f1a1266;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  background-image: url(/project-preview.webp);
+  background-size: 100% 100%;
+  image-rendering: pixelated;
 }
 
-@supports (color: color-mix(in lab, red, red)) {
-  .preview-frame__card {
-    background-color: color-mix(in oklab, var(--color-ops-surface) 40%, transparent);
-  }
+.preview-frame__viewport {
+  position: absolute;
+  top: 23.53%;
+  bottom: 10.43%;
+  left: 4.42%;
+  right: 4.42%;
+  overflow: hidden;
 }
 
 .preview-frame__image {
@@ -36,13 +45,7 @@
   font-family: var(--font-pixel-readable);
   font-size: 0.75rem;
   line-height: calc(1 / 0.75);
-  color: #a99f82b3;
-}
-
-@supports (color: color-mix(in lab, red, red)) {
-  .preview-frame__empty {
-    color: color-mix(in oklab, var(--color-ops-sand-soft) 70%, transparent);
-  }
+  color: #4a3420;
 }
 
 .preview-frame__nav-btn {

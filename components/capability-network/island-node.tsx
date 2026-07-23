@@ -4,6 +4,7 @@ import { memo } from "react";
 import type { CSSProperties } from "react";
 import { Icon } from "@/components/ui/icon";
 import { ACCENTS } from "@/lib/accents";
+import { SPRITE_CONTROL } from "@/lib/sprite-control";
 import { cn } from "@/lib/utils";
 import type { SkillCategory } from "@/types";
 import type { Slot } from "./types";
@@ -73,7 +74,7 @@ function IslandNodeComponent({
           src={
             (atShip ? category.artActive : undefined) ??
             category.art ??
-            `/sprites/islands/island_${index + 1}.png`
+            `${SPRITE_CONTROL.islands.dir}/island_${index + 1}.png`
           }
           alt=""
           aria-hidden

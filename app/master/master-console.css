@@ -103,7 +103,7 @@
   transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 0.15s;
-  color: var(--color-ops-sand-faint);
+  color: var(--color-ops-sand-soft);
 }
 
 @media (hover: hover) {
@@ -169,7 +169,7 @@
 .master-console__meta {
   font-size: 0.75rem;
   line-height: calc(1 / 0.75);
-  color: var(--color-ops-sand-faint);
+  color: var(--color-ops-sand-soft);
 }
 
 .master-console__label {
@@ -178,7 +178,7 @@
   font-size: 0.55rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--color-ops-sand-faint);
+  color: var(--color-ops-sand-soft);
 }
 
 .master-console__input {
@@ -254,7 +254,7 @@
 
 .master-console__remove {
   padding-inline: 0.25rem;
-  color: var(--color-ops-sand-faint);
+  color: var(--color-ops-sand-soft);
 }
 
 @media (hover: hover) {
@@ -345,7 +345,7 @@
 .master-console__empty-hint {
   font-size: 0.875rem;
   line-height: 1.42857;
-  color: var(--color-ops-sand-faint);
+  color: var(--color-ops-sand-soft);
 }
 
 @media (min-width: 48rem) {

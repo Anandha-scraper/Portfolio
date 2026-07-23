@@ -10,7 +10,6 @@ interface RevealProps {
   y?: number;
   blur?: boolean;
   once?: boolean;
-  as?: "div" | "section" | "li" | "span";
 }
 
 /** Blur-fade-up reveal on scroll. Honors reduced-motion (renders instantly). */

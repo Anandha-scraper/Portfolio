@@ -149,6 +149,11 @@ export function SkeletonCompanion({
       const dt = Math.min(0.05, (now - last) / 1000); // clamp big gaps
       last = now;
 
+      // Skip all position/DOM work while the tab is backgrounded — this is a
+      // fixed whole-page overlay, not a scroll-bound element, so there's no
+      // "offscreen" to gate on the way there is for scroll-bound sprites.
+      if (document.hidden) return;
+
       const { mode: m, idleDelayMs: delay } = cfgRef.current;
       const stillFor = now - lastMoveAt;
 

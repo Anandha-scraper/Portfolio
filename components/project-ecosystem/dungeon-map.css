@@ -18,7 +18,7 @@
   font-size: 0.5rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--color-ops-sand-faint);
+  color: var(--color-ops-sand-soft);
 }
 
 .dungeon-map__hud-highlight {
@@ -26,7 +26,7 @@
 }
 
 .dungeon-map__hud-note {
-  color: var(--color-ops-sand-faint);
+  color: var(--color-ops-sand-soft);
 }
 
 .dungeon-map__viewport {

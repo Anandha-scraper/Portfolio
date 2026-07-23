@@ -6,6 +6,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Ship } from "@/components/ui/ship";
 import type { TrailPosition } from "@/components/ui/pixel-trail";
 import { ACCENTS } from "@/lib/accents";
+import { SPRITE_CONTROL } from "@/lib/sprite-control";
 import { skillCategories } from "@/data/skills";
 import { scrollToSection } from "@/lib/scroll";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -400,7 +401,7 @@ export function CapabilityNetwork() {
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/sprites/fire/explosive_fire.png"
+                  src={`${SPRITE_CONTROL.fire.dir}/explosive_fire.png`}
                   alt=""
                   width={Math.round(islandW * 0.55)}
                   className={cn("capability-network__salvo-img", "pixelated")}

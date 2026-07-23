@@ -48,7 +48,7 @@ function ProfilePhotoReveal() {
           transition={{ duration: 0.9, ease: "easeInOut" }}
         >
           <Image
-            src="/profile/anandha.png"
+            src="/profile/anandha.webp"
             alt={profile.name}
             fill
             unoptimized
@@ -82,7 +82,7 @@ export function MissionControl() {
                 <NamePatrolSprite
                   character="robot"
                   direction="rtl"
-                  scale={1.5}
+                  scale={2}
                   className="mission-control__patrol-track"
                 />
               </span>
@@ -90,7 +90,7 @@ export function MissionControl() {
                 <NamePatrolSprite
                   character="skeleton"
                   direction="ltr"
-                  scale={1.5}
+                  scale={2}
                   className="mission-control__patrol-track"
                 />
                 <span className={cn("mission-control__name-word", "text-ops-gradient")}>KUMARAN M S</span>

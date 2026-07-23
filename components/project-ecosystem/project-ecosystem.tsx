@@ -30,6 +30,12 @@ export function ProjectEcosystem() {
 
   return (
     <section id="ecosystem" className={cn("project-ecosystem__section", "ops", "ops-scanlines")}>
+      {/* Visually hidden — the section is a full-bleed dungeon map with no
+          room for a visible heading, but screen-reader users navigating by
+          heading level still need an h2 here (the page otherwise jumps from
+          the h1 straight to a conditional h3 inside the dungeon panel). */}
+      <h2 className="sr-only">Projects</h2>
+
       {/* Legibility wash — light, and transparent at both edges so the global
           boxed-line grid runs seamlessly into the sections above and below (no
           dark band at the boundaries). */}

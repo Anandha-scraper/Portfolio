@@ -98,23 +98,23 @@
 }
 
 .mission-control__patrol-track {
-  height: 2rem;
+  height: 2.75rem;
   min-width: 4rem;
   flex: 1 1 0%;
-  max-width: 6rem;
+  max-width: 8rem;
 }
 
 @media (min-width: 40rem) {
   .mission-control__patrol-track {
-    height: 2.5rem;
-    max-width: 9rem;
+    height: 3.25rem;
+    max-width: 12rem;
   }
 }
 
 @media (min-width: 64rem) {
   .mission-control__patrol-track {
-    height: 3rem;
-    max-width: 12rem;
+    height: 4rem;
+    max-width: 16rem;
   }
 }
 
@@ -163,7 +163,14 @@
   padding-inline: 1.5rem;
 }
 
-.mission-control__word {
+/* Compound selector (0,2,0) — deliberately more specific than either
+   `.morphing-text` (its own component defaults, sized for a much bigger
+   standalone use) or `.mission-control__word` alone, so this always wins
+   regardless of which of the two stylesheets app/layout.tsx happens to
+   import last. Without this, both rules have equal specificity and the
+   later import silently wins — that's what caused the oversized/
+   off-center text this fixes. */
+.morphing-text.mission-control__word {
   height: 3rem;
   font-size: 1.5rem;
   line-height: 1.33333;
@@ -172,7 +179,7 @@
 }
 
 @media (min-width: 48rem) {
-  .mission-control__word {
+  .morphing-text.mission-control__word {
     height: 3.5rem;
     font-size: 1.875rem;
     line-height: 1.2;
@@ -180,7 +187,7 @@
 }
 
 @media (min-width: 64rem) {
-  .mission-control__word {
+  .morphing-text.mission-control__word {
     font-size: 2.25rem;
     line-height: 1.11111;
   }

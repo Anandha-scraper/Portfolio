@@ -60,7 +60,7 @@
   transition-duration: 0.15s;
   border-color: var(--color-ops-line);
   background-color: #14110cb3;
-  color: var(--color-ops-sand-faint);
+  color: var(--color-ops-sand-soft);
 }
 
 @supports (color: color-mix(in lab, red, red)) {

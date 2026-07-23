@@ -92,7 +92,7 @@
 }
 
 .terminal__text--system {
-  color: var(--color-ops-sand-faint);
+  color: var(--color-ops-sand-soft);
 }
 
 .terminal__input-row {

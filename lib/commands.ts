@@ -1,6 +1,6 @@
 import type { SectionId } from "@/types";
 import { profile } from "@/data/profile";
-import { projects } from "@/data/projects";
+import { featuredProjects } from "@/data/projects";
 import { socials } from "@/data/socials";
 
 export interface CommandContext {
@@ -54,9 +54,7 @@ export function buildCommands(): TerminalCommand[] {
       run: (ctx) => {
         ctx.print([
           "Featured modules:",
-          ...projects
-            .filter((p) => p.featured)
-            .map((p) => `  • ${p.name} — ${p.tagline}`),
+          ...featuredProjects.map((p) => `  • ${p.name} — ${p.tagline}`),
           "",
           "→ scrolling to ecosystem…",
         ]);

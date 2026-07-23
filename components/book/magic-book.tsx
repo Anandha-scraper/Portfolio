@@ -2,25 +2,16 @@
 
 import { useRef, useEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { SPRITE_CONTROL } from "@/lib/sprite-control";
 
 /**
  * Sprite sheet map — measured from the CraftPix "Animated Magic Book" pack
- * (alpha-boundary detection, not eyeballed):
- *
- *   open_book.png             1088×816   4×3 grid   272×272 cell   12 frames
- *   close_book.png            1088×816   4×3 grid   272×272 cell   12 frames
- *   turning_pages_right.png   1088×1088  4×4 grid   272×272 cell   15 frames (16th slot empty)
- *   turning_pages_left.png    1088×1088  4×4 grid   272×272 cell   15 frames
- *
- * Every sheet shares the same 272×272 cell — that's what makes a single
- * drawFrame() function usable for all four animations.
+ * (alpha-boundary detection, not eyeballed). Every sheet shares the same
+ * 272×272 cell — that's what makes a single drawFrame() function usable for
+ * all four animations. Grid/frame data lives in lib/sprite-control.ts
+ * (SPRITE_CONTROL.book) so it stays the single source of truth.
  */
-const SHEETS = {
-  open: { src: "/sprites/book/open_book.png", cols: 4, cellW: 272, cellH: 272, frameCount: 12 },
-  close: { src: "/sprites/book/close_book.png", cols: 4, cellW: 272, cellH: 272, frameCount: 12 },
-  turnRight: { src: "/sprites/book/turning_pages_right.png", cols: 4, cellW: 272, cellH: 272, frameCount: 15 },
-  turnLeft: { src: "/sprites/book/turning_pages_left.png", cols: 4, cellW: 272, cellH: 272, frameCount: 15 },
-} as const;
+const SHEETS = SPRITE_CONTROL.book;
 
 type SheetKey = keyof typeof SHEETS;
 type AnimEvent = "opened" | "closed" | "flipped";

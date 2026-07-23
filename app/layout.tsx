@@ -3,6 +3,7 @@ import { Pixelify_Sans } from "next/font/google";
 import { BackgroundEnvironment } from "@/components/blueprint/background-environment";
 import { SkeletonCompanion } from "@/components/companion/skeleton-companion";
 import { AssetGallery } from "@/components/ui/asset-gallery";
+import { SITE_URL } from "@/lib/constants";
 import "./globals.css";
 // Per-component plain CSS files, migrated off Tailwind utility classes.
 // Next.js's App Router only allows non-Module global CSS to be imported
@@ -52,8 +53,6 @@ const pixelify = Pixelify_Sans({
   variable: "--font-pixelify",
   display: "swap",
 });
-
-const SITE_URL = "https://anandhakumaran.dev";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

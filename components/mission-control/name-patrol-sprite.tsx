@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "motion/react";
 import { PixelSprite } from "@/components/ui/pixel-sprite";
+import { useInViewport } from "@/hooks/use-in-viewport";
 import { SPRITE_CONTROL } from "@/lib/sprite-control";
 import { cn } from "@/lib/utils";
 
@@ -41,10 +42,19 @@ export function NamePatrolSprite({
   const trackRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const jumpingRef = useRef(false);
+  const inViewport = useInViewport(trackRef);
+  const inViewportRef = useRef(inViewport);
 
   const [facing, setFacing] = useState<1 | -1>(direction === "rtl" ? -1 : 1);
   const [jumping, setJumping] = useState(false);
   const [jumpKey, setJumpKey] = useState(0);
+
+  // Mirrored into a ref (rather than added to the tick effect's own deps)
+  // so scrolling offscreen/onscreen pauses the walk without restarting the
+  // effect and snapping the sprite back to its start edge.
+  useEffect(() => {
+    inViewportRef.current = inViewport;
+  }, [inViewport]);
 
   const sprite = SPRITE_CONTROL[character];
   const spriteScale = scale ?? sprite.scale;
@@ -84,6 +94,7 @@ export function NamePatrolSprite({
       raf = requestAnimationFrame(tick);
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
+      if (!inViewportRef.current) return; // paused while scrolled offscreen
       if (jumpingRef.current) return; // paused mid-hop
 
       x += dir * SPEED * dt;
@@ -127,6 +138,7 @@ export function NamePatrolSprite({
           flip={facing === -1}
           mode={showJump ? "once" : "loop"}
           playKey={jumpKey}
+          playOnMount
           onDone={character === "robot" ? handleJumpDone : undefined}
         />
       </div>

@@ -352,6 +352,16 @@ export const SPRITE_CONTROL = {
     open: { suffix: "_open", w: 48 },
   },
 
+  /** Treasure-marker icons on the dungeon map — a different, unrelated set
+   *  from `treasures` above (that one's the open/close chest pair at
+   *  /sprites/dungeon; this is 11 numbered icons at /sprites/treasure,
+   *  zero-padded to 2 digits: treasure_01.png..treasure_11.png). Drives
+   *  components/project-ecosystem/dungeon-treasures.tsx. */
+  treasureIcons: {
+    dir: "/sprites/treasure",
+    count: 11,
+  },
+
   /** Pirate ship — only three angles survive (the rest were culled): 3 is the
    *  bow-on / top-down hull used as the centre turret in the Capabilities scene,
    *  4 is a three-quarter, 5 a left→right broadside. Static painted tiles brought
@@ -415,10 +425,10 @@ export const SPRITE_CONTROL = {
    *  the Project Dungeon panel
    *  (components/project-ecosystem/project-dungeon-panel.tsx). */
   book: {
-    open: "/sprites/book/open_book.png", // 1088×816, 4×3 grid, 12 frames
-    close: "/sprites/book/close_book.png", // 1088×816, 4×3 grid, 12 frames
-    turnLeft: "/sprites/book/turning_pages_left.png", // 1088×1088, 4×4 grid, 15 frames
-    turnRight: "/sprites/book/turning_pages_right.png", // 1088×1088, 4×4 grid, 15 frames
+    open: { src: "/sprites/book/open_book.png", cols: 4, cellW: 272, cellH: 272, frameCount: 12 },
+    close: { src: "/sprites/book/close_book.png", cols: 4, cellW: 272, cellH: 272, frameCount: 12 },
+    turnLeft: { src: "/sprites/book/turning_pages_left.png", cols: 4, cellW: 272, cellH: 272, frameCount: 15 },
+    turnRight: { src: "/sprites/book/turning_pages_right.png", cols: 4, cellW: 272, cellH: 272, frameCount: 15 },
   },
 
 } as const;

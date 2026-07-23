@@ -56,10 +56,3 @@ export function computeSlots(w: number, h: number): Slot[] {
   if (w <= 0 || h <= 0) return ROUTE_SLOTS;
   return w / h >= PORTRAIT_RATIO ? ROUTE_SLOTS : PORTRAIT_SLOTS;
 }
-
-/**
- * SHIP_HOME — the ship's starting berth: docked at the first island (is1). The
- * first navigation line is drawn from here until the user picks a course.
- * (Same slot in both arrangements' order — index 0.)
- */
-export const SHIP_HOME: Slot = ROUTE_SLOTS[0];

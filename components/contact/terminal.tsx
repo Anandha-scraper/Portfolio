@@ -80,7 +80,11 @@ export function Terminal() {
   };
 
   return (
-    <div className={cn("terminal", "ops")} onClick={() => inputRef.current?.focus()}>
+    <div
+      className={cn("terminal", "ops")}
+      role="presentation"
+      onClick={() => inputRef.current?.focus()}
+    >
       {/* chrome */}
       <div className="terminal__chrome">
         <div className="terminal__dots">
