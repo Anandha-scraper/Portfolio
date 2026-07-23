@@ -108,7 +108,22 @@ export function DungeonTouchControls({
         className="touch-controls__base"
         style={{ width: PAD, height: PAD, touchAction: "none" }}
       >
-        <div ref={knobRef} className="touch-controls__knob" style={{ width: KNOB, height: KNOB }} />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/sprites/ui/joystick_outer_off.png"
+          alt=""
+          draggable={false}
+          className={cn("touch-controls__base-img", "pixelated")}
+        />
+        <div ref={knobRef} className="touch-controls__knob" style={{ width: KNOB, height: KNOB }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/sprites/ui/joystick_inner_off.png"
+            alt=""
+            draggable={false}
+            className={cn("touch-controls__knob-img", "pixelated")}
+          />
+        </div>
       </div>
 
       {/* action button */}
@@ -116,10 +131,18 @@ export function DungeonTouchControls({
         type="button"
         aria-label="Open nearby treasure"
         onClick={onInteract}
-        className={cn("touch-controls__action", "font-pixel", interactReady && "touch-controls__action--ready")}
+        className={cn("touch-controls__action", interactReady && "touch-controls__action--ready")}
         style={{ touchAction: "none" }}
       >
-        ⚔
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/sprites/ui/attack_off.png" alt="" draggable={false} className={cn("touch-controls__action-img", "pixelated")} />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/sprites/ui/attack_lit.png"
+          alt=""
+          draggable={false}
+          className={cn("touch-controls__action-img", "touch-controls__action-img--lit", "pixelated")}
+        />
       </button>
     </>
   );
