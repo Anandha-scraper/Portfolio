@@ -1,8 +1,7 @@
 /* asset-gallery.tsx — static structural styles. `.pixelated`,
-   `.font-pixel`/`.font-pixel-readable`, `.animate-sprite-flicker`,
-   `.animate-ship-bob` are existing hand-written/theme-derived utilities,
-   left as-is. Imported once from app/layout.tsx (see
-   components/book/magic-book.css for why). */
+   `.font-pixel`/`.font-pixel-readable`, `.animate-sprite-flicker` are
+   existing hand-written/theme-derived utilities, left as-is. Imported once
+   from app/layout.tsx (see components/book/magic-book.css for why). */
 
 .asset-gallery__thumb {
   display: flex;

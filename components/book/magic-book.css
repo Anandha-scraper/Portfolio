@@ -68,3 +68,31 @@
   opacity: 1;
   transform: translateY(0);
 }
+
+/* Per-kind styling — makes a page's topic labels (Overview, Highlights, …)
+   read distinctly from the body content underneath them. */
+.magic-book__line--title {
+  font-weight: 700;
+  font-size: 1.25em;
+  letter-spacing: 0.01em;
+  color: #3a2515;
+}
+
+.magic-book__line--meta {
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b5439;
+}
+
+.magic-book__line--label {
+  font-weight: 700;
+  font-size: 0.95em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ops-rust);
+}
+
+.magic-book__line--bullet {
+  padding-left: 0.6em;
+}

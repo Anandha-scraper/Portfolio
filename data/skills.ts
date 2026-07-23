@@ -10,8 +10,6 @@ export const skillCategories: SkillCategory[] = [
     label: "Frontend",
     icon: "LayoutTemplate",
     accent: "blue",
-    art: "/sprites/maps/map_5_land.png",
-    artActive: "/sprites/maps/map_5_sea.png",
     blurb: "Performant, responsive interfaces with a product-design sensibility.",
     skills: [
       { name: "React.js", level: 90 },
@@ -27,8 +25,6 @@ export const skillCategories: SkillCategory[] = [
     label: "Backend",
     icon: "Server",
     accent: "indigo",
-    art: "/sprites/maps/map_1_land.png",
-    artActive: "/sprites/maps/map_1_sea.png",
     blurb: "REST APIs, server-side logic, and resilient data pipelines.",
     skills: [
       { name: "Node.js", level: 85 },
@@ -43,8 +39,6 @@ export const skillCategories: SkillCategory[] = [
     label: "Databases & BaaS",
     icon: "Database",
     accent: "emerald",
-    art: "/sprites/maps/map_2_land.png",
-    artActive: "/sprites/maps/map_2_sea.png",
     blurb: "Relational and document stores, plus realtime backends-as-a-service.",
     skills: [
       { name: "MongoDB", level: 86 },
@@ -58,8 +52,6 @@ export const skillCategories: SkillCategory[] = [
     label: "DevOps & Cloud",
     icon: "Cloud",
     accent: "violet",
-    art: "/sprites/maps/map_3_land.png",
-    artActive: "/sprites/maps/map_3_sea.png",
     blurb: "Deployments, hosting, and CI/CD that keep cloud costs lean.",
     skills: [
       { name: "Vercel", level: 86 },
@@ -74,8 +66,6 @@ export const skillCategories: SkillCategory[] = [
     label: "Agentic AI",
     icon: "Sparkles",
     accent: "violet",
-    art: "/sprites/maps/map_4_land.png",
-    artActive: "/sprites/maps/map_4_sea.png",
     // NOTE: drafted defaults — edit levels/notes to match your real experience.
     blurb: "LLM-powered agents: tools, retrieval, and orchestration that actually ship.",
     skills: [
@@ -91,10 +81,6 @@ export const skillCategories: SkillCategory[] = [
     label: "Web3",
     icon: "Boxes",
     accent: "coral",
-    // Only five map_N art sets exist for six categories — web3 previously
-    // duplicated backend's map_1. It uses the volcanic island sprite instead
-    // (no artActive; island-node.tsx falls back to `art` while docked).
-    art: "/sprites/islands/island_8.png",
     blurb: "Smart contracts and decentralized storage for tamper-proof systems.",
     skills: [
       { name: "Ethereum Smart Contracts", level: 64, note: "Hackathon-built" },

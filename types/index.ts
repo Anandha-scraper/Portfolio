@@ -42,10 +42,6 @@ export interface SkillCategory {
   accent: "blue" | "indigo" | "violet" | "coral" | "emerald";
   blurb: string;
   skills: Skill[];
-  /** Override island art (e.g. a map asset). Defaults to the island sprite. */
-  art?: string;
-  /** Art shown only while the ship is docked here (e.g. the map's sea form). */
-  artActive?: string;
 }
 
 export type ProjectStatus = "shipped" | "finalist" | "internal" | "live";

@@ -63,23 +63,6 @@
   }
 }
 
-.capability-network__hud {
-  position: relative;
-  z-index: 10;
-  margin-bottom: 0.25rem;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  column-gap: 0.5rem;
-  row-gap: 0.5rem;
-  text-align: center;
-  font-size: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-ops-sand-soft);
-}
-
 .capability-network__stage {
   position: relative;
   height: 87vh;
@@ -88,49 +71,4 @@
   width: 100%;
   min-width: 0;
   overflow: hidden;
-}
-
-.capability-network__anchors {
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-}
-
-.capability-network__anchor {
-  position: absolute;
-  translate: -50% -50%;
-}
-
-.capability-network__wake {
-  pointer-events: none;
-  z-index: 45;
-}
-
-.capability-network__salvo {
-  pointer-events: none;
-  position: absolute;
-  z-index: 46;
-}
-
-.capability-network__salvo-img {
-  translate: -50% -50%;
-}
-
-.capability-network__ship {
-  pointer-events: none;
-  position: absolute;
-  z-index: 40;
-}
-
-.capability-network__ship-inner {
-  display: flex;
-  height: 100%;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-}
-
-.capability-network__ship-art {
-  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.6));
 }

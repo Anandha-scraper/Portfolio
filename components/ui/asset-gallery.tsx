@@ -36,8 +36,6 @@ type StaticAsset = {
   w: number;
   /** Single-frame art that should still feel alive — adds a CSS fire flicker. */
   flicker?: boolean;
-  /** Painted ship tiles — gentle buoyant bob (see Ship / ship-bob keyframe). */
-  bob?: boolean;
 };
 type Asset = AnimatedAsset | StaticAsset;
 
@@ -200,17 +198,6 @@ const GROUPS: Group[] = [
     ],
   },
   {
-    // Three surviving ship angles (3/4/5) — each gently bobs (Ship / ship-bob).
-    label: "Ships",
-    assets: [3, 4, 5].map((n) => ({
-      kind: "image" as const,
-      name: `ship ${n}`,
-      src: `/sprites/ship/ship_${n}.png`,
-      w: 56,
-      bob: true,
-    })),
-  },
-  {
     // Single-frame flames — kept alive with a CSS flicker rather than frames.
     label: "Fire",
     assets: [
@@ -308,8 +295,7 @@ function Thumb({ asset }: { asset: Asset }) {
             className={cn(
               "asset-gallery__thumb-img",
               "pixelated",
-              asset.flicker && "animate-sprite-flicker",
-              asset.bob && "animate-ship-bob"
+              asset.flicker && "animate-sprite-flicker"
             )}
           />
         )}
