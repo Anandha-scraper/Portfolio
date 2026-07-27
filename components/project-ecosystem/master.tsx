@@ -166,9 +166,22 @@ export function Master({ project }: { project: Project }) {
         display: "flex",
         flexDirection: isRow ? "row" : "column",
         alignItems: isRow ? "stretch" : "center",
+        justifyContent: "flex-start",
         gap: COLUMN_GAP_PX,
         width: "100%",
-        height: "100%",
+        // Row (desktop) layout needs to actually fill the dungeon panel's
+        // available height for the book/preview columns to size against —
+        // a bare `height: "100%"` doesn't reliably resolve through
+        // .dungeon-panel__page's flex-column parent (which never gives this
+        // root an explicit flex-grow), so the book's ResizeObserver was
+        // measuring a content-sized box instead of the real available one
+        // and staying small. `flex: "1 1 auto"` fixes that directly. Column
+        // (mobile) layout wants the opposite — no forced height, so the
+        // box can never be taller than its own stacked content and
+        // introduce gaps around it.
+        ...(isRow
+          ? { flex: "1 1 auto", height: "100%", minHeight: 0 }
+          : { height: "auto" }),
         minWidth: 0,
       }}
     >

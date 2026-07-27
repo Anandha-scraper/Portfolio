@@ -32,10 +32,13 @@
 
 @media (min-width: 64rem) {
   .dungeon-panel__page {
-    /* The controls bar switches to small floating corner buttons at this
-       breakpoint (dungeon-slideshow-controls.css) — no full-width bar to
-       clear, so no extra top clearance is needed here. */
+    /* The controls bar switches to a small floating top-right cluster at
+       this breakpoint (dungeon-slideshow-controls.css) rather than a
+       full-width bar — but the preview column sits directly under it on
+       the right, and can grow tall enough to collide, so this still needs
+       the same top clearance as every other breakpoint. */
     padding: 1.5rem;
+    padding-top: 3.875rem;
   }
 }
 

@@ -75,35 +75,39 @@ export function MissionControl() {
       <div className={cn("mission-control__grid", "section-pad")}>
         {/* Left — context, anchored toward the top-left */}
         <div className="mission-control__context" style={{ maxWidth: "min(600px, 100%)" }}>
-          <Reveal delay={0.1}>
-            <h1 className={cn("mission-control__name", "font-pixel")}>
-              <span className="mission-control__name-row">
-                <span className="mission-control__name-word">ANANDHA</span>
-                <NamePatrolSprite
-                  character="robot"
-                  direction="rtl"
-                  scale={2}
-                  className="mission-control__patrol-track"
-                />
-              </span>
-              <span className="mission-control__name-row">
-                <NamePatrolSprite
-                  character="skeleton"
-                  direction="ltr"
-                  scale={2}
-                  className="mission-control__patrol-track"
-                />
-                <span className={cn("mission-control__name-word", "text-ops-gradient")}>KUMARAN M S</span>
-              </span>
-            </h1>
-          </Reveal>
+          <DungeonFrame wall={16} className="mission-control__name-card">
+            <div className="mission-control__name-card-inner">
+              <Reveal delay={0.1}>
+                <h1 className={cn("mission-control__name", "font-pixel")}>
+                  <span className="mission-control__name-row">
+                    <span className="mission-control__name-word">ANANDHA</span>
+                    <NamePatrolSprite
+                      character="robot"
+                      direction="rtl"
+                      scale={2}
+                      className="mission-control__patrol-track"
+                    />
+                  </span>
+                  <span className="mission-control__name-row">
+                    <NamePatrolSprite
+                      character="skeleton"
+                      direction="ltr"
+                      scale={2}
+                      className="mission-control__patrol-track"
+                    />
+                    <span className={cn("mission-control__name-word", "text-ops-gradient")}>KUMARAN M S</span>
+                  </span>
+                </h1>
+              </Reveal>
 
-          <Reveal delay={0.18}>
-            <p className={cn("mission-control__tagline", "font-pixel-readable")}>
-              <span className="mission-control__tagline-title">{profile.title}</span> —{" "}
-              {profile.tagline}
-            </p>
-          </Reveal>
+              <Reveal delay={0.18}>
+                <p className={cn("mission-control__tagline", "font-pixel-readable")}>
+                  <span className="mission-control__tagline-title">{profile.title}</span> —{" "}
+                  {profile.tagline}
+                </p>
+              </Reveal>
+            </div>
+          </DungeonFrame>
         </div>
 
         {/* Right — stone-walled "space" card with drifting particles + morphing text */}

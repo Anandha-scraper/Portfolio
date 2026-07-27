@@ -71,19 +71,35 @@
   flex-direction: column;
 }
 
+/* Framed panel around the name + tagline (DungeonFrame — the same
+   9-slice stone-border component already used for the space card on the
+   right), so the hero name reads as a deliberate, matching block instead
+   of bare text floating on the raw background. Also gives the name block
+   its own bordered boundary on mobile, where it used to sit close enough
+   to the fixed top-left chest icon to look crowded. */
+.mission-control__name-card {
+  width: 100%;
+}
+
+.mission-control__name-card-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.25rem 1.5rem;
+}
+
+@media (min-width: 40rem) {
+  .mission-control__name-card-inner {
+    padding: 1.5rem 1.75rem;
+  }
+}
+
 .mission-control__name {
-  margin-top: 1.75rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   font-size: clamp(1.4rem, 6vw, 3.1rem);
   line-height: 1.2;
-}
-
-@media (min-width: 64rem) {
-  .mission-control__name {
-    margin-left: -1rem;
-  }
 }
 
 .mission-control__name-row {
