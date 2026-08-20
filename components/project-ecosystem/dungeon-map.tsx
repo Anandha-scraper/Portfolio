@@ -5,12 +5,7 @@ import { DungeonFrame } from "@/components/ui/dungeon-frame";
 import { PixelSprite } from "@/components/ui/pixel-sprite";
 import { DungeonTilesCanvas } from "@/components/project-ecosystem/dungeon-tiles-canvas";
 import { DungeonTreasures } from "@/components/project-ecosystem/dungeon-treasures";
-import {
-  DungeonHero,
-  HERO_PX,
-  type HeroAction,
-  type HeroFacing,
-} from "@/components/project-ecosystem/dungeon-hero";
+import { DungeonHero, HERO_PX, type HeroAction, type HeroFacing, } from "@/components/project-ecosystem/dungeon-hero";
 import { DungeonTouchControls } from "@/components/project-ecosystem/dungeon-touch-controls";
 import { DungeonSlideshowControls } from "@/components/project-ecosystem/dungeon-slideshow-controls";
 import { ProjectDungeonPanel } from "@/components/project-ecosystem/project-dungeon-panel";
@@ -24,33 +19,10 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { scrollToSection } from "@/lib/scroll";
 import { cn } from "@/lib/utils";
 
-/**
- * DungeonMap — the Projects section. One dungeon, one frame, two screens
- * swapped inside it:
- *
- *  - Project view (default): the current project's full details fill the
- *    frame, auto-advancing through every project every few seconds. A
- *    fixed top-right transport bar (Prev / Play-Pause / Next / Playground)
- *    stays put across both screens.
- *  - Map / Playground (via the transport bar's Playground button): the
- *    frame swaps to the walkable hero — WASD/arrows (hold Shift to run) or
- *    the on-screen joystick on touch, walls collide (lib/dungeon-walk.ts),
- *    camera follows. Walking up to a treasure and pressing E / Enter (or ⚔
- *    on touch), or just clicking it, brings that project back to fully
- *    fill the frame. Pressing Playground again drops back to the map so
- *    another treasure can be picked.
- *
- * Rendering stays imperative where it's hot: hero + camera transforms are
- * written to the DOM inside one rAF game loop that only runs while there is
- * input or the camera is still settling; React state changes only on
- * action/facing/near-treasure transitions.
- */
-
 const AIM = SPRITE_CONTROL.aim;
 const AIM_PX = AIM.frameSize * AIM.scale; // ~39
 const HERO_CTRL = SPRITE_CONTROL.hero;
 const SLIDE_INTERVAL_MS = 4500;
-
 const KEYMAP: Record<string, "left" | "right" | "up" | "down"> = {
   ArrowLeft: "left", ArrowRight: "right", ArrowUp: "up", ArrowDown: "down",
   a: "left", d: "right", w: "up", s: "down", A: "left", D: "right", W: "up", S: "down",
@@ -59,27 +31,18 @@ const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v
 
 export function DungeonMap() {
   const [aiming, setAiming] = useState(false);
-
-  // true = the map/hero screen is showing (Playground); false = the current
-  // project fills the frame (the default screen). Autoplay starts off —
-  // the play button in DungeonSlideshowControls opts in.
   const [walking, setWalking] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
-
-  // hero render state — changes a few times a second at most.
   const [heroAction, setHeroAction] = useState<HeroAction>("idle");
   const [heroFacing, setHeroFacing] = useState<HeroFacing>("down");
   const [attackKey, setAttackKey] = useState(0);
   const [nearSector, setNearSector] = useState<string | null>(null);
-
   const coarsePointer = useMediaQuery("(pointer: coarse)");
-
   const viewRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const aimRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
-
   const cam = useRef({ x: 0, y: 0 });
   const heroPos = useRef(heroSpawn());
   const keys = useRef<Set<string>>(new Set());
@@ -90,8 +53,6 @@ export function DungeonMap() {
   const aimingRef = useRef(false);
   const fine = useRef(false);
   const autoFocused = useRef(false);
-
-  // mirrors so the rAF loop / handlers read fresh values without re-binding
   const walkingRef = useRef(false);
   const attackingRef = useRef(false);
   const nearSectorRef = useRef<string | null>(null);
@@ -99,8 +60,6 @@ export function DungeonMap() {
   const facingRef = useRef<HeroFacing>("down");
   const startLoopRef = useRef<() => void>(() => {});
   walkingRef.current = walking;
-
-  /** attack flourish + bring the nearby treasure's project back to fill the frame. */
   const interact = useCallback(() => {
     const near = nearSectorRef.current;
     if (!near || attackingRef.current) return;
@@ -465,16 +424,6 @@ export function DungeonMap() {
   return (
     <div>
       {/* HUD */}
-      <div className={cn("dungeon-map__hud", "font-pixel")}>
-        <span className="dungeon-map__hud-highlight">02 — Project Dungeon</span>
-        <span className="dungeon-map__hud-note">
-          {walking
-            ? coarsePointer
-              ? "// stick to walk · ⚔ to open treasure"
-              : "// wasd to walk · shift to run · E to open treasure"
-            : "// slideshow — tap playground to explore"}
-        </span>
-      </div>
 
       <DungeonFrame wall={24} className="font-pixel-readable">
         <div
@@ -485,12 +434,6 @@ export function DungeonMap() {
           className={cn("dungeon-map__viewport", aiming && walking && "dungeon-map__viewport--aiming")}
           style={{ touchAction: "pan-y" }}
         >
-          {/* the panned map layer (camera transform written imperatively).
-              The void — anywhere DungeonTilesCanvas leaves transparent —
-              shows this backdrop; floor/wall tiles paint over it opaquely.
-              Always mounted (visually covered by the project view below
-              when not walking) so hero/camera state is never lost or
-              stale when Playground is toggled. */}
           <div
             ref={mapRef}
             className={cn("dungeon-map__map-layer", "pixelated")}
@@ -543,6 +486,7 @@ export function DungeonMap() {
 
           {/* transport bar — fixed top-right, above both screens */}
           <DungeonSlideshowControls
+            project={activeProject}
             playing={playing}
             walking={walking}
             onPrev={handlePrev}

@@ -17,20 +17,30 @@
   display: flex;
   min-height: 100%;
   flex-direction: column;
+  /* Query container for master.css. The panel's own width — not the
+     viewport's — is what decides whether the book and the preview sit side by
+     side, because the chest sidebar steals 290px from this box without
+     changing the viewport at all (project-ecosystem.css). Everything that has
+     to agree on that decision reads `@container dungeon-panel` instead of a
+     media query — including the padding steps below, so the margins never
+     disagree with the row/column switch regardless of whether the chest
+     sidebar is open. Named so a future nested container can't capture it. */
+  container-type: inline-size;
+  container-name: dungeon-panel;
   padding: 0.75rem;
   /* Just clears DungeonSlideshowControls' full-width mobile bar (2.75rem
      buttons + 0.5rem block padding on each side + 1px border ≈ 3.8rem). */
   padding-top: 3.875rem;
 }
 
-@media (min-width: 40rem) {
+@container dungeon-panel (min-width: 40rem) {
   .dungeon-panel__page {
     padding: 1.25rem;
     padding-top: 3.875rem;
   }
 }
 
-@media (min-width: 64rem) {
+@container dungeon-panel (min-width: 64rem) {
   .dungeon-panel__page {
     /* The controls bar switches to a small floating top-right cluster at
        this breakpoint (dungeon-slideshow-controls.css) rather than a

@@ -15,10 +15,12 @@ import type { Project } from "@/types";
  * other being the map.
  *
  * Deliberately minimal: the outer frame directly contains only <Master />,
- * which owns rendering the book (carries every detail, name through
- * metrics, as its own page content) and the screenshot previewer, and is
- * the sole place their margin/gap/width/height are set — see
- * components/project-ecosystem/master.tsx. No separate identity header,
+ * which composes the book (carries every detail, name through metrics, as
+ * its own page content) and the screenshot previewer — see
+ * components/project-ecosystem/master.tsx. Note that .dungeon-panel__page is
+ * the query container those two are laid out against (master.css reads
+ * `@container dungeon-panel`), so its width, not the viewport's, decides
+ * whether they sit side by side. No separate identity header,
  * bordered panel, or spine — those all got folded into or removed in favor
  * of the book itself. The top transport bar (DungeonSlideshowControls) is a
  * sibling in dungeon-map.tsx, not part of this component, and is

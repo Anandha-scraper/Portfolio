@@ -89,7 +89,7 @@ export const projects: Project[] = [
     links: { github: "https://github.com/Anandha-scraper/Syntax" },
     related: ["project-4"],
     featured: false,
-    previewImages: ["/projects/syntax/syntax.png"],
+    previewImages: ["/projects/syntax/syntax.webp"],
   },
   {
     id: "spot",
@@ -111,7 +111,7 @@ export const projects: Project[] = [
     links: { github: "https://github.com/Anandha-scraper/SPOT-Q" },
     related: ["magizh", "crm3i"],
     featured: false,
-    previewImages: ["/projects/spot/sakthiauto1.png", "/projects/spot/sakthiauto2.png"],
+    previewImages: ["/projects/spot/sakthiauto1.webp", "/projects/spot/sakthiauto2.webp"],
   },
   {
     id: "magizh",
@@ -133,7 +133,7 @@ export const projects: Project[] = [
     links: { github: "https://github.com/Anandha-scraper/Magizh-Industries" },
     related: ["spot", "crm3i"],
     featured: false,
-    previewImages: ["/projects/magizh/magizhindustries.png"],
+    previewImages: ["/projects/magizh/magizhindustries.webp"],
   },
   {
     id: "crm3i",
@@ -155,7 +155,7 @@ export const projects: Project[] = [
     links: { github: "https://github.com/Anandha-scraper/3I-Services" },
     related: ["spot", "magizh"],
     featured: false,
-    previewImages: ["/projects/crm3i/3iservices.png"],
+    previewImages: ["/projects/crm3i/3iservices.webp"],
   },
 ];
 

@@ -1,19 +1,17 @@
-# dependencies
+# Dependencies
 node_modules/
 
-
-#Agents
-.claude
-.codex
+# Agents (local machine config — never committed/deployed)
+.claude/
+.codex/
 CLAUDE.md
 prompt.md
-
 
 # Next.js
 .next/
 out/
 
-# production
+# Production
 build/
 dist/
 
@@ -21,19 +19,34 @@ dist/
 *.tsbuildinfo
 next-env.d.ts
 
-# raw asset-extraction source (feed/*.aseprite, feed/extract_*.py) — never
+# Raw asset-extraction source (feed/*.aseprite, feed/extract_*.py) — never
 # committed/deployed; processed output lives under public/sprites/
 feed/
 
-# environment
+# Environment
 .env
-review-ss
-# deployment
+.env.local
+.env.*.local
+review-ss/
+
+# Deployment
 .vercel/
 .firebase/
 firebase-debug.log*
 firestore-debug.log*
 ui-debug.log*
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+next-debug.log*
+
+# Caches / tooling
+.eslintcache
+.turbo/
+.cache/
 
 # OS and editor files
 .DS_Store

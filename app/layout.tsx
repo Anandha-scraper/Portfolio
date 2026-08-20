@@ -13,7 +13,7 @@ import "./globals.css";
 import "./layout.css";
 import "@/components/book/magic-book.css";
 import "@/components/project-ecosystem/master.css";
-import "@/components/project-ecosystem/project-preview-frame.css";
+import "@/components/project-ecosystem/project-plate.css";
 import "@/components/project-ecosystem/project-dungeon-panel.css";
 import "@/components/project-ecosystem/dungeon-map.css";
 import "@/components/project-ecosystem/dungeon-hero.css";
@@ -49,6 +49,10 @@ const pixelify = Pixelify_Sans({
   weight: ["400", "500", "600", "700"],
   variable: "--font-pixelify",
   display: "swap",
+  // Some weights are only used in below-the-fold, dynamically-imported
+  // sections — preloading all 4 upfront just trips the browser's "preload
+  // wasn't used in time" warning for the ones that aren't needed yet.
+  preload: false,
 });
 
 export const metadata: Metadata = {

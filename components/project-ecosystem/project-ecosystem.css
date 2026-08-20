@@ -26,20 +26,21 @@
   position: relative;
   z-index: 10;
   width: 100%;
-  padding-inline: 0.5rem;
+  padding-inline: 0.25rem;
   padding-block: 0.25rem;
   transition-property: padding;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 0.4s;
 }
 
-@media (min-width: 40rem) {
-  .project-ecosystem__content {
-    padding-inline: 0.75rem;
-    padding-block: 0.25rem;
-  }
-}
-
+/* The chest sidebar overlays the left 290px of the viewport, so the dungeon
+   has to yield that width to stay clear of it. Because `.project-ecosystem__content`
+   is border-box and already capped at `max-width: 96rem` + centered via
+   `margin-inline: auto`, adding padding-left here only eats into the box's
+   *own* content width — the box's outer footprint (and its centered position
+   on wide viewports) stays exactly the same as the closed state. Only the
+   visible content shifts right within that unchanged footprint, instead of
+   the whole panel snapping toward the right edge. */
 @media (min-width: 64rem) {
   .project-ecosystem__content--sidebar-open {
     padding-left: 290px;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useRef, useEffect, useLayoutEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { SPRITE_CONTROL } from "@/lib/sprite-control";
 
@@ -12,6 +12,24 @@ import { SPRITE_CONTROL } from "@/lib/sprite-control";
  * (SPRITE_CONTROL.book) so it stays the single source of truth.
  */
 const SHEETS = SPRITE_CONTROL.book;
+
+/**
+ * Every book sheet cell (272×272) draws the book art lower/smaller than the
+ * cell itself — headroom the source animation needs so the cover has room to
+ * swing upright mid-open/close. At rest (the flat open-page state shown
+ * ~95% of the time, and the settled ends of every turn animation) the art's
+ * alpha bbox is a stable (13, 56)-(259, 267) rectangle (measured across all
+ * four sheets/frames) — cropping to that instead of the full cell removes
+ * the dead space above the book without needing per-frame crops. The
+ * open/close swing's most extreme mid-frames dip a little above this box and
+ * get clipped for a few animation frames — an acceptable trade for the
+ * static/settled state (where the book actually sits almost all the time)
+ * filling its box instead of floating in a third of empty canvas above it.
+ */
+const BOOK_CROP = { x: 13, y: 56, w: 246, h: 211 };
+/** Aspect ratio (height / width) of the cropped book art, for sizing the
+ *  canvas box without distorting the pixel art. */
+export const BOOK_ASPECT = BOOK_CROP.h / BOOK_CROP.w;
 
 type SheetKey = keyof typeof SHEETS;
 type AnimEvent = "opened" | "closed" | "flipped";
@@ -70,7 +88,7 @@ export default function MagicBook({
   onAnimationComplete,
   className,
 }: MagicBookProps) {
-  const resolvedHeight = height ?? width;
+  const resolvedHeight = height ?? Math.round(width * BOOK_ASPECT);
 
   const resolvedFontSize =
     fontSize ?? Math.min(40, Math.max(10, Math.min(width, resolvedHeight) * (16 / 544)));
@@ -125,7 +143,7 @@ export default function MagicBook({
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(
       img,
-      col * sheet.cellW, row * sheet.cellH, sheet.cellW, sheet.cellH,
+      col * sheet.cellW + BOOK_CROP.x, row * sheet.cellH + BOOK_CROP.y, BOOK_CROP.w, BOOK_CROP.h,
       0, 0, canvas.width, canvas.height
     );
     lastFrameRef.current = { sheet: sheetKey, frame: frameIndex };
@@ -275,7 +293,15 @@ export default function MagicBook({
   // that changes the viewport (dragging the window, rotating, opening or
   // closing the DevTools panel) resizes the canvas and blanks it. Repaint
   // whatever was last drawn once the new size lands.
-  useEffect(() => {
+  //
+  // This has to be a *layout* effect, not a passive one. A passive effect runs
+  // after the browser has already painted, so every resize showed one frame of
+  // cleared canvas — invisible when dragging a window slowly, but the chest
+  // sidebar animates the panel's width over 0.4s, firing the parent's
+  // ResizeObserver on essentially every frame, which turned those blank frames
+  // into a continuous flicker. useLayoutEffect redraws between the attribute
+  // change and the paint, so the bitmap is never shown empty.
+  useLayoutEffect(() => {
     if (lastFrameRef.current) {
       drawFrame(lastFrameRef.current.sheet, lastFrameRef.current.frame);
     }
@@ -320,15 +346,18 @@ export default function MagicBook({
 
   return (
     <div className={cn("magic-book__root", className)} style={{ width, height: resolvedHeight }}>
+      {/* The width/height *attributes* set both the backing store and, at 1:1,
+          the CSS box — no inline style needed. The text boxes below position
+          against .magic-book__root directly; they used to sit in an extra
+          inset-0 overlay div that resolved to the exact same box. */}
       <canvas
         ref={canvasRef}
         width={width}
         height={resolvedHeight}
         className="magic-book__canvas"
-        style={{ width, height: resolvedHeight }}
       />
       {isOpen && currentPage && (
-        <div className="magic-book__overlay">
+        <>
           <div
             className={cn(
               "magic-book__text-box",
@@ -340,7 +369,7 @@ export default function MagicBook({
           <div className="magic-book__text-box magic-book__text-box--right">
             {renderLines(rightLines)}
           </div>
-        </div>
+        </>
       )}
     </div>
   );

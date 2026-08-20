@@ -77,6 +77,32 @@ export const skillCategories: SkillCategory[] = [
     ],
   },
   {
+    id: "system-design",
+    label: "System Design & Architecture",
+    icon: "Layers",
+    accent: "indigo",
+    blurb: "Turning messy requirements into maintainable systems that scale without drama.",
+    skills: [
+      { name: "API design", level: 80 },
+      { name: "Architecture patterns", level: 72 },
+      { name: "Scalability & performance", level: 64, note: "Designing for growth" },
+      { name: "System trade-offs", level: 68 },
+    ],
+  },
+  {
+    id: "quality",
+    label: "QA & Testing",
+    icon: "ShieldCheck",
+    accent: "emerald",
+    blurb: "Automated coverage and testing discipline that keeps shipped code honest.",
+    skills: [
+      { name: "Unit testing", level: 70 },
+      { name: "Debugging & profiling", level: 74 },
+      { name: "E2E testing", level: 62, note: "Playwright / Cypress" },
+      { name: "CI test gates", level: 58, note: "Still levelling up" },
+    ],
+  },
+  {
     id: "web3",
     label: "Web3",
     icon: "Boxes",

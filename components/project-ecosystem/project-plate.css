@@ -1,0 +1,167 @@
+/* project-plate.tsx — the stone tablet holding a project's screenshot, plus the
+   carved banner and rune pager beneath it. Imported once from app/layout.tsx
+   (see magic-book.css for why no component imports its own CSS).
+
+   The stone border itself is not drawn here: it's the shared `DungeonFrame`
+   nine-slice, matching the house rule that chrome is either that border or
+   nothing at all — never a CSS-drawn fake bevel. */
+
+.project-plate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.625rem;
+  margin: 0;
+  width: 100%;
+  min-width: 0;
+}
+
+.project-plate__frame {
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Sizing contract, and the reason screenshots stopped cropping or letterboxing:
+   `--plate-ratio` is the *image's own* ratio, measured on load in
+   project-plate.tsx. Because the box takes that exact ratio, there is nothing
+   left for `object-fit` to pad or trim.
+
+   The *preferred* width is whatever this ratio needs in order to stay inside
+   `--plate-cap`, then `max-width` clamps it to the column. So height
+   (= width ÷ ratio) can never exceed the cap. A wide desktop shot fills the
+   column; a portrait phone shot narrows and centres instead of growing taller
+   than the dungeon panel — which is `position: absolute; inset: 0;
+   overflow: hidden`, so overflow would be silently clipped rather than
+   scrolled.
+
+   It has to be `width` + `max-width` rather than `width: min(100%, …)`: the
+   frame above is a shrink-to-fit flex item (`.project-plate` centres its
+   children), so a percentage width would resolve against an auto width and
+   collapse the box to zero. A preferred width feeds shrink-to-fit correctly and
+   lets the stone border hug the picture at any shape.
+
+   `--plate-cap` also indirectly sets the book's size: the preview column is a
+   ResizeObserver target in master.tsx that drives the book canvas resolution.
+   Re-check the book after changing it. */
+.project-plate__screen {
+  --plate-cap: 66vh;
+  position: relative;
+  width: calc(var(--plate-cap) * var(--plate-ratio, 2));
+  max-width: 100%;
+  aspect-ratio: var(--plate-ratio, 2);
+  margin-inline: auto;
+  overflow: hidden;
+  background-color: var(--color-ops-base);
+}
+
+.project-plate__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.project-plate__placard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Carved name banner. The accent only tints the edge and never the fill, so the
+   four project colours stay legible against the same sand-on-stone text. */
+.project-plate__name {
+  max-width: 100%;
+  border: 1px solid #a3b18a2e;
+  border-radius: 2px;
+  background-color: #1f1a12cc;
+  padding: 0.3rem 0.9rem;
+  font-family: var(--font-pixel-readable);
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-ops-sand);
+  text-align: center;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.65);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  .project-plate__name {
+    border-color: color-mix(in oklab, var(--accent) 40%, transparent);
+    background-color: color-mix(in oklab, var(--color-ops-surface) 80%, transparent);
+  }
+}
+
+.project-plate__index {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.project-plate__runes {
+  display: flex;
+  align-items: center;
+  /* No gap: the 1.5rem buttons already sit edge to edge, which spaces the
+     0.5rem marks inside them about right. The negative inline margin pulls the
+     row's outer padding back so it still centres against the banner. */
+  gap: 0;
+  margin-inline: -0.375rem;
+}
+
+/* Rune pager — a diamond, so it reads as carved rather than as a web dot.
+   The button itself is a 1.5rem hit target (the diamond alone would be an 8px
+   tap area); the visible rune is drawn by ::before so the target can grow
+   without the mark growing with it. */
+.project-plate__rune {
+  display: flex;
+  height: 1.5rem;
+  width: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+}
+
+.project-plate__rune::before {
+  content: "";
+  height: 0.5rem;
+  width: 0.5rem;
+  border: 1px solid var(--color-ops-sand-faint);
+  transform: rotate(45deg);
+  transition-property: background-color, border-color, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 0.15s;
+}
+
+.project-plate__rune--on::before {
+  border-color: var(--accent);
+  background-color: var(--accent);
+}
+
+@media (hover: hover) {
+  .project-plate__rune:not(.project-plate__rune--on):hover::before {
+    border-color: var(--color-ops-sand);
+    transform: rotate(45deg) scale(1.18);
+  }
+}
+
+.project-plate__rune:focus-visible {
+  outline: 1px solid var(--color-ops-sand);
+  outline-offset: -2px;
+}
+
+.project-plate__count {
+  font-family: var(--font-pixel-readable);
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+  color: var(--color-ops-sand-faint);
+}

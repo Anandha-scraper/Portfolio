@@ -1,6 +1,8 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { Icon } from "@/components/ui/icon";
+import type { Project } from "@/types";
 
 /**
  * DungeonSlideshowControls — top-right pixel-styled transport bar for the
@@ -12,15 +14,21 @@ import { cn } from "@/lib/utils";
  * opens the map to pick a project, and (once a treasure's project fills the
  * frame again) brings the map back so another can be picked.
  *
- * Each button is a stone-carved icon coin with a matching off/lit pair
- * (public/sprites/ui/, extracted by feed/extract_ui_assets.py) — the lit
+ * Each transport button is a stone-carved icon coin with a matching off/lit
+ * pair (public/sprites/ui/, extracted by feed/extract_ui_assets.py) — the lit
  * image crossfades in on hover for decorative feedback, and stays lit
  * whenever the button reflects an active mode (playing, playground). The
  * play/pause button is the one exception: its "lit" image is a different
  * icon (pause, not a brighter play), so it's driven purely by playing
  * state, never by hover, to avoid implying the wrong action.
+ *
+ * GitHub/Live Site — when the active project has them — render as the same
+ * size icon coin, first in the bar, so the whole cluster reads as one
+ * consistent control row instead of two unrelated button groups scattered
+ * around the panel.
  */
 export function DungeonSlideshowControls({
+  project,
   playing,
   walking,
   onPrev,
@@ -28,6 +36,7 @@ export function DungeonSlideshowControls({
   onNext,
   onPlayground,
 }: {
+  project?: Project | null;
   playing: boolean;
   walking: boolean;
   onPrev: () => void;
@@ -36,8 +45,23 @@ export function DungeonSlideshowControls({
   onPlayground: () => void;
 }) {
   const showingPlay = walking || !playing;
+  const { github, live } = project?.links ?? {};
   return (
     <div className="slideshow-controls__bar">
+      {github && (
+        <LinkButton
+          href={github}
+          label={`View ${project?.name} on GitHub`}
+          icon="Github"
+        />
+      )}
+      {live && (
+        <LinkButton
+          href={live}
+          label={`Open the live site for ${project?.name}`}
+          icon="Globe"
+        />
+      )}
       <ControlButton
         label="Previous project"
         onClick={onPrev}
@@ -68,6 +92,32 @@ export function DungeonSlideshowControls({
         hoverLit
       />
     </div>
+  );
+}
+
+/** GitHub / Live Site — same coin footprint as ControlButton, but an
+ *  outbound link with a static lucide icon instead of an off/lit sprite
+ *  pair (there's no matching stone-carved art for these two). */
+function LinkButton({
+  href,
+  label,
+  icon,
+}: {
+  href: string;
+  label: string;
+  icon: string;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={label}
+      title={label}
+      className="slideshow-controls__link-btn"
+    >
+      <Icon name={icon} size={16} />
+    </a>
   );
 }
 

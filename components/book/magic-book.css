@@ -1,49 +1,41 @@
-/* magic-book.tsx — static structural styles only. Genuinely dynamic values
-   (canvas width/height, the fontSize scale, and each line's revealed state)
-   stay as inline `style` in the component; this file covers everything
-   that's identical on every render. Imported once from app/layout.tsx —
-   Next.js's App Router only allows plain global CSS to be imported from the
-   root layout, not from arbitrary component files. */
-
+/* Positioning context for the text boxes — they are the canvas's siblings,
+   not its children, and pin themselves to percentages of this box. */
 .magic-book__root {
   position: relative;
 }
 
+/* `display: block` is load-bearing: the canvas carries no explicit CSS size
+   (its width/height attributes supply it at 1:1), so as an inline element it
+   would pick up baseline whitespace underneath. */
 .magic-book__canvas {
+  display: block;
   image-rendering: pixelated;
 }
 
-.magic-book__overlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
+/* Percentages are relative to the cropped book box drawn in magic-book.tsx
+   (BOOK_CROP), not the raw 272×272 sprite cell — re-derive these if that
+   crop rect ever changes. */
 .magic-book__text-box {
   position: absolute;
-  top: 34%;
-  height: 55%;
+  top: 17.3%;
+  height: 70.9%;
   overflow: hidden;
   pointer-events: auto;
 }
 
-/* Page 0's left box sits on the clean static "open" frame; every later
-   page settles on turning_pages_left.png's last frame, which draws a seam
-   near x=11% marking the stack of already-turned pages, so it needs extra
-   left clearance. See magic-book.tsx's own comment for the full context. */
 .magic-book__text-box--left-first {
-  left: 10.5%;
-  width: 35%;
+  left: 6.3%;
+  width: 38.7%;
 }
 
 .magic-book__text-box--left-rest {
-  left: 13%;
-  width: 32%;
+  left: 9.1%;
+  width: 35.4%;
 }
 
 .magic-book__text-box--right {
-  right: 11%;
-  width: 35%;
+  right: 6.9%;
+  width: 38.7%;
 }
 
 .magic-book__lines {

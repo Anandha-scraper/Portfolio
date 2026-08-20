@@ -42,6 +42,7 @@ import {
   Dot,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Briefcase,
   Info,
   Sun,
@@ -51,6 +52,7 @@ import {
   SkipBack,
   SkipForward,
   Gamepad2,
+  Globe,
   type LucideIcon,
 } from "lucide-react";
 
@@ -98,6 +100,7 @@ const ICONS = {
   Dot,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Briefcase,
   Info,
   Sun,
@@ -107,6 +110,7 @@ const ICONS = {
   SkipBack,
   SkipForward,
   Gamepad2,
+  Globe,
 } satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof ICONS;

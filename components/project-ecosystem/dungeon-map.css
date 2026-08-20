@@ -128,3 +128,12 @@
     background-color: color-mix(in oklab, var(--color-ops-base) 80%, transparent);
   }
 }
+
+/* On narrow screens the hint is centered and would sit on top of the virtual
+   joystick (bottom-left, ~8.25rem tall incl. margin) and action button
+   (bottom-right) that render alongside it in walking mode — lift it clear. */
+@media (max-width: 47.99rem) {
+  .dungeon-map__hint {
+    bottom: 8.75rem;
+  }
+}

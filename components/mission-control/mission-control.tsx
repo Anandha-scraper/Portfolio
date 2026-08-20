@@ -75,7 +75,7 @@ export function MissionControl() {
       <div className={cn("mission-control__grid", "section-pad")}>
         {/* Left — context, anchored toward the top-left */}
         <div className="mission-control__context" style={{ maxWidth: "min(600px, 100%)" }}>
-          <DungeonFrame wall={16} className="mission-control__name-card">
+          <div className="mission-control__name-card">
             <div className="mission-control__name-card-inner">
               <Reveal delay={0.1}>
                 <h1 className={cn("mission-control__name", "font-pixel")}>
@@ -101,13 +101,10 @@ export function MissionControl() {
               </Reveal>
 
               <Reveal delay={0.18}>
-                <p className={cn("mission-control__tagline", "font-pixel-readable")}>
-                  <span className="mission-control__tagline-title">{profile.title}</span> —{" "}
-                  {profile.tagline}
-                </p>
+                <p className={cn("mission-control__tagline", "font-pixel-readable")}>{profile.tagline}</p>
               </Reveal>
             </div>
-          </DungeonFrame>
+          </div>
         </div>
 
         {/* Right — stone-walled "space" card with drifting particles + morphing text */}

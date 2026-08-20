@@ -71,12 +71,10 @@
   flex-direction: column;
 }
 
-/* Framed panel around the name + tagline (DungeonFrame — the same
-   9-slice stone-border component already used for the space card on the
-   right), so the hero name reads as a deliberate, matching block instead
-   of bare text floating on the raw background. Also gives the name block
-   its own bordered boundary on mobile, where it used to sit close enough
-   to the fixed top-left chest icon to look crowded. */
+/* Unboxed - sits directly on the section's background (no DungeonFrame
+   stone border here; that's reserved for the space card on the right).
+   Left/bottom padding keeps the text clear of the fixed top-left chest
+   icon on mobile without needing a bordered boundary to do it. */
 .mission-control__name-card {
   width: 100%;
 }
@@ -85,20 +83,14 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  padding: 1.25rem 1.5rem;
-}
-
-@media (min-width: 40rem) {
-  .mission-control__name-card-inner {
-    padding: 1.5rem 1.75rem;
-  }
+  padding: 0;
 }
 
 .mission-control__name {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  font-size: clamp(1.4rem, 6vw, 3.1rem);
+  font-size: clamp(2.1rem, 9vw, 3.1rem);
   line-height: 1.2;
 }
 
@@ -140,10 +132,6 @@
   font-size: 1.5rem;
   line-height: 1.375;
   color: var(--color-ops-sand);
-}
-
-.mission-control__tagline-title {
-  color: var(--color-ops-rust);
 }
 
 .mission-control__space-card {

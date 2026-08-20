@@ -1,8 +1,111 @@
-/* master.tsx — static styles for the book's page-nav (Prev/Next) controls.
-   Everything else in master.tsx is already plain inline `style` (the
-   layout knobs it deliberately owns), so this file only covers the two
-   spots that were still Tailwind classNames. Imported once from
-   app/layout.tsx (see magic-book.css for why). */
+.master__root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  width: 100%;
+  height: auto;
+  min-width: 0;
+}
+
+.master__book-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
+  /* Containing block for the absolutely-positioned page-turn cluster, so it
+     centres on the book rather than on the whole dungeon panel. */
+  position: relative;
+}
+
+.master__book-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: auto;
+  min-width: 0;
+  touch-action: pan-y;
+  /* The book sprite's rest frame carries ~13.5% transparent headroom above the
+     art (the cover needs that room to swing during open/close), so the drawn
+     book starts well below the canvas box and sat visibly lower than the
+     plate's stone frame beside it. Shift it up by exactly that fraction to
+     line the two tops up.
+
+     `translateY` percentages resolve against the element's own height — which
+     is the canvas height — so this stays correct at every book size. It is a
+     transform, not a margin, deliberately: the column keeps its laid-out
+     height, so the ResizeObserver that derives the book size from this column
+     (master.tsx) can't feed back into itself. */
+  transform: translateY(-13.5%);
+}
+
+.master__page-topbar {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  position: absolute;
+  top: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+}
+
+.master__page-topbar-count {
+  font-family: var(--font-pixel-readable);
+  font-size: 0.875rem;
+  color: var(--color-ops-sand-soft);
+}
+
+.master__flip-btn {
+  flex: 0 0 auto;
+  width: 4.25rem;
+  height: 4.25rem;
+  border: none;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  padding: 0;
+  cursor: pointer;
+  transition-property: transform, opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 0.15s;
+}
+
+.master__flip-btn--prev {
+  background-image: url(/sprites/book/page_prev.png);
+}
+
+.master__flip-btn--next {
+  background-image: url(/sprites/book/page_next.png);
+}
+
+.master__flip-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+@media (hover: hover) {
+  .master__flip-btn:not(:disabled):hover {
+    transform: scale(1.08);
+  }
+}
+
+.master__preview-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
+}
 
 .master__page-nav {
   display: none;
@@ -12,12 +115,6 @@
   font-size: 0.75rem;
   line-height: calc(1 / 0.75);
   color: var(--color-ops-sand-soft);
-}
-
-@media (min-width: 64rem) {
-  .master__page-nav {
-    display: flex;
-  }
 }
 
 .master__page-nav-btn {
@@ -41,4 +138,56 @@
 
 .master__page-nav-btn:disabled {
   opacity: 0.3;
+}
+
+
+@container dungeon-panel (min-width: 38rem) {
+  .master__root {
+    flex-direction: row;
+    /* Centred, not top-aligned. The panel is as tall as the dungeon map's
+       viewport, but the book and a ~2:1 plate sitting side by side can never
+       be that tall at this width — so there is always leftover height. Centring
+       splits it above and below instead of pooling it all under the content. */
+    align-items: center;
+    flex: 1 1 auto;
+    height: 100%;
+    min-height: 0;
+  }
+
+  /* `flex-basis: 50%` on both columns plus `gap: 12px` on the row would
+     overflow the row by exactly the gap width (50% + 50% + 12px > 100%),
+     which ate straight into the preview column's own right-edge padding.
+     `flex: 1 1 0` grows/shrinks both columns from a zero basis instead, so
+     the `gap` is accounted for and the pair always sums to exactly 100%. */
+  .master__book-col {
+    flex: 1 1 0;
+    width: auto;
+  }
+
+  /* Weighted rather than an even split. The screenshots are ~2:1, so the
+     plate's height is set by how wide it is allowed to get — and the book is
+     in turn sized off the preview column's height (the ResizeObserver in
+     master.tsx). An even split left both small with dead space under them;
+     giving the plate the larger share grows it *and* the book. */
+  .master__preview-col {
+    flex: 1.35 1 0;
+  }
+
+  .master__page-nav {
+    display: flex;
+  }
+}
+
+/* Laptop and up: the big page-turn hands + count move into a bar above the
+   book, replacing the below-book chevron nav entirely. Its own tier because
+   there isn't room for the artwork above the book until well past the
+   38rem row-layout switch above. */
+@container dungeon-panel (min-width: 64rem) {
+  .master__page-topbar {
+    display: flex;
+  }
+
+  .master__page-nav {
+    display: none;
+  }
 }

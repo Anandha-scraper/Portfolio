@@ -52,6 +52,35 @@
   transition: transform 150ms ease;
 }
 
+/* GitHub / Live Site — same footprint as .slideshow-controls__btn, styled as
+   a stone coin around a plain lucide icon (no off/lit sprite art exists for
+   these two, unlike the transport buttons). */
+.slideshow-controls__link-btn {
+  display: flex;
+  height: 2.75rem;
+  width: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.4rem;
+  border: 1px solid var(--color-ops-line);
+  background-color: color-mix(in oklab, var(--color-ops-base) 80%, transparent);
+  color: var(--color-ops-sand-soft);
+  transition: color 150ms ease, border-color 150ms ease, transform 150ms ease, background-color 150ms ease;
+}
+
+@media (hover: hover) {
+  .slideshow-controls__link-btn:hover {
+    color: var(--color-ops-rust-bright);
+    border-color: color-mix(in oklab, var(--color-ops-rust) 55%, transparent);
+    background-color: color-mix(in oklab, var(--color-ops-rust) 12%, transparent);
+    transform: scale(1.08);
+  }
+}
+
+.slideshow-controls__link-btn:active {
+  transform: scale(0.94);
+}
+
 .slideshow-controls__btn-img {
   position: absolute;
   inset: 0;

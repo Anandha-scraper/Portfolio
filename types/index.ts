@@ -26,8 +26,10 @@ export type SkillCategoryId =
   | "backend"
   | "databases"
   | "devops"
+  | "agentic-ai"
   | "web3"
-  | "agentic-ai";
+  | "system-design"
+  | "quality";
 
 export interface Skill {
   name: string;
@@ -78,10 +80,11 @@ export interface Project {
   // only ProjectDungeonPanel swaps in a generic "being updated" card instead
   // of the full detail view when this is set.
   updating?: boolean;
-  // Screenshots for the treasure-book preview panel
-  // (components/project-ecosystem/project-preview-frame.tsx). Drop files under
-  // public/projects/<id>/ and reference them here — renders a placeholder
-  // card until populated.
+  // Screenshots for this project, shown on the stone plate in the dungeon
+  // panel (components/project-ecosystem/project-plate.tsx). Drop files under
+  // public/projects/<id>/ and reference them here — any number, in any shape:
+  // the plate takes each image's own aspect ratio, and only draws its rune
+  // pager once there is more than one. A project with none renders no plate.
   previewImages?: string[];
 }
 

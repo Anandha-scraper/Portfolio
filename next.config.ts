@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Pin the workspace root: an unrelated lockfile at ~/package-lock.json
+  // otherwise gets picked up, breaking Turbopack's module resolution.
+  turbopack: {
+    root: path.resolve(__dirname),
+  },
   // Emit a fully static site to ./out for Firebase Hosting (no Node server).
   output: "export",
   // The static export has no Image Optimization server, so serve images as-is.
