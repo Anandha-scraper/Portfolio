@@ -255,6 +255,10 @@ const GROUPS: Group[] = [
       { kind: "image", name: "joystick inner (lit)", src: "/sprites/ui/joystick_inner_lit.png", w: 44 },
       { kind: "image", name: "attack (off)", src: "/sprites/ui/attack_off.png", w: 56 },
       { kind: "image", name: "attack (lit)", src: "/sprites/ui/attack_lit.png", w: 56 },
+      // The two carved link signs that lead the transport bar. Wide rather
+      // than coin-shaped because the art carries its own lettering.
+      { kind: "image", name: "github sign", src: "/sprites/ui/sign_github.webp", w: 128 },
+      { kind: "image", name: "live sign", src: "/sprites/ui/sign_live.webp", w: 128 },
     ],
   },
   {

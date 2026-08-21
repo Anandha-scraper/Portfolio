@@ -5,38 +5,60 @@
    file can't read a JS variable directly. Imported once from
    app/layout.tsx (see components/book/magic-book.css for why). */
 
+/* Query container for master.css and for .dungeon-panel__page below. The
+   panel's own width — not the viewport's — is what decides whether the book
+   and the preview sit side by side, because the chest sidebar steals 290px
+   from this box without changing the viewport at all (project-ecosystem.css).
+   Everything that has to agree on that decision reads
+   `@container dungeon-panel` instead of a media query, so the paddings never
+   disagree with the row/column switch regardless of whether the chest sidebar
+   is open. Named so a future nested container can't capture it.
+
+   The container has to live *here*, on the root, and not on the page below it:
+   an element is a container for its descendants but never for itself, so with
+   the declaration one level down the page's own `@container` steps silently
+   never matched and it was stuck on the narrow-tier padding at every width.
+   The root has the same content width, so master.css's breakpoints are
+   unaffected by the move. */
 .dungeon-panel__root {
   position: absolute;
   inset: 0;
   z-index: 40;
   overflow: hidden;
   background-color: var(--color-ops-base);
+  container-type: inline-size;
+  container-name: dungeon-panel;
 }
 
 .dungeon-panel__page {
   display: flex;
   min-height: 100%;
   flex-direction: column;
-  /* Query container for master.css. The panel's own width — not the
-     viewport's — is what decides whether the book and the preview sit side by
-     side, because the chest sidebar steals 290px from this box without
-     changing the viewport at all (project-ecosystem.css). Everything that has
-     to agree on that decision reads `@container dungeon-panel` instead of a
-     media query — including the padding steps below, so the margins never
-     disagree with the row/column switch regardless of whether the chest
-     sidebar is open. Named so a future nested container can't capture it. */
-  container-type: inline-size;
-  container-name: dungeon-panel;
+  /* The book/plate pair is never as tall as the dungeon viewport, so there is
+     always slack. Centre the content as one block and the slack splits evenly
+     above and below it — master.css relies on this, because its two columns
+     have to stay top-aligned with each other and so can't each centre
+     themselves. */
+  justify-content: center;
   padding: 0.75rem;
-  /* Just clears DungeonSlideshowControls' full-width mobile bar (2.75rem
-     buttons + 0.5rem block padding on each side + 1px border ≈ 3.8rem). */
-  padding-top: 3.875rem;
+  padding-bottom: 0.5rem;
+  /* Clears DungeonSlideshowControls, which overlaps this panel. The bar
+     measures itself and publishes `--controls-h` onto the shared parent
+     (dungeon-slideshow-controls.tsx), so this stays correct when the bar
+     changes size — it is a full-width row on phones and a floating cluster on
+     laptops, and it now carries two link signs whose height varies by tier.
+     The literal is only the pre-measurement fallback for the first paint. */
+  padding-top: calc(var(--controls-h, 3.875rem) + 0.5rem);
 }
 
-@container dungeon-panel (min-width: 40rem) {
+/* Matches master.css's row/column switch exactly. These two used to step at
+   40rem and 38rem respectively, so between the two there was a band where the
+   panel padded for one layout while the content used the other. */
+@container dungeon-panel (min-width: 38rem) {
   .dungeon-panel__page {
     padding: 1.25rem;
-    padding-top: 3.875rem;
+    padding-bottom: 0.75rem;
+    padding-top: calc(var(--controls-h, 3.875rem) + 0.625rem);
   }
 }
 
@@ -48,7 +70,8 @@
        the right, and can grow tall enough to collide, so this still needs
        the same top clearance as every other breakpoint. */
     padding: 1.5rem;
-    padding-top: 3.875rem;
+    padding-bottom: 1rem;
+    padding-top: calc(var(--controls-h, 3.875rem) + 0.75rem);
   }
 }
 

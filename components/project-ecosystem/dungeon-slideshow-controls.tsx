@@ -1,7 +1,7 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { Icon } from "@/components/ui/icon";
 import type { Project } from "@/types";
 
 /**
@@ -22,10 +22,16 @@ import type { Project } from "@/types";
  * icon (pause, not a brighter play), so it's driven purely by playing
  * state, never by hover, to avoid implying the wrong action.
  *
- * GitHub/Live Site — when the active project has them — render as the same
- * size icon coin, first in the bar, so the whole cluster reads as one
- * consistent control row instead of two unrelated button groups scattered
- * around the panel.
+ * GitHub and Live Site lead the bar as carved wooden signs rather than coins —
+ * they are destinations, not transport, and the wider art carries its own
+ * label. Both are always present: a project with no live URL still shows the
+ * sign, dimmed and inert, so the bar keeps a constant width instead of
+ * reflowing every time the slideshow advances.
+ *
+ * The bar publishes its own measured height to its parent as `--controls-h`.
+ * It overlaps the detail panel, which has to pad itself clear of it, and that
+ * clearance used to be a hardcoded 3.875rem guess that any change to the bar's
+ * contents (these signs, for one) would silently invalidate.
  */
 export function DungeonSlideshowControls({
   project,
@@ -46,22 +52,41 @@ export function DungeonSlideshowControls({
 }) {
   const showingPlay = walking || !playing;
   const { github, live } = project?.links ?? {};
+  const barRef = useRef<HTMLDivElement>(null);
+
+  // Hand the measured bar height to the parent (.dungeon-map__viewport) so the
+  // detail panel underneath can pad itself clear of it. A ResizeObserver
+  // rather than a constant because the bar is a full-width row on phones and a
+  // small floating cluster on laptops, and its contents can change size.
+  useEffect(() => {
+    const el = barRef.current;
+    const host = el?.parentElement;
+    if (!el || !host) return;
+    const observer = new ResizeObserver(([entry]) => {
+      const height = entry?.borderBoxSize?.[0]?.blockSize ?? el.offsetHeight;
+      host.style.setProperty("--controls-h", `${Math.round(height)}px`);
+    });
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      host.style.removeProperty("--controls-h");
+    };
+  }, []);
+
   return (
-    <div className="slideshow-controls__bar">
-      {github && (
-        <LinkButton
-          href={github}
-          label={`View ${project?.name} on GitHub`}
-          icon="Github"
-        />
-      )}
-      {live && (
-        <LinkButton
-          href={live}
-          label={`Open the live site for ${project?.name}`}
-          icon="Globe"
-        />
-      )}
+    <div ref={barRef} className="slideshow-controls__bar">
+      <LinkBanner
+        href={github}
+        label={`View ${project?.name ?? "this project"} on GitHub`}
+        emptyLabel="No public repository for this project"
+        src="/sprites/ui/sign_github.webp"
+      />
+      <LinkBanner
+        href={live}
+        label={`Open the live site for ${project?.name ?? "this project"}`}
+        emptyLabel="No live site for this project yet"
+        src="/sprites/ui/sign_live.webp"
+      />
       <ControlButton
         label="Previous project"
         onClick={onPrev}
@@ -95,18 +120,41 @@ export function DungeonSlideshowControls({
   );
 }
 
-/** GitHub / Live Site — same coin footprint as ControlButton, but an
- *  outbound link with a static lucide icon instead of an off/lit sprite
- *  pair (there's no matching stone-carved art for these two). */
-function LinkButton({
+/** GitHub / Live Site — a carved wooden sign, wider than the transport coins
+ *  because the art carries its own label. Rendered whether or not the project
+ *  has the link: without one it degrades to a dimmed <span>, never an <a>
+ *  with no href, so nothing focusable promises a navigation it can't do. */
+function LinkBanner({
   href,
   label,
-  icon,
+  emptyLabel,
+  src,
 }: {
-  href: string;
+  href?: string;
   label: string;
-  icon: string;
+  emptyLabel: string;
+  src: string;
 }) {
+  // Deliberately no `pixelated` class, unlike every other sprite here — these
+  // two downscale smoothly instead. The class alone wouldn't settle it either
+  // way; see the `image-rendering` reset in dungeon-slideshow-controls.css.
+  const art = (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={src} alt="" className="slideshow-controls__banner-img" />
+  );
+
+  if (!href) {
+    return (
+      <span
+        aria-label={emptyLabel}
+        title={emptyLabel}
+        className={cn("slideshow-controls__banner", "slideshow-controls__banner--disabled")}
+      >
+        {art}
+      </span>
+    );
+  }
+
   return (
     <a
       href={href}
@@ -114,9 +162,9 @@ function LinkButton({
       rel="noopener noreferrer"
       aria-label={label}
       title={label}
-      className="slideshow-controls__link-btn"
+      className="slideshow-controls__banner"
     >
-      <Icon name={icon} size={16} />
+      {art}
     </a>
   );
 }

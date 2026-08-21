@@ -1,6 +1,16 @@
+/* Stacked (phone) layout. `column-reverse`, not `column`: the plate belongs on
+   top here, because a screenshot identifies a project at a glance where the
+   book's text does not at this width. Only the paint order flips — the DOM
+   keeps the book column first, so the project's name and overview still lead
+   for screen readers and keyboard order.
+
+   The row/column switch at 38rem below sets `flex-direction: row` and takes
+   over from this. Note `justify-content: flex-start` now means "toward the
+   bottom"; that is inert while the row is `height: auto` and has no free space,
+   but it would need revisiting if a height were ever set here. */
 .master__root {
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   align-items: center;
   justify-content: flex-start;
   gap: 12px;
@@ -14,12 +24,13 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  /* Deliberately tight: the book art now ends exactly at this column's flow
+     position (see the negative margin below), so this gap is the whole visual
+     distance between the book and the page nav under it. */
+  gap: 0.5rem;
   flex: 0 0 auto;
   width: 100%;
   min-width: 0;
-  /* Containing block for the absolutely-positioned page-turn cluster, so it
-     centres on the book rather than on the whole dungeon panel. */
   position: relative;
 }
 
@@ -34,57 +45,102 @@
   /* The book sprite's rest frame carries ~13.5% transparent headroom above the
      art (the cover needs that room to swing during open/close), so the drawn
      book starts well below the canvas box and sat visibly lower than the
-     plate's stone frame beside it. Shift it up by exactly that fraction to
-     line the two tops up.
+     plate's stone frame beside it. Pull it up by exactly that fraction to line
+     the two tops up.
 
-     `translateY` percentages resolve against the element's own height — which
-     is the canvas height — so this stays correct at every book size. It is a
-     transform, not a margin, deliberately: the column keeps its laid-out
-     height, so the ResizeObserver that derives the book size from this column
-     (master.tsx) can't feed back into itself. */
-  transform: translateY(-13.5%);
+     A negative margin, not a transform. A transform would move only the paint
+     and leave the full canvas box in the column, which cost us twice: the
+     bottom 13.5% of the box stayed empty (a dead gap above the page nav), and
+     the art painted higher than layout believed, so on phones the book's top
+     slid up underneath DungeonSlideshowControls' bar. Shrinking the box
+     instead makes the flow agree with what's on screen.
+
+     Safe against feedback: the ResizeObserver that derives the book size
+     (master.tsx) observes the *preview* column, not this one, so changing this
+     column's height cannot drive `bookSize`.
+
+     `--book-headroom` is that fraction of the canvas height, in px, published
+     by master.tsx (BOOK_HEADROOM) — the single source of truth for the number.
+     It has to arrive as a length rather than a percentage because percentage
+     margins resolve against the containing block's *width*, not its height. */
+  margin-top: calc(-1 * var(--book-headroom, 0px));
 }
 
+/* Shrink-wraps the book canvas so every percentage below resolves against the
+   book's own box. Without it the cluster would anchor to .master__book-col,
+   which .master__book-wrap's negative margin has already shifted the book out
+   of — that mismatch is what used to drop the hands onto the page text. */
+.master__book-stage {
+  position: relative;
+  width: max-content;
+  max-width: 100%;
+}
+
+/* The page-turn hands sit in the book's own headroom: the drawn art starts
+   13.28% down its canvas (measured off the settled open frame — see BOOK_CROP
+   in magic-book.tsx) and the page text starts at 17.3%
+   (.magic-book__text-box). Ending the band at 14.5% seats the hands on the
+   book's top edge with a hair of overlap, clear of the text either way.
+   Re-derive these two numbers if the crop rect ever changes. */
 .master__page-topbar {
   display: none;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
+  align-items: flex-end;
+  justify-content: space-between;
   position: absolute;
-  top: 0.75rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 50;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 14.5%;
+  padding: 0 2%;
+  /* Only the buttons should catch the pointer — the span between them sits
+     over the book and would otherwise swallow the swipe handler on the wrap. */
+  pointer-events: none;
+  z-index: 2;
 }
 
 .master__page-topbar-count {
+  align-self: center;
   font-family: var(--font-pixel-readable);
   font-size: 0.875rem;
   color: var(--color-ops-sand-soft);
 }
 
+/* Both sprite sheets are 480×640 with the art floating in a large transparent
+   margin (prev's alpha box is 400×297 at 18,164; next's is 404×335 at 62,164).
+   `background-size: contain` therefore rendered two differently-sized,
+   differently-offset hands inside identical square boxes. Scaling to a shared
+   404-wide art unit and cropping to it instead makes the button box *be* the
+   artwork: both hands come out at the same scale, sharing a top edge, so the
+   pair reads as a matched set at the book's two top corners. */
 .master__flip-btn {
   flex: 0 0 auto;
-  width: 4.25rem;
-  height: 4.25rem;
+  height: 100%;
+  width: auto;
+  aspect-ratio: 404 / 335;
   border: none;
   background-color: transparent;
   background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
+  /* 480 / 404 — the sheet scaled so its art spans the button's width. */
+  background-size: 118.812% auto;
   padding: 0;
   cursor: pointer;
+  pointer-events: auto;
   transition-property: transform, opacity;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 0.15s;
 }
 
+/* Percentages, not pixels, so the crop holds at every book size. Each pair
+   lands the art's alpha-box origin on the button's origin: x solves
+   P·(box − img) = −originX, y is shared because both arts start at y=164. */
 .master__flip-btn--prev {
   background-image: url(/sprites/book/page_prev.png);
+  background-position: 24.211% 53.771%;
 }
 
 .master__flip-btn--next {
   background-image: url(/sprites/book/page_next.png);
+  background-position: 81.578% 53.771%;
 }
 
 .master__flip-btn:disabled {
@@ -144,13 +200,19 @@
 @container dungeon-panel (min-width: 38rem) {
   .master__root {
     flex-direction: row;
-    /* Centred, not top-aligned. The panel is as tall as the dungeon map's
-       viewport, but the book and a ~2:1 plate sitting side by side can never
-       be that tall at this width — so there is always leftover height. Centring
-       splits it above and below instead of pooling it all under the content. */
-    align-items: center;
-    flex: 1 1 auto;
-    height: 100%;
+    /* Top-aligned, so the book's first line of art sits level with the top of
+       the plate's stone frame. The two columns are different heights (the
+       plate carries a name placard the book has nothing to match), and
+       centring them individually staggered their tops by half that
+       difference.
+
+       The leftover height this leaves under the pair is not pooled at the
+       bottom: the panel centres this whole row as a block instead
+       (project-dungeon-panel.css `justify-content`), which splits the slack
+       above and below exactly as centring each column used to, but without
+       breaking the alignment between them. */
+    align-items: flex-start;
+    flex: 0 1 auto;
     min-height: 0;
   }
 

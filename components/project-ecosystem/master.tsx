@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import dynamic from "next/dynamic";
 import { Icon } from "@/components/ui/icon";
 import { BOOK_ASPECT } from "@/components/book/magic-book";
@@ -21,7 +21,9 @@ const MagicBook = dynamic(() => import("@/components/book/magic-book"), { ssr: f
  * chunked into as many pages as it takes to fit without scrolling (see
  * LINES_PER_PAGE) rather than one page with an internal scrollbar — and the
  * book canvas's backing-store resolution, which has to be a number in JS
- * because CSS can't set a <canvas>'s width/height attributes.
+ * because CSS can't set a <canvas>'s width/height attributes. That same
+ * number is published as `--book-h` for master.css, which needs the canvas
+ * height as a length to cancel the sprite's headroom (see BOOK_HEADROOM).
  */
 
 // ── Canvas resolution clamp — the book's drawn pixel size, not its layout ──
@@ -30,6 +32,11 @@ const MagicBook = dynamic(() => import("@/components/book/magic-book"), { ssr: f
 // would otherwise clip the page-turn art at the edges.
 const BOOK_MIN_PX = 280;
 const BOOK_MAX_PX = 1100;
+/** Fraction of the book canvas that is transparent headroom above the drawn
+ *  art (the cover swings into it while opening). master.css cancels it with a
+ *  negative margin so the column's box matches what's actually painted — it
+ *  reads the resolved px value from the `--book-headroom` property below. */
+const BOOK_HEADROOM = 0.135;
 const OPEN_DELAY_MS = 200;
 const SWIPE_THRESHOLD_PX = 40;
 const LINES_PER_PAGE = 6;
@@ -146,75 +153,44 @@ export function Master({ project }: { project: Project }) {
     else goToPage(page - 1);
   };
 
+  const bookHeight = Math.round(bookSize * BOOK_ASPECT);
+  const pager = { page, pageCount, animating, goToPage };
+
   return (
     <div className="master__root">
-      <div className="master__book-col">
-        {pageCount > 1 && (
-          <div className="master__page-topbar">
-            <button
-              type="button"
-              aria-label="Previous page"
-              disabled={page <= 0 || animating}
-              onClick={() => goToPage(page - 1)}
-              className="master__flip-btn master__flip-btn--prev"
-            />
-            <span className="master__page-topbar-count">
-              {page + 1}/{pageCount}
-            </span>
-            <button
-              type="button"
-              aria-label="Next page"
-              disabled={page >= pageCount - 1 || animating}
-              onClick={() => goToPage(page + 1)}
-              className="master__flip-btn master__flip-btn--next"
-            />
-          </div>
-        )}
-
+      <div
+        className="master__book-col"
+        style={{ "--book-headroom": `${Math.round(bookHeight * BOOK_HEADROOM)}px` } as CSSProperties}
+      >
         <div
           ref={bookContainerRef}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
           className="master__book-wrap"
         >
-          <MagicBook
-            isOpen={isOpen}
-            page={page}
-            pages={pages}
-            width={bookSize}
-            height={Math.round(bookSize * BOOK_ASPECT)}
-            lineDelayMs={140}
-            onAnimationComplete={(event) => {
-              if (event === "flipped") setAnimating(false);
-            }}
-          />
+          {/* Shrink-wraps the book's own box (MagicBook's root carries an
+              explicit pixel width/height), so the page-turn hands can be
+              positioned as percentages of the book art itself rather than of
+              the column, which the wrap's negative margin has already moved
+              them out of alignment with. */}
+          <div className="master__book-stage">
+            <MagicBook
+              isOpen={isOpen}
+              page={page}
+              pages={pages}
+              width={bookSize}
+              height={bookHeight}
+              lineDelayMs={140}
+              onAnimationComplete={(event) => {
+                if (event === "flipped") setAnimating(false);
+              }}
+            />
+
+            <PageNav variant="hands" {...pager} />
+          </div>
         </div>
 
-        {pageCount > 1 && (
-          <div className="master__page-nav">
-            <button
-              type="button"
-              aria-label="Previous page"
-              disabled={page <= 0 || animating}
-              onClick={() => goToPage(page - 1)}
-              className="master__page-nav-btn"
-            >
-              <Icon name="ChevronLeft" size={14} />
-            </button>
-            <span>
-              {page + 1}/{pageCount}
-            </span>
-            <button
-              type="button"
-              aria-label="Next page"
-              disabled={page >= pageCount - 1 || animating}
-              onClick={() => goToPage(page + 1)}
-              className="master__page-nav-btn"
-            >
-              <Icon name="ChevronRight" size={14} />
-            </button>
-          </div>
-        )}
+        <PageNav variant="chevrons" {...pager} />
       </div>
 
       {/* The plate sizes itself from each screenshot's own aspect ratio
@@ -222,6 +198,65 @@ export function Master({ project }: { project: Project }) {
       <div ref={previewColRef} className="master__preview-col">
         <ProjectPlate project={project} />
       </div>
+    </div>
+  );
+}
+
+/**
+ * The book's page pager, in its two guises. Both render the same prev/count/next
+ * controls over the same state and only one is ever visible — master.css swaps
+ * them at the 64rem container step, where there is finally room for the big
+ * sprite hands in the book's own headroom:
+ *
+ *   "hands"    — sprite-art hands overlaying the top of the book (>= 64rem)
+ *   "chevrons" — a small icon row beneath the book (38rem - 64rem)
+ *
+ * Below 38rem neither shows and paging is swipe-only (see handleTouchEnd).
+ * They live in one component so a paging change can't be applied to half of
+ * them; the two DOM shapes stay distinct because their styling has nothing in
+ * common.
+ */
+function PageNav({
+  variant,
+  page,
+  pageCount,
+  animating,
+  goToPage,
+}: {
+  variant: "hands" | "chevrons";
+  page: number;
+  pageCount: number;
+  animating: boolean;
+  goToPage: (next: number) => void;
+}) {
+  if (pageCount <= 1) return null;
+
+  const atStart = page <= 0 || animating;
+  const atEnd = page >= pageCount - 1 || animating;
+  const count = `${page + 1}/${pageCount}`;
+  const hands = variant === "hands";
+
+  return (
+    <div className={hands ? "master__page-topbar" : "master__page-nav"}>
+      <button
+        type="button"
+        aria-label="Previous page"
+        disabled={atStart}
+        onClick={() => goToPage(page - 1)}
+        className={hands ? "master__flip-btn master__flip-btn--prev" : "master__page-nav-btn"}
+      >
+        {hands ? null : <Icon name="ChevronLeft" size={14} />}
+      </button>
+      <span className={hands ? "master__page-topbar-count" : undefined}>{count}</span>
+      <button
+        type="button"
+        aria-label="Next page"
+        disabled={atEnd}
+        onClick={() => goToPage(page + 1)}
+        className={hands ? "master__flip-btn master__flip-btn--next" : "master__page-nav-btn"}
+      >
+        {hands ? null : <Icon name="ChevronRight" size={14} />}
+      </button>
     </div>
   );
 }

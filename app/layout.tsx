@@ -5,11 +5,6 @@ import { SkeletonCompanion } from "@/components/companion/skeleton-companion";
 import { AssetGallery } from "@/components/ui/asset-gallery";
 import { SITE_URL } from "@/lib/constants";
 import "./globals.css";
-// Per-component plain CSS files, migrated off Tailwind utility classes.
-// Next.js's App Router only allows non-Module global CSS to be imported
-// from the root layout, so every component's own .css file (co-located
-// next to its .tsx) is wired in centrally here rather than self-imported —
-// see the doc comment at the top of each file for why.
 import "./layout.css";
 import "@/components/book/magic-book.css";
 import "@/components/project-ecosystem/master.css";
@@ -41,17 +36,11 @@ import "./loading.css";
 import "./not-found.css";
 import "./page.css";
 import "./master/master-console.css";
-
-// Global pixel typeface. next/font self-hosts the files at build time, so this
-// stays compatible with the static export (no runtime fetch to Google).
 const pixelify = Pixelify_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-pixelify",
   display: "swap",
-  // Some weights are only used in below-the-fold, dynamically-imported
-  // sections — preloading all 4 upfront just trips the browser's "preload
-  // wasn't used in time" warning for the ones that aren't needed yet.
   preload: false,
 });
 

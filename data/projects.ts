@@ -89,7 +89,7 @@ export const projects: Project[] = [
     links: { github: "https://github.com/Anandha-scraper/Syntax" },
     related: ["project-4"],
     featured: false,
-    previewImages: ["/projects/syntax/syntax.webp"],
+    previewImages: ["/projects/syntax/syntax1.webp", "/projects/syntax/syntax2.webp"],
   },
   {
     id: "spot",
@@ -155,7 +155,7 @@ export const projects: Project[] = [
     links: { github: "https://github.com/Anandha-scraper/3I-Services" },
     related: ["spot", "magizh"],
     featured: false,
-    previewImages: ["/projects/crm3i/3iservices.webp"],
+    previewImages: ["/projects/crm3i/3iservices1.webp", "/projects/crm3i/3iservices2.webp", "/projects/crm3i/3iservices3.webp", "/projects/crm3i/3iservices4.webp"],
   },
 ];
 
