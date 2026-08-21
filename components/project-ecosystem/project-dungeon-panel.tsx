@@ -1,5 +1,5 @@
 "use client";
-import type { CSSProperties } from "react";
+import { useEffect, type CSSProperties } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Master } from "@/components/project-ecosystem/master";
 import { ACCENTS } from "@/lib/accents";
@@ -25,10 +25,39 @@ import type { Project } from "@/types";
  * of the book itself. The top transport bar (DungeonSlideshowControls) is a
  * sibling in dungeon-map.tsx, not part of this component, and is
  * unaffected by any of this.
+ *
+ * `playing`/`onFinished` pass straight through to Master, which drives
+ * autoplay by turning the book's pages and reports back when the last one has
+ * had its dwell. The one thing this component adds is the placeholder guard
+ * below: an `updating` project never mounts Master, so without it autoplay
+ * would reach a "being reworked" card and stop forever.
  */
-export function ProjectDungeonPanel({ project }: { project: Project | null }) {
+
+/** How long a placeholder card holds before autoplay moves on. Roughly the
+ *  time a one-page book would take, so the rhythm doesn't visibly break. */
+const PLACEHOLDER_DWELL_MS = 3000;
+
+export function ProjectDungeonPanel({
+  project,
+  playing = false,
+  onFinished,
+}: {
+  project: Project | null;
+  playing?: boolean;
+  onFinished?: () => void;
+}) {
   const accent = project ? ACCENTS[project.accent] : null;
   const reduceMotion = useReducedMotion();
+  const updating = Boolean(project?.updating);
+
+  // Placeholder dwell. dungeon-map's advanceProject skips `updating` projects,
+  // so this is only reachable when someone opens one directly and then hits
+  // play — but without it that would be a dead end rather than a pause.
+  useEffect(() => {
+    if (!playing || !updating || !onFinished) return;
+    const id = window.setTimeout(onFinished, PLACEHOLDER_DWELL_MS);
+    return () => window.clearTimeout(id);
+  }, [playing, updating, onFinished, project?.id]);
 
   const pageTransition = reduceMotion
     ? {
@@ -67,7 +96,7 @@ export function ProjectDungeonPanel({ project }: { project: Project | null }) {
                 </div>
               </div>
             ) : (
-              <Master project={project} />
+              <Master project={project} playing={playing} onFinished={onFinished} />
             )}
           </motion.div>
         )}

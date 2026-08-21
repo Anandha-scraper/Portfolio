@@ -12,37 +12,42 @@
   image-rendering: pixelated;
 }
 
-/* Percentages are relative to the cropped book box drawn in magic-book.tsx
-   (BOOK_CROP), not the raw 272×272 sprite cell — re-derive these if that
-   crop rect ever changes. */
+/* Every number here arrives as a custom property from BOOK_TEXT_METRICS in
+   magic-book.tsx, which publishes them on .magic-book__root. They are
+   fractions of the cropped book box (BOOK_CROP), not the raw 272×272 sprite
+   cell. They live in JS rather than here because pagination has to measure
+   text against the same geometry, and CSS can't hand these to JS — so the
+   stylesheet is the consumer, not the owner. Change them there.
+
+   The fallbacks are only for the frames before the inline style lands. */
 .magic-book__text-box {
   position: absolute;
-  top: 17.3%;
-  height: 70.9%;
+  top: var(--book-text-top, 17.3%);
+  height: var(--book-text-height, 70.9%);
   overflow: hidden;
   pointer-events: auto;
 }
 
 .magic-book__text-box--left-first {
-  left: 6.3%;
-  width: 38.7%;
+  left: var(--book-text-left-first, 6.3%);
+  width: var(--book-text-left-first-w, 38.7%);
 }
 
 .magic-book__text-box--left-rest {
-  left: 9.1%;
-  width: 35.4%;
+  left: var(--book-text-left-rest, 9.1%);
+  width: var(--book-text-left-rest-w, 35.4%);
 }
 
 .magic-book__text-box--right {
-  right: 6.9%;
-  width: 38.7%;
+  right: var(--book-text-right, 6.9%);
+  width: var(--book-text-right-w, 38.7%);
 }
 
 .magic-book__lines {
   display: flex;
   flex-direction: column;
-  gap: 0.5em;
-  padding: 0.4em;
+  gap: var(--book-line-gap, 0.5em);
+  padding: var(--book-line-pad, 0.4em);
   line-height: 1.4;
   font-family: var(--font-pixel-readable);
   color: #4a3420;

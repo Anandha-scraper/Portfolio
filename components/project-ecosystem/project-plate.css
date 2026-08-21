@@ -73,30 +73,70 @@
   min-width: 0;
 }
 
-/* Carved name banner. The accent only tints the edge and never the fill, so the
-   four project colours stay legible against the same sand-on-stone text. */
+/* Carved name banner — the `banner.png` plate art (224x32: cream fill, dark-red
+   border, orange tabs that overhang the top corners). Drawn with `border-image`
+   rather than a stretched background: `background-size: 100% 100%` would smear
+   those corner tabs as the plate widens, while a nine-slice keeps them at their
+   drawn size and stretches only the flat middle. The slice is asymmetric
+   (12 top vs 10 bottom) because the tabs sit above the frame line.
+
+   The fill is cream, so the type here is the book's dark ink rather than the
+   sand used everywhere else on the dark UI — sand would be invisible on it. The
+   accent tints only the outer glow, keeping all four project colours legible
+   against the same ink. */
 .project-plate__name {
+  display: block;
   max-width: 100%;
-  border: 1px solid #a3b18a2e;
-  border-radius: 2px;
-  background-color: #1f1a12cc;
-  padding: 0.3rem 0.9rem;
-  font-family: var(--font-pixel-readable);
-  font-size: 0.6875rem;
-  letter-spacing: 0.16em;
+  border-width: 12px 12px 10px;
+  border-style: solid;
+  border-color: transparent;
+  border-image-source: url(/sprites/ui/banner.png);
+  border-image-slice: 12 12 10 12 fill;
+  border-image-repeat: stretch;
+  image-rendering: pixelated;
+  padding: 0.15rem 0.75rem 0.2rem;
+  background: none;
+  font-family: var(--font-pixel);
+  font-size: 0.85rem;
+  line-height: 1.15;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-ops-sand);
+  /* Same ink as the book's pages (magic-book.css) — both sit on parchment. */
+  color: #4a3420;
   text-align: center;
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.65);
+  text-shadow: none;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+/* Interactive variant: the plate doubles as "next screenshot" when a project
+   has more than one. Projects with a single image render a plain <span> with
+   the identical art, so nothing focusable promises an action it can't do. */
+button.project-plate__name {
+  cursor: pointer;
+  transition: transform 150ms ease, filter 150ms ease;
+}
+
+@media (hover: hover) {
+  button.project-plate__name:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.06);
+  }
+}
+
+button.project-plate__name:active {
+  transform: translateY(1px);
+}
+
+button.project-plate__name:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
 @supports (color: color-mix(in lab, red, red)) {
   .project-plate__name {
-    border-color: color-mix(in oklab, var(--accent) 40%, transparent);
-    background-color: color-mix(in oklab, var(--color-ops-surface) 80%, transparent);
+    filter: drop-shadow(0 0 6px color-mix(in oklab, var(--accent) 35%, transparent));
   }
 }
 

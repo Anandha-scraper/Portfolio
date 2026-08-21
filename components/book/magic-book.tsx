@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useLayoutEffect, useState, useCallback } from "react";
+import { useRef, useEffect, useLayoutEffect, useState, useCallback, type CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import { SPRITE_CONTROL } from "@/lib/sprite-control";
 
@@ -30,6 +30,42 @@ const BOOK_CROP = { x: 13, y: 56, w: 246, h: 211 };
 /** Aspect ratio (height / width) of the cropped book art, for sizing the
  *  canvas box without distorting the pixel art. */
 export const BOOK_ASPECT = BOOK_CROP.h / BOOK_CROP.w;
+
+/**
+ * Where the two text columns sit on the drawn page, as fractions of the
+ * cropped book box above. Exported because pagination has to know how much
+ * room a page actually has — master.tsx measures real text against these to
+ * decide where to break, rather than counting array entries and hoping.
+ *
+ * These are the single source of truth: the component publishes them as
+ * custom properties on `.magic-book__root` and magic-book.css consumes those
+ * vars, so the numbers exist once rather than being mirrored in a stylesheet
+ * JS can't read. Re-derive them if BOOK_CROP changes.
+ *
+ * `leftRest` is narrower than `leftFirst` because the turned page sits further
+ * into the gutter. Pagination measures against the narrow one for every page:
+ * page 0 then has a little slack, which is the safe direction to be wrong in.
+ */
+export const BOOK_TEXT_METRICS = {
+  top: 0.173,
+  height: 0.709,
+  leftFirst: { left: 0.063, width: 0.387 },
+  leftRest: { left: 0.091, width: 0.354 },
+  right: { right: 0.069, width: 0.387 },
+  /** `gap` and `padding` on `.magic-book__lines`, in em of the resolved font
+   *  size — needed to convert measured line heights into a page budget. */
+  lineGapEm: 0.5,
+  paddingEm: 0.4,
+} as const;
+
+/** The font-size the book uses at a given canvas size. Exported so the
+ *  pagination pass can measure at exactly the size that will be painted. */
+export function bookFontSize(width: number, height: number): number {
+  return Math.min(40, Math.max(10, Math.min(width, height) * (16 / 544)));
+}
+
+/** Local shorthand — this object is referenced a dozen times in the style block. */
+const M = BOOK_TEXT_METRICS;
 
 type SheetKey = keyof typeof SHEETS;
 type AnimEvent = "opened" | "closed" | "flipped";
@@ -90,8 +126,7 @@ export default function MagicBook({
 }: MagicBookProps) {
   const resolvedHeight = height ?? Math.round(width * BOOK_ASPECT);
 
-  const resolvedFontSize =
-    fontSize ?? Math.min(40, Math.max(10, Math.min(width, resolvedHeight) * (16 / 544)));
+  const resolvedFontSize = fontSize ?? bookFontSize(width, resolvedHeight);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagesRef = useRef<Partial<Record<SheetKey, HTMLImageElement>>>({});
@@ -345,7 +380,27 @@ export default function MagicBook({
   );
 
   return (
-    <div className={cn("magic-book__root", className)} style={{ width, height: resolvedHeight }}>
+    <div
+      className={cn("magic-book__root", className)}
+      style={
+        {
+          width,
+          height: resolvedHeight,
+          // Published so magic-book.css positions the text boxes from the same
+          // numbers pagination measures against (BOOK_TEXT_METRICS).
+          "--book-text-top": `${M.top * 100}%`,
+          "--book-text-height": `${M.height * 100}%`,
+          "--book-text-left-first": `${M.leftFirst.left * 100}%`,
+          "--book-text-left-first-w": `${M.leftFirst.width * 100}%`,
+          "--book-text-left-rest": `${M.leftRest.left * 100}%`,
+          "--book-text-left-rest-w": `${M.leftRest.width * 100}%`,
+          "--book-text-right": `${M.right.right * 100}%`,
+          "--book-text-right-w": `${M.right.width * 100}%`,
+          "--book-line-gap": `${M.lineGapEm}em`,
+          "--book-line-pad": `${M.paddingEm}em`,
+        } as CSSProperties
+      }
+    >
       {/* The width/height *attributes* set both the backing store and, at 1:1,
           the CSS box — no inline style needed. The text boxes below position
           against .magic-book__root directly; they used to sit in an extra

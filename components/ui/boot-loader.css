@@ -1,0 +1,88 @@
+/* boot-loader.tsx — the first-paint overlay. Imported once from app/layout.tsx
+   (see components/book/magic-book.css for why no component imports its own). */
+
+.boot-loader {
+  position: fixed;
+  inset: 0;
+  /* Above everything, including the chest sidebar (z-index 60) and the
+     dungeon's transport bar. Nothing may paint over the loader. */
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-ops-base);
+  opacity: 1;
+  transition: opacity 420ms ease;
+}
+
+/* The fade. `pointer-events: none` lands with it so the page beneath is
+   clickable for the whole fade rather than only once it finishes. */
+.boot-loader--leaving {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.boot-loader__stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.boot-loader__monster {
+  /* PixelSprite sets its own width/height from frameW/frameH × scale, so this
+     only has to keep the art crisp and let it shrink on tiny screens. */
+  image-rendering: pixelated;
+  max-width: 80vw;
+}
+
+.boot-loader__label {
+  font-size: 0.7rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--color-ops-sand-soft);
+  animation: boot-loader-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes boot-loader-pulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
+}
+
+/* The blur behind the monster. Applied by the server (app/layout.tsx puts
+   `root-body--booting` on <body>) so it is in effect at first paint, before
+   any JS runs — BootLoader's only job is removing it. */
+.root-body--booting .root-content {
+  filter: blur(8px);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Nothing behind the overlay should be reachable by keyboard either. */
+.root-body--booting {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boot-loader {
+    transition: none;
+  }
+
+  .boot-loader__label {
+    animation: none;
+    opacity: 0.8;
+  }
+
+  /* A blur that snaps off is fine; a blur that snaps off *and* is heavy is
+     not. Keep it light for anyone who asked for less motion. */
+  .root-body--booting .root-content {
+    filter: blur(3px);
+  }
+}
+
+/* Escape hatch for JS-off lives in app/layout.tsx as a <noscript><style>, not
+   here: with no JS, BootLoader can never dismiss itself, so the overlay and the
+   blur would be permanent. A <noscript> block is the only way to express
+   "undo this when scripting is unavailable" — a plain rule in this file would
+   apply either always or never. The static export renders every word of
+   content into the HTML, so the page is perfectly usable that way. */

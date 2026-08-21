@@ -6,6 +6,7 @@ import { PixelSprite } from "@/components/ui/pixel-sprite";
 import { DungeonFrame } from "@/components/ui/dungeon-frame";
 import { Icon } from "@/components/ui/icon";
 import { useClickOutside } from "@/hooks/use-click-outside";
+import { SPRITE_CONTROL } from "@/lib/sprite-control";
 import { cn } from "@/lib/utils";
 
 /**
@@ -156,7 +157,10 @@ const GROUPS: Group[] = [
     label: "Bosses",
     assets: [
       { kind: "sprite", name: "devil", src: "/sprites/boss/devil.png", frames: 17, frameSize: 120, frameW: 120, frameH: 100, scale: 0.5, frameMs: 140, bob: false },
-      { kind: "sprite", name: "monster", src: "/sprites/boss/monster.png", frames: 11, frameSize: 45, frameW: 45, frameH: 51, scale: 1, frameMs: 140, bob: false },
+      // Reads from SPRITE_CONTROL.boss.monster — the boot loader renders the
+      // same sprite, so the numbers live in one place. Shown at scale 1 here
+      // because the gallery thumbnails are uniform; the loader scales it up.
+      { kind: "sprite", name: "monster", src: SPRITE_CONTROL.boss.monster.src, frames: SPRITE_CONTROL.boss.monster.frames, frameSize: SPRITE_CONTROL.boss.monster.frameW, frameW: SPRITE_CONTROL.boss.monster.frameW, frameH: SPRITE_CONTROL.boss.monster.frameH, scale: 1, frameMs: SPRITE_CONTROL.boss.monster.frameMs, bob: false },
       { kind: "sprite", name: "shadow", src: "/sprites/boss/shadow.png", frames: 18, frameSize: 80, frameW: 80, frameH: 70, scale: 0.7, frameMs: 120, bob: false },
     ],
   },

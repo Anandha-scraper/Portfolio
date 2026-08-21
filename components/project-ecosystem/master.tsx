@@ -2,9 +2,10 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import dynamic from "next/dynamic";
 import { Icon } from "@/components/ui/icon";
-import { BOOK_ASPECT } from "@/components/book/magic-book";
+import { BOOK_ASPECT, BOOK_TEXT_METRICS, bookFontSize } from "@/components/book/magic-book";
 import type { MagicBookLine, MagicBookPage } from "@/components/book/magic-book";
 import { ProjectPlate } from "@/components/project-ecosystem/project-plate";
+import { cn } from "@/lib/utils";
 import type { Project } from "@/types";
 const MagicBook = dynamic(() => import("@/components/book/magic-book"), { ssr: false });
 
@@ -16,14 +17,26 @@ const MagicBook = dynamic(() => import("@/components/book/magic-book"), { ssr: f
  * each child owns its own internals in its own stylesheet. Nothing here sets
  * layout in JS.
  *
- * What this file does own beyond composition: the book's page-turn navigation
- * (Prev/Next when there's room for two columns, swipe otherwise) — content is
- * chunked into as many pages as it takes to fit without scrolling (see
- * LINES_PER_PAGE) rather than one page with an internal scrollbar — and the
- * book canvas's backing-store resolution, which has to be a number in JS
- * because CSS can't set a <canvas>'s width/height attributes. That same
- * number is published as `--book-h` for master.css, which needs the canvas
- * height as a length to cancel the sprite's headroom (see BOOK_HEADROOM).
+ * What this file does own beyond composition:
+ *
+ * - **Pagination.** Content is split across as many pages as it takes to fit
+ *   without scrolling. The split is *measured*, not counted: `paginate()`
+ *   renders every line into a hidden mirror at the real page width and font
+ *   size and packs by actual height. It used to chunk the line array six at a
+ *   time, which is blind to wrapping — one long sentence, the joined stack
+ *   list, or a full URL can occupy ten visual rows while costing one slot, and
+ *   since `.magic-book__text-box` is `overflow: hidden` the excess was silently
+ *   invisible. On a phone that swallowed most of the overview.
+ * - **Page-turn navigation** — Prev/Next when there's room for two columns,
+ *   swipe otherwise.
+ * - **Autoplay's clock.** While `playing`, the book turns a page every
+ *   PAGE_INTERVAL_MS and calls `onFinished` once the last page has had its
+ *   dwell, which is how the dungeon knows to move to the next project. The
+ *   timer lives here because `page`/`pageCount` do.
+ * - **The book canvas's backing-store resolution**, which has to be a number
+ *   in JS because CSS can't set a <canvas>'s width/height attributes. That
+ *   same number is published as `--book-h` for master.css, which needs the
+ *   canvas height as a length to cancel the sprite's headroom (BOOK_HEADROOM).
  */
 
 // ── Canvas resolution clamp — the book's drawn pixel size, not its layout ──
@@ -39,7 +52,9 @@ const BOOK_MAX_PX = 1100;
 const BOOK_HEADROOM = 0.135;
 const OPEN_DELAY_MS = 200;
 const SWIPE_THRESHOLD_PX = 40;
-const LINES_PER_PAGE = 6;
+/** Autoplay's page dwell. Each page gets this long; when the last one expires
+ *  the dungeon advances to the next project. */
+const PAGE_INTERVAL_MS = 3000;
 
 function splitOverview(text: string): string[] {
   return text
@@ -48,14 +63,44 @@ function splitOverview(text: string): string[] {
     .filter(Boolean);
 }
 
-function chunk<T>(items: T[], size: number): T[][] {
-  if (!items.length) return [[]];
-  const out: T[][] = [];
-  for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size));
-  return out;
+/** Pack lines into pages by measured height. `heights` is parallel to `lines`
+ *  and holds each line's rendered height in px at the page's real width and
+ *  font size; `budget` is the usable height of one text box.
+ *
+ *  Greedy: keep adding until the next line would overflow, then start a page.
+ *  A single line taller than the whole budget still gets its own page rather
+ *  than looping forever — it will clip, but only that one line, and only in a
+ *  case that has no better answer than shipping a smaller book. */
+function packByHeight(
+  lines: MagicBookLine[],
+  heights: number[],
+  budget: number,
+  gap: number
+): MagicBookLine[][] {
+  if (!lines.length) return [[]];
+  const pages: MagicBookLine[][] = [];
+  let current: MagicBookLine[] = [];
+  let used = 0;
+
+  lines.forEach((line, i) => {
+    const h = heights[i] ?? 0;
+    const cost = current.length ? h + gap : h;
+    if (current.length && used + cost > budget) {
+      pages.push(current);
+      current = [line];
+      used = h;
+      return;
+    }
+    current.push(line);
+    used += cost;
+  });
+
+  if (current.length) pages.push(current);
+  return pages.length ? pages : [[]];
 }
 
-function buildPages(project: Project): MagicBookPage[] {
+/** The book's content as two flat streams, before any page splitting. */
+function buildLines(project: Project): { left: MagicBookLine[]; right: MagicBookLine[] } {
   const links = [
     project.links.github ? `GitHub: ${project.links.github}` : null,
     project.links.live ? `Live: ${project.links.live}` : null,
@@ -92,27 +137,42 @@ function buildPages(project: Project): MagicBookPage[] {
     rightLines.push(line("Links", "label"), ...links.map((l) => line(l, "bullet")));
   }
 
-  const leftChunks = chunk(leftLines, LINES_PER_PAGE);
-  const rightChunks = chunk(rightLines, LINES_PER_PAGE);
-  const pageCount = Math.max(leftChunks.length, rightChunks.length);
+  return { left: leftLines, right: rightLines };
+}
 
-  return Array.from({ length: pageCount }, (_, i) => ({
-    left: leftChunks[i] ?? [],
-    right: rightChunks[i] ?? [],
+/** Zip two independently-packed column streams into pages. */
+function zipPages(left: MagicBookLine[][], right: MagicBookLine[][]): MagicBookPage[] {
+  const count = Math.max(left.length, right.length, 1);
+  return Array.from({ length: count }, (_, i) => ({
+    left: left[i] ?? [],
+    right: right[i] ?? [],
   }));
 }
 
-export function Master({ project }: { project: Project }) {
+export function Master({
+  project,
+  playing = false,
+  onFinished,
+}: {
+  project: Project;
+  playing?: boolean;
+  onFinished?: () => void;
+}) {
   const bookContainerRef = useRef<HTMLDivElement>(null);
   const previewColRef = useRef<HTMLDivElement>(null);
+  const measureRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
   const [bookSize, setBookSize] = useState(BOOK_MIN_PX);
   const [isOpen, setIsOpen] = useState(false);
   const [page, setPage] = useState(0);
   const [animating, setAnimating] = useState(false);
+  const [held, setHeld] = useState(false);
+  const [pages, setPages] = useState<MagicBookPage[]>([]);
 
-  const pages = buildPages(project);
-  const pageCount = pages.length;
+  const lines = buildLines(project);
+  const bookHeight = Math.round(bookSize * BOOK_ASPECT);
+  const fontSize = bookFontSize(bookSize, bookHeight);
+  const pageCount = Math.max(pages.length, 1);
 
   useEffect(() => {
     const el = previewColRef.current;
@@ -131,6 +191,56 @@ export function Master({ project }: { project: Project }) {
     return () => window.clearTimeout(timer);
   }, []);
 
+  // ── Measure, then paginate ──────────────────────────────────────
+  // The mirror below renders every line at the page's real width and font
+  // size; this reads back each one's height and packs pages that actually
+  // fit. Re-runs whenever the book resizes or the project changes.
+  //
+  // It waits on `document.fonts.ready` first: Pixelify arrives via next/font,
+  // and measuring against the fallback face yields heights that are wrong by
+  // enough to misplace a break.
+  useEffect(() => {
+    let cancelled = false;
+
+    const measure = () => {
+      const el = measureRef.current;
+      if (cancelled || !el) return;
+
+      const M = BOOK_TEXT_METRICS;
+      const gap = M.lineGapEm * fontSize;
+      // Usable height inside one text box, less the .magic-book__lines padding
+      // on both edges.
+      const budget = bookHeight * M.height - M.paddingEm * fontSize * 2;
+
+      const readColumn = (selector: string) =>
+        Array.from(el.querySelectorAll<HTMLElement>(selector)).map(
+          (node) => node.getBoundingClientRect().height
+        );
+
+      const nextPages = zipPages(
+        packByHeight(lines.left, readColumn("[data-measure='left'] > *"), budget, gap),
+        packByHeight(lines.right, readColumn("[data-measure='right'] > *"), budget, gap)
+      );
+
+      setPages(nextPages);
+      setPage((p) => Math.min(p, nextPages.length - 1));
+    };
+
+    // rAF so the mirror has been laid out with the current font size before
+    // anything is read back.
+    const raf = requestAnimationFrame(() => {
+      if (document.fonts?.ready) document.fonts.ready.then(measure);
+      else measure();
+    });
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+    };
+    // `lines` is rebuilt every render, so key off the project instead.
+  }, [project.id, bookSize, bookHeight, fontSize]); // eslint-disable-line react-hooks/exhaustive-deps
+
+
   const goToPage = useCallback(
     (next: number) => {
       if (animating || next < 0 || next >= pageCount || next === page) return;
@@ -139,6 +249,20 @@ export function Master({ project }: { project: Project }) {
     },
     [animating, page, pageCount]
   );
+
+  // ── Autoplay's clock ────────────────────────────────────────────
+  // One page per tick; when the last page's tick lands, hand back to the
+  // dungeon to open the next project. Gated on `isOpen` so page 1 gets a full
+  // dwell rather than a partial one while the book is still swinging open,
+  // and on `animating` so a tick can't stack on top of a turn in flight.
+  useEffect(() => {
+    if (!playing || held || !isOpen || animating) return;
+    const id = window.setInterval(() => {
+      if (page >= pageCount - 1) onFinished?.();
+      else goToPage(page + 1);
+    }, PAGE_INTERVAL_MS);
+    return () => window.clearInterval(id);
+  }, [playing, held, isOpen, animating, page, pageCount, goToPage, onFinished]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0]?.clientX ?? null;
@@ -153,11 +277,55 @@ export function Master({ project }: { project: Project }) {
     else goToPage(page - 1);
   };
 
-  const bookHeight = Math.round(bookSize * BOOK_ASPECT);
   const pager = { page, pageCount, animating, goToPage };
+  const M = BOOK_TEXT_METRICS;
 
   return (
-    <div className="master__root">
+    <div
+      className="master__root"
+      /* Autoplay pauses while a pointer rests anywhere on the panel — hover
+         with a cursor, a finger held on a phone. Pointer events rather than
+         mouse ones so both work from one handler pair; pointercancel matters
+         on touch, where a scroll steals the pointer and no leave arrives.
+         ProjectPlate keeps its own copy of this for its image rotation. */
+      onPointerEnter={() => setHeld(true)}
+      onPointerLeave={() => setHeld(false)}
+      onPointerCancel={() => setHeld(false)}
+    >
+      {/* Off-screen measuring mirror. Not display:none — that has no layout and
+          would measure zero. It carries the same classes and font size as the
+          real pages so every line wraps identically, at the narrower
+          `leftRest` width so a break that fits here fits on page 0 too. */}
+      <div
+        ref={measureRef}
+        aria-hidden
+        className="master__measure"
+        style={{ fontSize: `${fontSize}px` } as CSSProperties}
+      >
+        <div
+          data-measure="left"
+          className="magic-book__lines"
+          style={{ width: `${bookSize * M.leftRest.width}px` }}
+        >
+          {lines.left.map((line, i) => (
+            <div key={`l${i}`} className={cn("magic-book__line", `magic-book__line--${line.kind ?? "body"}`, "magic-book__line--revealed")}>
+              {line.text}
+            </div>
+          ))}
+        </div>
+        <div
+          data-measure="right"
+          className="magic-book__lines"
+          style={{ width: `${bookSize * M.right.width}px` }}
+        >
+          {lines.right.map((line, i) => (
+            <div key={`r${i}`} className={cn("magic-book__line", `magic-book__line--${line.kind ?? "body"}`, "magic-book__line--revealed")}>
+              {line.text}
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div
         className="master__book-col"
         style={{ "--book-headroom": `${Math.round(bookHeight * BOOK_HEADROOM)}px` } as CSSProperties}

@@ -253,3 +253,22 @@
     display: none;
   }
 }
+
+/* Off-screen measuring mirror for the book's pagination (master.tsx).
+   Deliberately *not* `display: none` or `visibility: hidden` on the lines
+   themselves: both would still be measurable, but the first has no layout box
+   at all and the second is fine — what matters is that the element keeps its
+   real width and font so text wraps exactly as it will on the page. Parked
+   off-canvas instead, which is the one approach that guarantees identical
+   layout to the visible copy.
+
+   `.magic-book__line` starts at `opacity: 0` with a transform; the mirror adds
+   `--revealed` so the lines sit at their settled height rather than mid-fade. */
+.master__measure {
+  position: absolute;
+  top: 0;
+  left: -99999px;
+  width: max-content;
+  visibility: hidden;
+  pointer-events: none;
+}

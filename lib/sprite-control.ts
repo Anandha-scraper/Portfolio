@@ -352,6 +352,23 @@ export const SPRITE_CONTROL = {
     open: { suffix: "_open", w: 48 },
   },
 
+  /** Boss sprites (CraftPix). Each is a single horizontal strip: idle into a
+   *  collapse, no attack cycle. `monster` drives the site's boot loader
+   *  (components/ui/boot-loader.tsx) — it was gallery-only before that, with
+   *  its numbers hard-coded in asset-gallery.tsx; both read from here now. */
+  boss: {
+    monster: {
+      src: "/sprites/boss/monster.png",
+      frames: 11,
+      frameW: 45,
+      frameH: 51,
+      frameMs: 140,
+      /** 45×51 source → 270×306 on screen. Big enough to read as the subject
+       *  of the loading screen rather than a spinner-sized afterthought. */
+      scale: 6,
+    },
+  },
+
   /** Treasure-marker icons on the dungeon map — a different, unrelated set
    *  from `treasures` above (that one's the open/close chest pair at
    *  /sprites/dungeon; this is 11 numbered icons at /sprites/treasure,
@@ -394,7 +411,15 @@ export const SPRITE_CONTROL = {
    *  before E / the action button opens it. */
   hero: {
     sprite: "vampire1",
-    scale: 0.75, // 64px source → 48px in map space
+    // 64px source → ~67px in map space, a little over two 32px cells. This is
+    // the only lever for the player's on-screen size: HERO_PX in
+    // dungeon-hero.tsx derives from it, and the feet-anchor transform in
+    // dungeon-map.tsx re-centres off HERO_PX, so nothing else needs touching.
+    // The collision box does NOT follow — HERO_HALF_W/H in lib/dungeon-walk.ts
+    // come from CELL — so the hero still fits one-cell doorways. That gap
+    // widens as this grows; past ~1.2 the sprite starts visibly overlapping
+    // walls it can walk through.
+    scale: 1.05,
     walkSpeed: 170,
     runSpeed: 290, // hold Shift
     interactRadius: 110,

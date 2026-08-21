@@ -3,6 +3,7 @@ import { Pixelify_Sans } from "next/font/google";
 import { BackgroundEnvironment } from "@/components/blueprint/background-environment";
 import { SkeletonCompanion } from "@/components/companion/skeleton-companion";
 import { AssetGallery } from "@/components/ui/asset-gallery";
+import { BootLoader } from "@/components/ui/boot-loader";
 import { SITE_URL } from "@/lib/constants";
 import "./globals.css";
 import "./layout.css";
@@ -29,6 +30,7 @@ import "@/components/blueprint/section-heading.css";
 import "@/components/blueprint/section-shell.css";
 import "@/components/companion/skeleton-companion.css";
 import "@/components/ui/asset-gallery.css";
+import "@/components/ui/boot-loader.css";
 import "@/components/ui/dungeon-frame.css";
 import "@/components/ui/morphing-text.css";
 import "@/components/ui/particles.css";
@@ -94,7 +96,17 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning className={pixelify.variable}>
-      <body className="root-body">
+      {/* `root-body--booting` ships in the static HTML so the blur is live at
+          first paint, before any JS. BootLoader takes it off once the page has
+          loaded — see components/ui/boot-loader.tsx. */}
+      <body className="root-body root-body--booting">
+        {/* With scripting off nothing can ever dismiss the loader, so undo it
+            outright. The export prerenders all the content, so the page works
+            perfectly well without the loader having run. */}
+        <noscript>
+          <style>{`.boot-loader{display:none}.root-body--booting{overflow:auto}.root-body--booting .root-content{filter:none;pointer-events:auto;user-select:auto}`}</style>
+        </noscript>
+        <BootLoader />
         <BackgroundEnvironment />
         {/* Cursor companion. mode: "chase" | "rest" | "wander";
             idleDelayMs: 1000 | 2000 | 3000; set debug to tune live. */}

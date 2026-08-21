@@ -115,7 +115,23 @@ export function ProjectPlate({ project }: { project: Project }) {
       </DungeonFrame>
 
       <figcaption className="project-plate__placard">
-        <span className="project-plate__name">{project.name}</span>
+        {/* The name plate doubles as the "next screenshot" control when there
+            is more than one. With a single image it degrades to a plain span
+            carrying the same art, rather than a focusable button that does
+            nothing — the same rule the link signs follow. */}
+        {multiple ? (
+          <button
+            type="button"
+            className="project-plate__name"
+            onClick={() => setActive((i) => (i + 1) % count)}
+            aria-label={`Next screenshot (${active + 1} of ${count})`}
+            title="Next screenshot"
+          >
+            {project.name}
+          </button>
+        ) : (
+          <span className="project-plate__name">{project.name}</span>
+        )}
 
         {multiple && (
           <div className="project-plate__index">

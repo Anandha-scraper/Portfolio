@@ -22,7 +22,6 @@ import { cn } from "@/lib/utils";
 const AIM = SPRITE_CONTROL.aim;
 const AIM_PX = AIM.frameSize * AIM.scale; // ~39
 const HERO_CTRL = SPRITE_CONTROL.hero;
-const SLIDE_INTERVAL_MS = 4500;
 const KEYMAP: Record<string, "left" | "right" | "up" | "down"> = {
   ArrowLeft: "left", ArrowRight: "right", ArrowUp: "up", ArrowDown: "down",
   a: "left", d: "right", w: "up", s: "down", A: "left", D: "right", W: "up", S: "down",
@@ -360,15 +359,25 @@ export function DungeonMap() {
     return () => observer.disconnect();
   }, []);
 
-  // auto-advance — one project every SLIDE_INTERVAL_MS while playing and not
-  // walking; stops entirely once Playground takes over.
-  useEffect(() => {
-    if (walking || !playing) return;
-    const id = window.setInterval(() => {
-      setActiveIndex((i) => (i + 1) % SECTOR_ORDER.length);
-    }, SLIDE_INTERVAL_MS);
-    return () => window.clearInterval(id);
-  }, [walking, playing]);
+  /** Autoplay's project step. There is deliberately no timer here any more:
+   *  the dwell is now however long the open project's book takes to turn all
+   *  its pages (Master owns that tick, since it owns `page`/`pageCount`), and
+   *  it calls this when the last page has had its turn.
+   *
+   *  Placeholder projects are skipped. `updating: true` entries render a
+   *  "being reworked" card with no book, so they have no pages to walk and
+   *  would otherwise be half of an autoplay loop showing nothing. They stay
+   *  reachable by treasure click and by Prev/Next. */
+  const advanceProject = useCallback(() => {
+    setActiveIndex((i) => {
+      for (let step = 1; step <= SECTOR_ORDER.length; step++) {
+        const next = (i + step) % SECTOR_ORDER.length;
+        const project = projects.find((p) => p.id === SECTOR_PROJECT_MAP[SECTOR_ORDER[next]]);
+        if (project && !project.updating) return next;
+      }
+      return i; // every project is a placeholder — stay put rather than spin
+    });
+  }, []);
 
   // Look-ahead prefetch: warm the browser cache for the *next* project's
   // first screenshot during the current one's dwell time, so autoplay (or
@@ -482,7 +491,13 @@ export function DungeonMap() {
           {/* project view — fills the whole frame, covering the map, whenever
               not walking. Same frame either way: the default auto-advancing
               screen, or whatever the hero just opened. */}
-          {!walking && <ProjectDungeonPanel project={activeProject} />}
+          {!walking && (
+            <ProjectDungeonPanel
+              project={activeProject}
+              playing={playing}
+              onFinished={advanceProject}
+            />
+          )}
 
           {/* transport bar — fixed top-right, above both screens */}
           <DungeonSlideshowControls
