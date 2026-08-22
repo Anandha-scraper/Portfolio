@@ -241,8 +241,9 @@ const GROUPS: Group[] = [
   },
   {
     // Transport bar, joystick, and attack-button coins (feed/extract_ui_assets.py,
-    // from feed/ui-source) — each an off/lit pair, wired into
-    // DungeonSlideshowControls and DungeonTouchControls.
+    // from feed/ui-source), wired into DungeonSlideshowControls and
+    // DungeonTouchControls. The transport/attack-button coins are each an
+    // off/lit pair; the joystick is off-only.
     label: "Dungeon Controls",
     assets: [
       { kind: "image", name: "prev (off)", src: "/sprites/ui/btn_prev_off.png", w: 56 },
@@ -254,9 +255,7 @@ const GROUPS: Group[] = [
       { kind: "image", name: "playground (off)", src: "/sprites/ui/btn_playground_off.png", w: 56 },
       { kind: "image", name: "playground (lit)", src: "/sprites/ui/btn_playground_lit.png", w: 56 },
       { kind: "image", name: "joystick outer", src: "/sprites/ui/joystick_outer_off.png", w: 64 },
-      { kind: "image", name: "joystick outer (lit)", src: "/sprites/ui/joystick_outer_lit.png", w: 64 },
       { kind: "image", name: "joystick inner", src: "/sprites/ui/joystick_inner_off.png", w: 44 },
-      { kind: "image", name: "joystick inner (lit)", src: "/sprites/ui/joystick_inner_lit.png", w: 44 },
       { kind: "image", name: "attack (off)", src: "/sprites/ui/attack_off.png", w: 56 },
       { kind: "image", name: "attack (lit)", src: "/sprites/ui/attack_lit.png", w: 56 },
       // The two carved link signs that lead the transport bar. Wide rather

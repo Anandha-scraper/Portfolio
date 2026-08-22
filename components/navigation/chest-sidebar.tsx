@@ -7,6 +7,7 @@ import { DungeonFrame } from "@/components/ui/dungeon-frame";
 import { Icon } from "@/components/ui/icon";
 import { NAV_ITEMS, SECTION_IDS } from "@/lib/constants";
 import { socials } from "@/data/socials";
+import { trackEvent } from "@/lib/analytics";
 import { SPRITE_CONTROL } from "@/lib/sprite-control";
 import { useActiveSection } from "@/hooks/use-active-section";
 import { useClickOutside } from "@/hooks/use-click-outside";
@@ -139,6 +140,9 @@ export function ChestSidebar() {
                       rel="noopener noreferrer"
                       aria-label={s.label}
                       className="chest-sidebar__social-link"
+                      onClick={() =>
+                        trackEvent("social_link_click", { url: s.href, label: s.label })
+                      }
                     >
                       <Icon name={s.icon} size={16} />
                     </a>

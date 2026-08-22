@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import type { Project } from "@/types";
 
@@ -80,12 +81,26 @@ export function DungeonSlideshowControls({
         label={`View ${project?.name ?? "this project"} on GitHub`}
         emptyLabel="No public repository for this project"
         src="/sprites/ui/sign_github.webp"
+        onClick={() =>
+          trackEvent("project_link_click", {
+            url: github,
+            type: "github",
+            project: project?.id,
+          })
+        }
       />
       <LinkBanner
         href={live}
         label={`Open the live site for ${project?.name ?? "this project"}`}
         emptyLabel="No live site for this project yet"
         src="/sprites/ui/sign_live.webp"
+        onClick={() =>
+          trackEvent("project_link_click", {
+            url: live,
+            type: "live",
+            project: project?.id,
+          })
+        }
       />
       <ControlButton
         label="Previous project"
@@ -129,11 +144,13 @@ function LinkBanner({
   label,
   emptyLabel,
   src,
+  onClick,
 }: {
   href?: string;
   label: string;
   emptyLabel: string;
   src: string;
+  onClick?: () => void;
 }) {
   // Deliberately no `pixelated` class, unlike every other sprite here — these
   // two downscale smoothly instead. The class alone wouldn't settle it either
@@ -163,6 +180,7 @@ function LinkBanner({
       aria-label={label}
       title={label}
       className="slideshow-controls__banner"
+      onClick={onClick}
     >
       {art}
     </a>
