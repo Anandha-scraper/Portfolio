@@ -34,7 +34,6 @@
   height: clamp(420px, 82vh, 1000px);
   width: 100%;
   overflow: hidden;
-  background-color: var(--color-ops-base);
   outline-style: none;
 }
 

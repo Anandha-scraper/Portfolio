@@ -1,10 +1,15 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { PixelSprite } from "@/components/ui/pixel-sprite";
 import { DungeonFrame } from "@/components/ui/dungeon-frame";
 import { Icon } from "@/components/ui/icon";
+import { ReactorCycle } from "@/components/ui/reactor-cycle";
+import { BasicFurnaceCycle, AdvancedFurnaceCycle } from "@/components/ui/furnace-cycle";
+import { TankColorPicker } from "@/components/ui/tank-color-picker";
+import { TransporterBelt } from "@/components/ui/transporter-belt";
+import { LightningBolt } from "@/components/ui/lightning-bolt";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import { SPRITE_CONTROL } from "@/lib/sprite-control";
 import { cn } from "@/lib/utils";
@@ -38,9 +43,55 @@ type StaticAsset = {
   /** Single-frame art that should still feel alive — adds a CSS fire flicker. */
   flicker?: boolean;
 };
-type Asset = AnimatedAsset | StaticAsset;
+/** Escape hatch for a thumbnail whose animation isn't a single PixelSprite
+ *  strip (e.g. ReactorCycle, which swaps between three sprite sheets). */
+type NodeAsset = {
+  kind: "node";
+  name: string;
+  node: ReactNode;
+};
+type Asset = AnimatedAsset | StaticAsset | NodeAsset;
 
-type Group = { label: string; assets: Asset[] };
+type Group = {
+  label: string;
+  assets: Asset[];
+  /** Forge/Factory sprites render much bigger than the rest of the catalogue
+   *  (smith at scale 3, factory art at native scale 1 with frames up to
+   *  166×155) — the standard 4rem thumb box clips/crowds them, so these
+   *  groups opt into a taller box and a 2-column grid instead of 3. */
+  large?: boolean;
+  /** For a group whose one asset is wide rather than tall (TransporterBelt:
+   *  192×64) — a single full-width column instead of 2/3 narrow ones, so it
+   *  isn't forced into a box too narrow for it. */
+  wide?: boolean;
+};
+
+/** Builds a gallery row straight off a SPRITE_CONTROL leaf (src/frames/
+ *  frameW/frameH/scale/frameMs) instead of spelling out all 7 fields inline
+ *  — every Forge/Factory/Effects/Lightning entry has this exact shape.
+ *  `scale` defaults to the leaf's own live-scene scale but can be overridden
+ *  (forgeSmith renders at 14 in the actual Capability Forge but that's too
+ *  big for a thumbnail, so its gallery row asks for 3 instead). Pre-existing
+ *  hand-authored rows elsewhere in this file use literal values, not a
+ *  SPRITE_CONTROL read, so they don't go through this. */
+function fromSprite(
+  name: string,
+  s: { src: string; frames: number; frameW: number; frameH: number; scale: number; frameMs: number },
+  opts: { scale?: number; bob?: boolean } = {}
+): AnimatedAsset {
+  return {
+    kind: "sprite",
+    name,
+    src: s.src,
+    frames: s.frames,
+    frameSize: s.frameW,
+    frameW: s.frameW,
+    frameH: s.frameH,
+    scale: opts.scale ?? s.scale,
+    frameMs: s.frameMs,
+    bob: opts.bob ?? false,
+  };
+}
 
 /** Build a directional fighter group (feed/s2|s3|s4): walk + bow + spear in all
  *  four directions + death, all 64px @ 0.75 scale. Frame counts are [down, up,
@@ -202,15 +253,75 @@ const GROUPS: Group[] = [
     ],
   },
   {
-    // Single-frame flames — kept alive with a CSS flicker rather than frames.
-    label: "Fire",
+    // Capability Network forge smith (user-uploaded Smith_Tile pack, source
+    // kept outside the repo). One row (hammer strike + sparks) cropped out
+    // of the smith's action sheet.
+    label: "Forge",
+    large: true,
     assets: [
-      { kind: "image", name: "torch", src: "/sprites/fire/torch.png", w: 28, flicker: true },
-      { kind: "image", name: "camp fire", src: "/sprites/fire/camp_fire.png", w: 44, flicker: true },
-      { kind: "image", name: "fireball 1", src: "/sprites/fire/fireball_1.png", w: 48, flicker: true },
-      { kind: "image", name: "fireball 2", src: "/sprites/fire/fireball_2.png", w: 56, flicker: true },
-      { kind: "image", name: "fire blast", src: "/sprites/fire/fire_blast.png", w: 60, flicker: true },
-      { kind: "image", name: "explosive", src: "/sprites/fire/explosive_fire.png", w: 56, flicker: true },
+      fromSprite("forge smith (strike)", SPRITE_CONTROL.forgeSmith, { scale: 3 }),
+      { kind: "image", name: "forge anvil (hot)", src: SPRITE_CONTROL.forgeAnvilHot.src, w: SPRITE_CONTROL.forgeAnvilHot.w * SPRITE_CONTROL.forgeAnvilHot.scale },
+      { kind: "image", name: "forge anvil (cold)", src: SPRITE_CONTROL.forgeAnvilCold.src, w: SPRITE_CONTROL.forgeAnvilCold.w * SPRITE_CONTROL.forgeAnvilCold.scale },
+    ],
+  },
+  {
+    // "factory v.2" pack (user-uploaded, source kept outside the repo).
+    // Registered only — see lib/sprite-control.ts's `factory` block.
+    label: "Factory",
+    large: true,
+    assets: [
+      fromSprite("building 1 (idle)", SPRITE_CONTROL.factory.building1Idle),
+      { kind: "image", name: "building 2", src: SPRITE_CONTROL.factory.building2.src, w: SPRITE_CONTROL.factory.building2.w },
+      { kind: "image", name: "building 3", src: SPRITE_CONTROL.factory.building3.src, w: SPRITE_CONTROL.factory.building3.w },
+      // tank.png bakes in a 10-colour legend + a "current colour" gauge dot
+      // — TankColorPicker makes clicking a swatch actually set the gauge.
+      { kind: "node", name: "liquid tank", node: <TankColorPicker /> },
+      // One combined thumbnail instead of four static ones per furnace —
+      // cycles opening → on → working/idle → off → repeat, 3s per phase.
+      { kind: "node", name: "basic furnace", node: <BasicFurnaceCycle /> },
+      { kind: "node", name: "advanced furnace", node: <AdvancedFurnaceCycle /> },
+      // One combined thumbnail instead of three static ones — cycles
+      // opening → idle → closing → repeat, 3s per phase (ReactorCycle).
+      { kind: "node", name: "reactor", node: <ReactorCycle /> },
+    ],
+  },
+  {
+    // "extract/" transporter pack (user-uploaded, source kept outside the
+    // repo). Left/right rollers + repeated middle tile composed into one
+    // continuous belt — see lib/sprite-control.ts's `transporter` block.
+    label: "Transporter",
+    large: true,
+    wide: true,
+    assets: [{ kind: "node", name: "conveyor belt", node: <TransporterBelt /> }],
+  },
+  {
+    // "extract/" effects pack (user-uploaded, source kept outside the
+    // repo), replacing the old torch/campfire Fire group — see
+    // lib/sprite-control.ts's `effects` block for the conversion story.
+    label: "Effects",
+    large: true,
+    assets: [
+      fromSprite("circle explosion", SPRITE_CONTROL.effects.circleExplosion),
+      fromSprite("explosion", SPRITE_CONTROL.effects.explosion),
+      fromSprite("explosion (blue circle)", SPRITE_CONTROL.effects.explosionBlueCircle),
+      fromSprite("explosion (blue oval)", SPRITE_CONTROL.effects.explosionBlueOval),
+      fromSprite("explosion (gas)", SPRITE_CONTROL.effects.explosionGas),
+      fromSprite("explosion (gas circle)", SPRITE_CONTROL.effects.explosionGasCircle),
+      fromSprite("explosion (two colors)", SPRITE_CONTROL.effects.explosionTwoColors),
+      fromSprite("nuclear explosion", SPRITE_CONTROL.effects.nuclearExplosion),
+      fromSprite("fire", SPRITE_CONTROL.effects.fire),
+      fromSprite("smoke", SPRITE_CONTROL.effects.smoke),
+    ],
+  },
+  {
+    // Lightning bolt (beginning → cycle → end, LightningBolt) plus the
+    // independent ground-impact glow loop — both from the same "extract/"
+    // effects pack as the Effects group above.
+    label: "Lightning",
+    large: true,
+    assets: [
+      { kind: "node", name: "bolt", node: <LightningBolt /> },
+      fromSprite("impact spot", SPRITE_CONTROL.effects.lightningSpot),
     ],
   },
   {
@@ -300,10 +411,10 @@ const GROUPS: Group[] = [
   },
 ];
 
-function Thumb({ asset }: { asset: Asset }) {
+function Thumb({ asset, large }: { asset: Asset; large?: boolean }) {
   return (
     <div className="asset-gallery__thumb">
-      <div className="asset-gallery__thumb-frame">
+      <div className={cn("asset-gallery__thumb-frame", large && "asset-gallery__thumb-frame--lg")}>
         {asset.kind === "sprite" ? (
           <PixelSprite
             src={asset.src}
@@ -315,7 +426,7 @@ function Thumb({ asset }: { asset: Asset }) {
             frameMs={asset.frameMs}
             bob={asset.bob ?? true}
           />
-        ) : (
+        ) : asset.kind === "image" ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={asset.src}
@@ -323,10 +434,13 @@ function Thumb({ asset }: { asset: Asset }) {
             width={asset.w}
             className={cn(
               "asset-gallery__thumb-img",
+              large && "asset-gallery__thumb-img--lg",
               "pixelated",
               asset.flicker && "animate-sprite-flicker"
             )}
           />
+        ) : (
+          asset.node
         )}
       </div>
       <span className={cn("asset-gallery__thumb-label", "font-pixel-readable")}>{asset.name}</span>
@@ -375,9 +489,15 @@ export function AssetGallery() {
                 {GROUPS.map((group) => (
                   <div key={group.label} className="asset-gallery__group">
                     <p className={cn("asset-gallery__group-title", "font-pixel")}>{group.label}</p>
-                    <div className="asset-gallery__group-grid">
+                    <div
+                      className={cn(
+                        "asset-gallery__group-grid",
+                        group.large && "asset-gallery__group-grid--lg",
+                        group.wide && "asset-gallery__group-grid--wide"
+                      )}
+                    >
                       {group.assets.map((a) => (
-                        <Thumb key={a.name} asset={a} />
+                        <Thumb key={a.name} asset={a} large={group.large} />
                       ))}
                     </div>
                   </div>

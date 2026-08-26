@@ -386,13 +386,6 @@ export const SPRITE_CONTROL = {
     scale: 0.5,
   },
 
-  /** Animated flames — single-frame art (asset.png has no frame pairs), brought
-   *  to life on-site with a CSS flicker rather than frame-stepping. */
-  fire: {
-    dir: "/sprites/fire",
-    scale: 0.6,
-    list: ["torch", "camp_fire", "fireball_1", "fireball_2", "fire_blast", "explosive_fire"],
-  },
 
   /** Dynamic aim reticle — a 5-frame strip (feed/cursor.png) that expands from a
    *  wide crosshair to a locked target. Catalogued in the Asset Gallery. */
@@ -437,6 +430,333 @@ export const SPRITE_CONTROL = {
     close: { src: "/sprites/book/close_book.png", cols: 4, cellW: 272, cellH: 272, frameCount: 12 },
     turnLeft: { src: "/sprites/book/turning_pages_left.png", cols: 4, cellW: 272, cellH: 272, frameCount: 15 },
     turnRight: { src: "/sprites/book/turning_pages_right.png", cols: 4, cellW: 272, cellH: 272, frameCount: 15 },
+  },
+
+  /** Capability Network forge smith, from the user-uploaded Smith_Tile
+   *  Aseprite pack (source kept outside the repo — see .gitignore). One row
+   *  (hammer strike + sparks) cropped out of the smith's 4-row action sheet
+   *  into its own single-row strip — the only shape PixelSprite reads. */
+  // Cropped tight to the character's actual pixels (union bbox across all 8
+  // frames, 64x64 source → 33x42) — the raw export had a lot of transparent
+  // margin, which read as "small" even at a big `scale` since most of the
+  // box was empty. frameW/frameH (not frameSize) since it's no longer square.
+  forgeSmith: {
+    src: "/sprites/forge/smith_strike.png",
+    frames: 8,
+    frameW: 33,
+    frameH: 42,
+    scale: 14,
+    frameMs: 130,
+  },
+
+  /** Forge anvils — two distinct user-uploaded loose PNGs (anvil1.png/
+   *  anvil2.png, source kept outside the repo, deleted after these were
+   *  built), NOT two frames of one animated anvil (an earlier pass wrongly
+   *  merged them into a 2-frame strip — they're separate assets). Both were
+   *  1536x1024 with a soft radial glow that made a plain alpha bbox nearly
+   *  the full canvas — cropped to a threshold (alpha > 150) bbox instead:
+   *  (105,111)-(1403,951) for anvil1 (orange glow), same box reused for
+   *  anvil2 (blue glow) since its own bbox was a near-identical subset. */
+  forgeAnvilHot: {
+    src: "/sprites/forge/anvil_hot.png",
+    w: 1298,
+    h: 840,
+    scale: 0.12,
+  },
+  forgeAnvilCold: {
+    src: "/sprites/forge/anvil_cold.png",
+    w: 1298,
+    h: 840,
+    scale: 0.12,
+  },
+
+  /** "factory v.2" pack (user-uploaded, source kept outside the repo — see
+   *  .gitignore): buildings, furnaces, and a battery/reactor power station.
+   *  Registered only — nothing on the site consumes these yet. Each
+   *  animated object's combined "all animations" sheet was dropped in favor
+   *  of its named sub-animations (opening/closing/on/off/idle/working),
+   *  same call made for forgeSmith above. `scale: 1` is a neutral default
+   *  for whichever component ends up rendering these. */
+  factory: {
+    building1Idle: {
+      src: "/sprites/factory/building_1_idle.png",
+      frames: 4,
+      frameW: 92,
+      frameH: 124,
+      scale: 1,
+      frameMs: 150,
+    },
+    building2: { src: "/sprites/factory/building_2.png", w: 166, h: 155 },
+    building3: { src: "/sprites/factory/building_3.png", w: 76, h: 125 },
+    tank: { src: "/sprites/factory/tank.png", w: 70, h: 76 },
+    // Both furnaces are driven as one cycle by
+    // components/ui/furnace-cycle.tsx (opening → on → working/idle → off →
+    // repeat), same pattern as the reactor below. One-shot phases
+    // (opening/on/off) get frameMs so (frames-1) * frameMs ≈ 3000ms —
+    // PixelSprite's "once" mode shows frame 0 immediately then fires onDone
+    // after (frames-1) steps, not `frames` steps — so each play-through
+    // takes ~3s; the held loop phase (working/idle) keeps its own ambient
+    // pace and is just held for furnace*CycleHoldMs (3s) between phases.
+    furnaceBasicOpening: {
+      src: "/sprites/factory/furnace_basic_opening.png",
+      frames: 6,
+      frameW: 64,
+      frameH: 64,
+      scale: 1,
+      frameMs: 600, // 5 * 600 = 3000ms
+    },
+    furnaceBasicTurningOff: {
+      src: "/sprites/factory/furnace_basic_turning_off.png",
+      frames: 5,
+      frameW: 64,
+      frameH: 64,
+      scale: 1,
+      frameMs: 750, // 4 * 750 = 3000ms
+    },
+    furnaceBasicTurningOn: {
+      src: "/sprites/factory/furnace_basic_turning_on.png",
+      frames: 5,
+      frameW: 64,
+      frameH: 64,
+      scale: 1,
+      frameMs: 750, // 4 * 750 = 3000ms
+    },
+    furnaceBasicWorking: {
+      src: "/sprites/factory/furnace_basic_working.png",
+      frames: 8,
+      frameW: 64,
+      frameH: 64,
+      scale: 1,
+      frameMs: 130,
+    },
+    furnaceBasicCycleHoldMs: 3000,
+    furnaceAdvancedIdle: {
+      src: "/sprites/factory/furnace_advanced_idle.png",
+      frames: 8,
+      frameW: 64,
+      frameH: 124,
+      scale: 1,
+      frameMs: 130,
+    },
+    furnaceAdvancedOff: {
+      src: "/sprites/factory/furnace_advanced_off.png",
+      frames: 5,
+      frameW: 64,
+      frameH: 124,
+      scale: 1,
+      frameMs: 750, // 4 * 750 = 3000ms
+    },
+    furnaceAdvancedOn: {
+      src: "/sprites/factory/furnace_advanced_on.png",
+      frames: 5,
+      frameW: 64,
+      frameH: 124,
+      scale: 1,
+      frameMs: 750, // 4 * 750 = 3000ms
+    },
+    furnaceAdvancedOpening: {
+      src: "/sprites/factory/furnace_advanced_opening.png",
+      frames: 8,
+      frameW: 64,
+      frameH: 124,
+      scale: 1,
+      frameMs: 429, // 7 * 429 ≈ 3000ms
+    },
+    furnaceAdvancedCycleHoldMs: 3000,
+    // The three reactor strips are driven as one cycle by
+    // components/ui/reactor-cycle.tsx (opening → idle → closing → repeat),
+    // each phase held for reactorCycleHoldMs (3s). opening/closing are
+    // one-shots, so their frameMs is set so (frames-1) * frameMs ≈ 3000ms —
+    // PixelSprite's "once" mode shows frame 0 immediately then fires onDone
+    // after (frames-1) steps, not `frames` steps. idle is a loop and just
+    // keeps its own ambient pace for the 3s hold.
+    reactorOpening: {
+      src: "/sprites/factory/reactor_opening.png",
+      frames: 14,
+      frameW: 92,
+      frameH: 92,
+      scale: 1,
+      frameMs: 231, // 13 * 231 ≈ 3000ms
+    },
+    reactorClosing: {
+      src: "/sprites/factory/reactor_closing.png",
+      frames: 17,
+      frameW: 92,
+      frameH: 92,
+      scale: 1,
+      frameMs: 188, // 16 * 188 ≈ 3000ms
+    },
+    reactorIdle: {
+      src: "/sprites/factory/reactor_idle.png",
+      frames: 10,
+      frameW: 92,
+      frameH: 92,
+      scale: 1,
+      frameMs: 150,
+    },
+    reactorCycleHoldMs: 3000,
+  },
+
+  /** "extract/" transporter pack (user-uploaded, source kept outside the
+   *  repo — see .gitignore): a modular conveyor belt. `left`/`right` are
+   *  the roller end-caps — each already a clean 4-frame horizontal strip
+   *  (32px tiles) of the roller spinning through 4 rotation shapes, so they
+   *  use PixelSprite's existing "loop" mode directly, no phased cycle
+   *  needed. components/ui/transporter-belt.tsx places them directly
+   *  against each other with no middle segment — a real conveyor's top and
+   *  bottom surfaces move opposite directions, which a flat scrolling
+   *  middle tile can't represent, so every attempt at animating one (linear
+   *  scroll, stepped scroll) read as wrong. `mid` (the belt surface — its
+   *  source file repeated the same 32x32 tile 4x with zero pixel
+   *  difference, diffed via PIL, so only one tile was kept) stays
+   *  registered but unused, cheap to reuse later if a real top/bottom-aware
+   *  treatment gets built. */
+  transporter: {
+    left: {
+      src: "/sprites/transporter/left.png",
+      frames: 4,
+      frameSize: 32,
+      scale: 2,
+      frameMs: 150,
+    },
+    right: {
+      src: "/sprites/transporter/right.png",
+      frames: 4,
+      frameSize: 32,
+      scale: 2,
+      frameMs: 150,
+    },
+    mid: { src: "/sprites/transporter/mid.png", w: 32, h: 32 },
+  },
+
+  /** "extract/" effects pack (user-uploaded, source kept outside the repo —
+   *  see .gitignore), replacing the old torch/campfire/fireball `fire`
+   *  registry entry. Unlike every pack before it, the source wasn't
+   *  pre-built sprite-sheet strips — each animation was a set of separate
+   *  numbered PNGs (Explosion1.png … Explosion10.png), concatenated into
+   *  single horizontal strips via PIL before registering here (see
+   *  public/sprites/effects/). Explosions/nuclear are 256x256 art, scaled
+   *  way down (0.3) for gallery display; fire/smoke are 128x128 (0.4);
+   *  lightning strips are 64x193 (bolt) / 64x64 (spot), scaled to 0.5 so
+   *  the tall bolt art fits the gallery's "large" box height. The lightning
+   *  beginning/cycle/end trio is driven as one cycle by
+   *  components/ui/lightning-bolt.tsx (same SpriteCycle machinery as the
+   *  reactor/furnaces); `spot` is a separate, independent ambient loop, not
+   *  part of that cycle. */
+  effects: {
+    circleExplosion: {
+      src: "/sprites/effects/circle_explosion.png",
+      frames: 10,
+      frameW: 256,
+      frameH: 256,
+      scale: 0.3,
+      frameMs: 70,
+    },
+    explosion: {
+      src: "/sprites/effects/explosion.png",
+      frames: 10,
+      frameW: 256,
+      frameH: 256,
+      scale: 0.3,
+      frameMs: 70,
+    },
+    explosionBlueCircle: {
+      src: "/sprites/effects/explosion_blue_circle.png",
+      frames: 10,
+      frameW: 256,
+      frameH: 256,
+      scale: 0.3,
+      frameMs: 70,
+    },
+    explosionBlueOval: {
+      src: "/sprites/effects/explosion_blue_oval.png",
+      frames: 10,
+      frameW: 256,
+      frameH: 256,
+      scale: 0.3,
+      frameMs: 70,
+    },
+    explosionGas: {
+      src: "/sprites/effects/explosion_gas.png",
+      frames: 10,
+      frameW: 256,
+      frameH: 256,
+      scale: 0.3,
+      frameMs: 70,
+    },
+    explosionGasCircle: {
+      src: "/sprites/effects/explosion_gas_circle.png",
+      frames: 10,
+      frameW: 256,
+      frameH: 256,
+      scale: 0.3,
+      frameMs: 70,
+    },
+    explosionTwoColors: {
+      src: "/sprites/effects/explosion_two_colors.png",
+      frames: 10,
+      frameW: 256,
+      frameH: 256,
+      scale: 0.3,
+      frameMs: 70,
+    },
+    nuclearExplosion: {
+      src: "/sprites/effects/nuclear_explosion.png",
+      frames: 10,
+      frameW: 256,
+      frameH: 256,
+      scale: 0.3,
+      frameMs: 70,
+    },
+    fire: {
+      src: "/sprites/effects/fire.png",
+      frames: 6,
+      frameW: 128,
+      frameH: 128,
+      scale: 0.4,
+      frameMs: 120,
+    },
+    smoke: {
+      src: "/sprites/effects/smoke.png",
+      frames: 6,
+      frameW: 128,
+      frameH: 128,
+      scale: 0.4,
+      frameMs: 150,
+    },
+    lightningBeginning: {
+      src: "/sprites/effects/lightning_beginning.png",
+      frames: 5,
+      frameW: 64,
+      frameH: 193,
+      scale: 0.5,
+      frameMs: 90,
+    },
+    lightningCycle: {
+      src: "/sprites/effects/lightning_cycle.png",
+      frames: 6,
+      frameW: 64,
+      frameH: 193,
+      scale: 0.5,
+      frameMs: 80,
+    },
+    lightningEnd: {
+      src: "/sprites/effects/lightning_end.png",
+      frames: 3,
+      frameW: 64,
+      frameH: 193,
+      scale: 0.5,
+      frameMs: 100,
+    },
+    lightningCycleHoldMs: 600,
+    lightningSpot: {
+      src: "/sprites/effects/lightning_spot.png",
+      frames: 4,
+      frameW: 64,
+      frameH: 64,
+      scale: 0.5,
+      frameMs: 150,
+    },
   },
 
 } as const;

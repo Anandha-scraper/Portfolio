@@ -1,57 +1,10 @@
-# Dependencies
+.claude
+.next
 node_modules/
-
-# Agents (local machine config — never committed/deployed)
-.claude/
-.codex/
-CLAUDE.md
-prompt.md
-
-# Next.js
-.next/
-out/
-
-# Production
-build/
-dist/
-
-# TypeScript
-*.tsbuildinfo
 next-env.d.ts
+tsconfig.tsbuildinfo
+CLAUDE.md
 
-# Raw asset-extraction source (feed/*.aseprite, feed/extract_*.py) — never
-# committed/deployed; processed output lives under public/sprites/
-feed/
-
-# Environment
-.env
-.env.local
-.env.*.local
-review-ss/
-
-# Deployment
-.vercel/
-.firebase/
-firebase-debug.log*
-firestore-debug.log*
-ui-debug.log*
-
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-pnpm-debug.log*
-next-debug.log*
-
-# Caches / tooling
-.eslintcache
-.turbo/
-.cache/
-
-# OS and editor files
-.DS_Store
-Thumbs.db
-*.swp
-*.swo
-.idea/
-.vscode/
+# Raw uploaded asset pack (reused as a staging dir across uploads); processed
+# output lives under public/sprites/<name>/
+extract/

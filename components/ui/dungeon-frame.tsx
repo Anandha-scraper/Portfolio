@@ -14,6 +14,12 @@ import { cn } from "@/lib/utils";
 export interface DungeonFrameProps {
   /** Wall thickness in px (the nine-slice border width). Default 28. */
   wall?: number;
+  /** Tile the floor tile across the centre (border-image-slice's `fill`
+   *  keyword). Default true. `fill` paints over any CSS background on this
+   *  element regardless of z-index, so set false to keep just the wall
+   *  border and let the interior stay transparent/whatever `background` is
+   *  set to instead. */
+  fill?: boolean;
   className?: string;
   style?: CSSProperties;
   children?: ReactNode;
@@ -21,6 +27,7 @@ export interface DungeonFrameProps {
 
 export function DungeonFrame({
   wall = 28,
+  fill = true,
   className,
   style,
   children,
@@ -32,7 +39,7 @@ export function DungeonFrame({
         borderStyle: "solid",
         borderWidth: wall,
         borderImageSource: "url(/sprites/dungeon/wall_9slice.png)",
-        borderImageSlice: "16 fill",
+        borderImageSlice: fill ? "16 fill" : "16",
         borderImageRepeat: "repeat",
         borderImageWidth: `${wall}px`,
         imageRendering: "pixelated",
