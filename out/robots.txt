@@ -1,0 +1,5 @@
+User-Agent: *
+Allow: /
+Disallow: /master
+
+Sitemap: https://anandhakumaran.dev/sitemap.xml

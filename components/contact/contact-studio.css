@@ -4,7 +4,12 @@
    for why). */
 
 .contact-studio__shell {
-  min-height: 100vh;
+  /* `dvh`, not `vh` — matches mission-control/layout/loading/not-found.
+     `vh` resolves to the *largest* possible mobile viewport (address bar
+     hidden), so on first paint (address bar still showing) this section
+     measured taller than the real visible area and pushed the footer below
+     the fold until the bar collapsed on scroll. */
+  min-height: 100dvh;
   scroll-margin-top: 0;
   padding-bottom: 2.5rem;
 }

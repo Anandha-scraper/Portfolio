@@ -33,6 +33,7 @@ import "@/components/companion/skeleton-companion.css";
 import "@/components/ui/asset-gallery.css";
 import "@/components/ui/boot-loader.css";
 import "@/components/ui/dungeon-frame.css";
+import "@/components/ui/image-lightbox.css";
 import "@/components/ui/morphing-text.css";
 import "@/components/ui/particles.css";
 import "./loading.css";

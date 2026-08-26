@@ -5,6 +5,3 @@ next-env.d.ts
 tsconfig.tsbuildinfo
 CLAUDE.md
 
-# Raw uploaded asset pack (reused as a staging dir across uploads); processed
-# output lives under public/sprites/<name>/
-extract/

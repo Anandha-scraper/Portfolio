@@ -54,6 +54,10 @@
   background-color: var(--color-ops-base);
 }
 
+.project-plate__screen--tappable {
+  cursor: zoom-in;
+}
+
 .project-plate__img {
   display: block;
   width: 100%;

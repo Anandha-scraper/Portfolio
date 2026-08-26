@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import { DungeonFrame } from "@/components/ui/dungeon-frame";
+import { ImageLightbox } from "@/components/ui/image-lightbox";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { ACCENTS } from "@/lib/accents";
 import { cn } from "@/lib/utils";
 import type { Project } from "@/types";
@@ -46,6 +48,11 @@ export function ProjectPlate({ project }: { project: Project }) {
   const [active, setActive] = useState(0);
   const [ratio, setRatio] = useState(DEFAULT_RATIO);
   const [held, setHeld] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  // Full-screen tap-to-view is a phone affordance — on desktop the plate is
+  // already comfortably large, and clicking it would just shadow the name
+  // button's own "next screenshot" behaviour.
+  const isMobile = useMediaQuery("(max-width: 48rem)");
 
   const count = images.length;
   const multiple = count > 1;
@@ -93,7 +100,10 @@ export function ProjectPlate({ project }: { project: Project }) {
       }
     >
       <DungeonFrame wall={16} className="project-plate__frame">
-        <div className="project-plate__screen">
+        <div
+          className={cn("project-plate__screen", isMobile && "project-plate__screen--tappable")}
+          onClick={isMobile ? () => setLightboxOpen(true) : undefined}
+        >
           {/* Raw <img>, not next/image: the static export sets
               images.unoptimized so next/image adds nothing, and this needs the
               natural dimensions off the load event anyway. */}
@@ -113,6 +123,13 @@ export function ProjectPlate({ project }: { project: Project }) {
           />
         </div>
       </DungeonFrame>
+
+      <ImageLightbox
+        src={current}
+        alt={`${project.name} screenshot ${active + 1} of ${count}`}
+        open={isMobile && lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+      />
 
       <figcaption className="project-plate__placard">
         {/* The name plate doubles as the "next screenshot" control when there

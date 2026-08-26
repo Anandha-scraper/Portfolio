@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { DungeonFrame } from "@/components/ui/dungeon-frame";
 import { PixelSprite } from "@/components/ui/pixel-sprite";
 import { TransporterBelt } from "@/components/ui/transporter-belt";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { SPRITE_CONTROL } from "@/lib/sprite-control";
 import { cn } from "@/lib/utils";
 
@@ -29,12 +30,20 @@ const SMITH_SCALE = 5.4;
 const ANVIL_SCALE = 0.075;
 const BUILDINGS_SCALE = 0.65;
 
+// Below this width the forge (smith + anvil) is scaled down together —
+// PixelSprite sizes itself from real `scale`, not CSS, so a `useMediaQuery`
+// breakpoint swap is the equivalent of a media query here (see the note
+// above: a CSS `transform` wouldn't shrink the sprite's actual layout box).
+const MOBILE_FORGE_SCALE = 0.62;
+
 export function CapabilityNetwork() {
   const sectionRef = useRef<HTMLElement>(null);
 
   // The forge spans full width; it only yields room when the chest sidebar
   // is open — same wiring as ProjectEcosystem.
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 30rem)");
+  const forgeScale = isMobile ? MOBILE_FORGE_SCALE : 1;
   useEffect(() => {
     const onOpen = () => setSidebarOpen(true);
     const onClose = () => setSidebarOpen(false);
@@ -68,7 +77,7 @@ export function CapabilityNetwork() {
                 frames={SMITH.frames}
                 frameW={SMITH.frameW}
                 frameH={SMITH.frameH}
-                scale={SMITH_SCALE}
+                scale={SMITH_SCALE * forgeScale}
                 frameMs={SMITH.frameMs}
                 mode="loop"
                 bob={false}
@@ -79,8 +88,8 @@ export function CapabilityNetwork() {
               <img
                 src={ANVIL.src}
                 alt="forge anvil"
-                width={ANVIL.w * ANVIL_SCALE}
-                height={ANVIL.h * ANVIL_SCALE}
+                width={ANVIL.w * ANVIL_SCALE * forgeScale}
+                height={ANVIL.h * ANVIL_SCALE * forgeScale}
                 className="pixelated capability-network__anvil"
               />
               {/* "Hammer strike" sparks — a slow, independent loop, not
@@ -96,7 +105,7 @@ export function CapabilityNetwork() {
                 frames={SPARKS.frames}
                 frameW={SPARKS.frameW}
                 frameH={SPARKS.frameH}
-                scale={0.18}
+                scale={0.18 * forgeScale}
                 frameMs={120}
                 mode="loop"
                 bob={false}
