@@ -1,7 +1,7 @@
 import type { NavItem, SectionId } from "@/types";
 
 /** Canonical production URL — shared by layout metadata, robots.ts, and sitemap.ts. */
-export const SITE_URL = "https://anandhakumaran.dev";
+export const SITE_URL = "https://anandha.codes";
 
 /** GA4 Measurement ID — shared by layout.tsx (loader) and lib/analytics.ts (events). */
 export const GA_MEASUREMENT_ID = "G-2S0R6MWXHP";
