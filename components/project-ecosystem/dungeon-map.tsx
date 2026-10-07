@@ -218,8 +218,16 @@ export function DungeonMap() {
 
     const active = () => hovered.current || focused.current;
 
+    const isEditableTarget = (target: EventTarget | null) =>
+      target instanceof HTMLElement &&
+      (target.isContentEditable ||
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.tagName === "SELECT");
+
     const onKeyDown = (e: KeyboardEvent) => {
       if (!walkingRef.current) return;
+      if (isEditableTarget(e.target)) return;
       if (e.key === "Shift") {
         running.current = true;
         return;

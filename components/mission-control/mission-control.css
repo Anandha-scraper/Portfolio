@@ -69,6 +69,7 @@
 .mission-control__context {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 /* Unboxed - sits directly on the section's background (no DungeonFrame
@@ -98,12 +99,16 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .mission-control__name-word {
   white-space: nowrap;
   color: var(--color-ops-sand);
+  overflow-wrap: anywhere;
 }
+
+@media (max-width: 23rem) { .mission-control__name-row { flex-wrap: wrap; } .mission-control__patrol-track { flex-basis: 100%; } }
 
 .mission-control__patrol-track {
   height: 2.75rem;

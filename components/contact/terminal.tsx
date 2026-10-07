@@ -58,6 +58,9 @@ export function Terminal() {
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // The dungeon also listens for keyboard controls at window scope. Keep
+    // terminal editing local so Enter/arrows never trigger a map interaction.
+    e.stopPropagation();
     if (e.key === "Enter") submit(value);
     else if (e.key === "ArrowUp") {
       e.preventDefault();
