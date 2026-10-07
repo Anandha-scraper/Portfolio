@@ -1,10 +1,8 @@
 "use client";
 
-<<<<<<< HEAD
 import { useEffect, useState } from "react";
-=======
->>>>>>> origin/main
 import { DungeonFrame } from "@/components/ui/dungeon-frame";
+import { cn } from "@/lib/utils";
 
 /**
  * Capabilities stays intentionally empty while the next scene is being
@@ -30,17 +28,12 @@ export function CapabilityNetwork() {
   }, []);
 
   return (
-<<<<<<< HEAD
     <section id="capabilities" className={cn("capability-network__section", "ops", "ops-scanlines")}>
       <DungeonFrame
         wall={24}
         fill={false}
         className={cn("capability-network__stage", sidebarOpen && "capability-network__stage--sidebar-open")}
       />
-=======
-    <section id="capabilities" className="capability-network__section ops ops-scanlines">
-      <DungeonFrame wall={24} fill={false} className="capability-network__stage" />
->>>>>>> origin/main
     </section>
   );
 }
