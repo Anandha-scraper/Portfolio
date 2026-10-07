@@ -39,7 +39,6 @@ import "@/components/ui/particles.css";
 import "./loading.css";
 import "./not-found.css";
 import "./page.css";
-import "./master/master-console.css";
 const pixelify = Pixelify_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],

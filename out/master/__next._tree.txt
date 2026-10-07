@@ -1,3 +1,0 @@
-:HL["/_next/static/chunks/3k5pqgw7aw34-.css","style"]
-:HC["/",""]
-0:{"tree":{"name":"","param":null,"prefetchHints":20,"slots":{"children":{"name":"master","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}},"staleTime":300,"buildId":"-rb30vtwNyuVLBtZ8Mglp"}

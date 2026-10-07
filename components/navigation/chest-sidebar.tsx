@@ -41,11 +41,18 @@ export function ChestSidebar() {
   const chestRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
 
+  const close = (restoreFocus = false) => {
+    setOpen(false);
+    if (restoreFocus) {
+      requestAnimationFrame(() => chestRef.current?.focus());
+    }
+  };
+
   // Open/close imperatively (e.g. the idle companion opens; the Capabilities idle
   // timer closes).
   useEffect(() => {
     const onOpen = () => setOpen(true);
-    const onClose = () => setOpen(false);
+    const onClose = () => close();
     window.addEventListener(OPEN_EVENT, onOpen);
     window.addEventListener(CLOSE_EVENT, onClose);
     return () => {
@@ -60,11 +67,23 @@ export function ChestSidebar() {
     window.dispatchEvent(new Event(open ? "chest-sidebar-open" : "chest-sidebar-close"));
   }, [open]);
 
-  useClickOutside(open, [chestRef, panelRef], () => setOpen(false));
+  useClickOutside(open, [chestRef, panelRef], () => close(true));
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") close(true);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    panelRef.current?.querySelector<HTMLButtonElement>(".chest-sidebar__nav-item")?.focus();
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open]);
 
   const go = (id: (typeof NAV_ITEMS)[number]["id"]) => {
     scrollToSection(id);
-    setOpen(false);
+    close();
   };
 
   const chest = SPRITE_CONTROL.chest;
