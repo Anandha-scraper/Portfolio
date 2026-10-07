@@ -105,7 +105,10 @@
 .mission-control__name-word {
   white-space: nowrap;
   color: var(--color-ops-sand);
+  overflow-wrap: anywhere;
 }
+
+@media (max-width: 23rem) { .mission-control__name-row { flex-wrap: wrap; } .mission-control__patrol-track { flex-basis: 100%; } }
 
 .mission-control__patrol-track {
   height: 2.75rem;

@@ -25,6 +25,7 @@ export type CyclePhase =
       frameH: number;
       frameMs: number;
       scale?: number;
+      flip?: boolean;
     }
   | {
       mode: "hold";
@@ -34,6 +35,7 @@ export type CyclePhase =
       frameH: number;
       frameMs: number;
       scale?: number;
+      flip?: boolean;
       holdMs: number;
     };
 
@@ -51,6 +53,7 @@ export function SpriteCycle({ phases }: { phases: CyclePhase[] }) {
         frameW={phase.frameW}
         frameH={phase.frameH}
         scale={phase.scale ?? 1}
+        flip={phase.flip}
         frameMs={phase.frameMs}
         mode="once"
         playOnMount
@@ -81,6 +84,7 @@ function HoldPhase({
       frameW={phase.frameW}
       frameH={phase.frameH}
       scale={phase.scale ?? 1}
+      flip={phase.flip}
       frameMs={phase.frameMs}
       mode="loop"
       bob={false}
