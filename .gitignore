@@ -5,6 +5,6 @@ next-env.d.ts
 tsconfig.tsbuildinfo
 CLAUDE.md
 out
-AGENTS.md
-.playwright-cli/
 .firebase/
+.playwright-cli/
+AGENTS.md

@@ -1,21 +1,23 @@
+<<<<<<< HEAD
 /* capability-network.tsx — the intentionally empty framed stage. Imported
    once from app/layout.tsx. */
 
+=======
+/* Public placeholder for the next authored capability scene. */
+>>>>>>> origin/main
 .capability-network__section {
   position: relative;
   width: 100%;
   overflow: hidden;
   scroll-margin-top: 6rem;
 }
-
 .capability-network__stage {
   width: 100%;
-  /* Phones get a frame sized closer to the line than to the viewport; the
-     mobile layout's own world is a short, wide box, so a viewport-tall frame
-     would strand it in mostly-empty space. */
+  min-height: 260px;
   height: max(260px, 42vh);
   overflow: hidden;
   padding: clamp(1rem, 3vw, 1.75rem) clamp(0.75rem, 3vw, 1.5rem);
+<<<<<<< HEAD
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -35,4 +37,6 @@
     margin-left: 290px;
     width: calc(100% - 290px);
   }
+=======
+>>>>>>> origin/main
 }

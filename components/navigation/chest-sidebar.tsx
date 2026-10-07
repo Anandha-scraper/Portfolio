@@ -43,7 +43,9 @@ export function ChestSidebar() {
 
   const close = (restoreFocus = false) => {
     setOpen(false);
-    if (restoreFocus) requestAnimationFrame(() => chestRef.current?.focus());
+    if (restoreFocus) {
+      requestAnimationFrame(() => chestRef.current?.focus());
+    }
   };
 
   // Open/close imperatively (e.g. the idle companion opens; the Capabilities idle
@@ -69,9 +71,11 @@ export function ChestSidebar() {
 
   useEffect(() => {
     if (!open) return;
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") close(true);
     };
+
     window.addEventListener("keydown", onKeyDown);
     panelRef.current?.querySelector<HTMLButtonElement>(".chest-sidebar__nav-item")?.focus();
     return () => window.removeEventListener("keydown", onKeyDown);

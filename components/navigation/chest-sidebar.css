@@ -162,4 +162,7 @@
 
 .chest-sidebar__toggle:focus-visible,
 .chest-sidebar__nav-item:focus-visible,
-.chest-sidebar__social-link:focus-visible { outline: 2px solid var(--color-ops-rust); outline-offset: 2px; }
+.chest-sidebar__social-link:focus-visible {
+  outline: 2px solid var(--color-ops-rust);
+  outline-offset: 2px;
+}

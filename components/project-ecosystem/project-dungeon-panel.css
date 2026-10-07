@@ -33,7 +33,6 @@
   container-type: inline-size;
   container-name: dungeon-panel;
 }
-
 .dungeon-panel__page {
   display: flex;
   min-height: 100%;

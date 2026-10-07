@@ -137,6 +137,17 @@
   font-size: 1.5rem;
   line-height: 1.375;
   color: var(--color-ops-sand);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 23rem) {
+  .mission-control__name-row {
+    flex-wrap: wrap;
+  }
+
+  .mission-control__patrol-track {
+    flex-basis: 100%;
+  }
 }
 
 .mission-control__space-card {
