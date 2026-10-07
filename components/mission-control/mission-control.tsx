@@ -103,6 +103,7 @@ export function MissionControl() {
               <Reveal delay={0.18}>
                 <p className={cn("mission-control__tagline", "font-pixel-readable")}>{profile.tagline}</p>
               </Reveal>
+
             </div>
           </div>
         </div>

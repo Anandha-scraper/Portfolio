@@ -20,13 +20,10 @@
    never matched and it was stuck on the narrow-tier padding at every width.
    The root has the same content width, so master.css's breakpoints are
    unaffected by the move. */
-/* This solid fill is what hides the always-mounted Playground map layer
+/* This opaque fill hides the always-mounted Playground map layer
    (.dungeon-map__map-layer in dungeon-map.tsx — background image, tile
    canvas, hero, treasures never unmount) while the slideshow/book view is
-   showing. Same hex as the page's own background (--color-canvas), so it
-   reads as seamless/transparent against the rest of the page rather than a
-   visible box — but it has to stay opaque, or the map bleeds through
-   behind the book. */
+   showing, so the map never bleeds through behind the book. */
 .dungeon-panel__root {
   position: absolute;
   inset: 0;

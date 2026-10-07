@@ -8,6 +8,8 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(__dirname),
   },
+  // Allow local browser tooling to connect to the Next.js HMR endpoint.
+  allowedDevOrigins: ["localhost", "127.0.0.1"],
   // Emit a fully static site to ./out for Firebase Hosting (no Node server).
   output: "export",
   // The static export has no Image Optimization server, so serve images as-is.

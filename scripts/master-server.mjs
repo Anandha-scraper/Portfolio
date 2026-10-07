@@ -3,11 +3,11 @@
  *
  * The site is a static export with no backend, so the console can't save
  * through a Next API route. Instead this tiny dependency-free server runs
- * beside `next dev` (`npm run master`) and writes ONLY the two whitelisted
- * data files. Bound to 127.0.0.1 — never expose it.
+ * beside `next dev` (`npm run master`) and writes ONLY the whitelisted data
+ * files in FILES below. Bound to 127.0.0.1 — never expose it.
  *
  *   GET  /health → { ok: true }
- *   POST /save   → body { file: "skills" | "projects", content: <array> }
+ *   POST /save   → body { file: "skills" | "projects" | "scene", content: … }
  *
  * The deployed site still renders /master, but every fetch to this server
  * fails there, so the page just shows its "dev only" banner.
@@ -20,8 +20,10 @@ import { fileURLToPath } from "node:url";
 import {
   serializeSkills,
   serializeProjects,
+  serializeScene,
   validateSkills,
   validateProjects,
+  validateScene,
 } from "./master-serializers.mjs";
 
 const PORT = 4321;
@@ -37,6 +39,11 @@ const FILES = {
     path: path.join(ROOT, "data", "projects.ts"),
     validate: validateProjects,
     serialize: serializeProjects,
+  },
+  scene: {
+    path: path.join(ROOT, "data", "scene-capabilities.ts"),
+    validate: validateScene,
+    serialize: serializeScene,
   },
 };
 
@@ -82,18 +89,20 @@ const server = http.createServer(async (req, res) => {
     req.on("end", async () => {
       try {
         const { file, content } = JSON.parse(raw);
-        const target = FILES[file];
-        if (!target) {
+        // hasOwn, not a bare index: "__proto__"/"constructor" would otherwise
+        // resolve to a truthy object and fall through to the 500 branch.
+        if (typeof file !== "string" || !Object.hasOwn(FILES, file)) {
           json(res, 400, { ok: false, error: `unknown file "${file}"` });
           return;
         }
+        const target = FILES[file];
         const invalid = target.validate(content);
         if (invalid) {
           json(res, 422, { ok: false, error: invalid });
           return;
         }
         await writeFile(target.path, target.serialize(content), "utf8");
-        console.log(`[master] wrote data/${file}.ts`);
+        console.log(`[master] wrote ${path.relative(ROOT, target.path)}`);
         json(res, 200, { ok: true });
       } catch (err) {
         json(res, 500, { ok: false, error: String(err) });

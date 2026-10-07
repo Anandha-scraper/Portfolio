@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { skillCategories } from "@/data/skills";
 import { projects } from "@/data/projects";
 import { parseProjectDraft, buildClaudePrompt } from "@/lib/master/parse-project";
+import { useSidecar } from "@/lib/master/use-sidecar";
 import { cn } from "@/lib/utils";
 import type { Project, SkillCategory } from "@/types";
 
@@ -16,14 +17,14 @@ import type { Project, SkillCategory } from "@/types";
  *              ready-made Claude Code prompt for the AI-assisted path
  *
  * Saving POSTs the whole array to the sidecar (scripts/master-server.mjs)
- * which rewrites the data file; `next dev` hot-reloads it back in.
+ * which rewrites the data file; `next dev` hot-reloads it back in. The
+ * sidecar client itself lives in lib/master/use-sidecar.ts, shared with the
+ * scene editor at /master/scene.
  */
-
-const SIDECAR = "http://127.0.0.1:4321";
 
 const ACCENT_OPTIONS = ["blue", "indigo", "violet", "coral", "emerald"] as const;
 const CATEGORY_OPTIONS = ["web3", "platform", "enterprise", "data"] as const;
-const STATUS_OPTIONS = ["shipped", "finalist", "internal", "live"] as const;
+const STATUS_OPTIONS = ["shipped", "finalist", "internal", "live", "in-progress"] as const;
 
 const inputCls = "master-console__input";
 const labelCls = cn("master-console__label", "font-pixel");
@@ -33,7 +34,7 @@ type Tab = "skills" | "projects" | "import";
 
 export function MasterConsole() {
   const [tab, setTab] = useState<Tab>("skills");
-  const [sidecarUp, setSidecarUp] = useState<boolean | null>(null);
+  const { sidecarUp, message, setMessage, save } = useSidecar();
   const [skills, setSkills] = useState<SkillCategory[]>(() =>
     JSON.parse(JSON.stringify(skillCategories)),
   );
@@ -41,40 +42,7 @@ export function MasterConsole() {
     JSON.parse(JSON.stringify(projects)),
   );
   const [editingId, setEditingId] = useState<string | null>(projects[0]?.id ?? null);
-  const [message, setMessage] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
   const [importText, setImportText] = useState("");
-
-  // sidecar health — drives the dev-only banner
-  useEffect(() => {
-    let alive = true;
-    const check = () =>
-      fetch(`${SIDECAR}/health`)
-        .then((r) => alive && setSidecarUp(r.ok))
-        .catch(() => alive && setSidecarUp(false));
-    check();
-    const t = window.setInterval(check, 8000);
-    return () => {
-      alive = false;
-      window.clearInterval(t);
-    };
-  }, []);
-
-  const save = useCallback(async (file: "skills" | "projects", content: unknown) => {
-    setMessage(null);
-    try {
-      const r = await fetch(`${SIDECAR}/save`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ file, content }),
-      });
-      const body = await r.json();
-      if (body.ok) setMessage({ kind: "ok", text: `Saved data/${file}.ts — dev server reloads it now.` });
-      else setMessage({ kind: "err", text: `Save rejected: ${body.error}` });
-    } catch {
-      setSidecarUp(false);
-      setMessage({ kind: "err", text: "Sidecar unreachable — run `npm run master` beside `npm run dev`." });
-    }
-  }, []);
 
   const editingProject = useMemo(
     () => projs.find((p) => p.id === editingId) ?? null,

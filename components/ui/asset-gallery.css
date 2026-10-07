@@ -16,6 +16,7 @@
   width: 100%;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   border-radius: 0.25rem;
   border: 1px solid var(--color-ops-line);
   background-color: #14110c99;

@@ -29,6 +29,18 @@ const PROJECTS_HEADER = `import type { Project } from "@/types";
  */
 `;
 
+const SCENE_HEADER = `import type { Scene } from "@/types";
+
+/**
+ * Capability Network scene placement. See the Scene* types in types/index.ts
+ * for what the fields mean and why coordinates are world-space.
+ *
+ * Maintained via the dev-only /master/scene editor (npm run master) — edits
+ * are serialized by scripts/master-serializers.mjs, which rewrites this whole
+ * file, so comments added here will not survive a save.
+ */
+`;
+
 export function serializeSkills(categories) {
   return (
     SKILLS_HEADER +
@@ -46,6 +58,71 @@ export function serializeProjects(projects) {
     `;\n\n` +
     `export const featuredProjects = projects.filter((p) => p.featured);\n`
   );
+}
+
+export function serializeScene(scene) {
+  return (
+    SCENE_HEADER +
+    `export const capabilityScene: Scene = ` +
+    JSON.stringify(scene, null, 2) +
+    `;\n`
+  );
+}
+
+/**
+ * Component names the scene data is allowed to reference. Mirrors
+ * SCENE_COMPONENTS in lib/scene.ts — the sidecar can't import the TS module,
+ * so this list has to be kept in step with it by hand. Anything not listed
+ * here is rejected rather than written, so a typo surfaces as a red banner
+ * instead of an item that silently vanishes from the scene.
+ */
+const SCENE_COMPONENT_NAMES = new Set([
+  "TransporterBelt",
+  "Turbine1Cycle",
+  "Turbine2Cycle",
+  "RamboCycle",
+  "LightningBolt",
+  "ReactorCycle",
+  "BasicFurnaceCycle",
+  "AdvancedFurnaceCycle",
+]);
+
+const LAYOUT_IDS = ["desktop", "mobile"];
+
+export function validateScene(scene) {
+  if (typeof scene !== "object" || scene === null) return "scene payload must be an object";
+  for (const layoutId of LAYOUT_IDS) {
+    const layout = scene[layoutId];
+    if (typeof layout !== "object" || layout === null) return `scene: missing "${layoutId}" layout`;
+    const world = layout.world;
+    if (typeof world?.w !== "number" || typeof world?.h !== "number" || world.w <= 0 || world.h <= 0) {
+      return `${layoutId}: world must have positive w + h`;
+    }
+    if (!Array.isArray(layout.items)) return `${layoutId}: items must be an array`;
+
+    const ids = new Set();
+    for (const item of layout.items) {
+      if (typeof item?.id !== "string" || !item.id) return `${layoutId}: every item needs an id`;
+      if (ids.has(item.id)) return `${layoutId}: duplicate item id: ${item.id}`;
+      ids.add(item.id);
+      for (const key of ["x", "y", "z"]) {
+        if (!Number.isFinite(item[key])) return `${layoutId}/${item.id}: ${key} must be a finite number`;
+      }
+      if (!Number.isFinite(item.scale) || item.scale <= 0) {
+        return `${layoutId}/${item.id}: scale must be a positive number`;
+      }
+      if (item.kind === "sprite") {
+        if (typeof item.sprite !== "string" || !item.sprite) return `${layoutId}/${item.id}: needs a sprite path`;
+      } else if (item.kind === "component") {
+        if (!SCENE_COMPONENT_NAMES.has(item.component)) {
+          return `${layoutId}/${item.id}: unknown component "${item.component}"`;
+        }
+      } else {
+        return `${layoutId}/${item.id}: kind must be "sprite" or "component"`;
+      }
+    }
+  }
+  return null;
 }
 
 /** Minimal shape validation so a buggy client can't clobber a data file. */

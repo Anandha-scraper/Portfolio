@@ -478,7 +478,9 @@ export const SPRITE_CONTROL = {
    *  same call made for forgeSmith above. `scale: 1` is a neutral default
    *  for whichever component ends up rendering these. */
   factory: {
-    building1Idle: {
+    // "fac 1" in the Capability Network line — the PNG keeps its provenance
+    // name, the key is what the site reads.
+    fac1: {
       src: "/sprites/factory/building_1_idle.png",
       frames: 4,
       frameW: 92,
@@ -486,8 +488,6 @@ export const SPRITE_CONTROL = {
       scale: 1,
       frameMs: 150,
     },
-    building2: { src: "/sprites/factory/building_2.png", w: 166, h: 155 },
-    building3: { src: "/sprites/factory/building_3.png", w: 76, h: 125 },
     tank: { src: "/sprites/factory/tank.png", w: 70, h: 76 },
     // Both furnaces are driven as one cycle by
     // components/ui/furnace-cycle.tsx (opening → on → working/idle → off →
@@ -602,15 +602,15 @@ export const SPRITE_CONTROL = {
    *  the roller end-caps — each already a clean 4-frame horizontal strip
    *  (32px tiles) of the roller spinning through 4 rotation shapes, so they
    *  use PixelSprite's existing "loop" mode directly, no phased cycle
-   *  needed. components/ui/transporter-belt.tsx places them directly
-   *  against each other with no middle segment — a real conveyor's top and
+   *  needed. components/ui/transporter-belt.tsx places `left`/`right` on
+   *  either end with `segments` copies of `mid` (the belt surface — its
+   *  source file repeated the same 32x32 tile 4x with zero pixel
+   *  difference, diffed via PIL, so only one tile was kept) filling the run
+   *  between them, static rather than scrolling — a real conveyor's top and
    *  bottom surfaces move opposite directions, which a flat scrolling
    *  middle tile can't represent, so every attempt at animating one (linear
-   *  scroll, stepped scroll) read as wrong. `mid` (the belt surface — its
-   *  source file repeated the same 32x32 tile 4x with zero pixel
-   *  difference, diffed via PIL, so only one tile was kept) stays
-   *  registered but unused, cheap to reuse later if a real top/bottom-aware
-   *  treatment gets built. */
+   *  scroll, stepped scroll) read as wrong; a static run between two
+   *  spinning rollers reads correctly at any length instead. */
   transporter: {
     left: {
       src: "/sprites/transporter/left.png",
@@ -757,6 +757,107 @@ export const SPRITE_CONTROL = {
       scale: 0.5,
       frameMs: 150,
     },
+  },
+
+  /** "Rambo" character pack (user-uploaded, source kept outside the repo):
+   *  idle/run were four loose 64x64 PNGs each, concatenated into single-row
+   *  strips; jump/fall are one-shot single frames (kept as static images,
+   *  not 1-frame "strips"). All source art faces right — there is no
+   *  left-facing art, and none is needed: PixelSprite's `flip` prop mirrors
+   *  this in place for leftward movement. Registered only — nothing on the
+   *  site consumes these yet.
+   */
+  rambo: {
+    idle: {
+      src: "/sprites/rambo/idle.png",
+      frames: 4,
+      frameW: 64,
+      frameH: 64,
+      scale: 2,
+      frameMs: 150,
+    },
+    run: {
+      src: "/sprites/rambo/run.png",
+      frames: 4,
+      frameW: 64,
+      frameH: 64,
+      scale: 2,
+      frameMs: 110,
+    },
+    jump: { src: "/sprites/rambo/jump.png", w: 64, h: 64, scale: 2 },
+    fall: { src: "/sprites/rambo/fall.png", w: 64, h: 64, scale: 2 },
+  },
+
+  /** Modular isometric conveyor kit (user-uploaded, source kept outside the
+   *  repo), the intended successor to the two-roller `transporter` block
+   *  above. Every piece arrived already in PixelSprite's format — a
+   *  single-row 4-frame strip — so these are straight copies, no reslicing.
+   *  Four directions (ne/nw/se/sw) x four roles: `start`/`end` are the
+   *  run's cap pieces, `mid` tiles the middle, `single` is a one-tile run.
+   *  A belt of any length is start + N x mid + end, all sharing frameMs so
+   *  they animate in lockstep. `curve1..4` are the corner pieces and
+   *  `splitterMerger` the junction — both on a much larger 172x171 cell
+   *  than the straight pieces' 64x64. Registered/catalogued only: the art
+   *  is isometric while the Capability Network scene it would join is flat
+   *  side-view, so the swap is deliberately deferred until that style
+   *  question is settled. */
+  belt: {
+    neStart: { src: "/sprites/belt/ne_start.png", frames: 4, frameW: 64, frameH: 64, scale: 1, frameMs: 150 },
+    neMid: { src: "/sprites/belt/ne_mid.png", frames: 4, frameW: 64, frameH: 64, scale: 1, frameMs: 150 },
+    neEnd: { src: "/sprites/belt/ne_end.png", frames: 4, frameW: 64, frameH: 64, scale: 1, frameMs: 150 },
+    neSingle: { src: "/sprites/belt/ne_single.png", frames: 4, frameW: 64, frameH: 64, scale: 1, frameMs: 150 },
+    nwStart: { src: "/sprites/belt/nw_start.png", frames: 4, frameW: 64, frameH: 64, scale: 1, frameMs: 150 },
+    nwMid: { src: "/sprites/belt/nw_mid.png", frames: 4, frameW: 64, frameH: 64, scale: 1, frameMs: 150 },
+    nwEnd: { src: "/sprites/belt/nw_end.png", frames: 4, frameW: 64, frameH: 64, scale: 1, frameMs: 150 },
+    nwSingle: { src: "/sprites/belt/nw_single.png", frames: 4, frameW: 64, frameH: 64, scale: 1, frameMs: 150 },
+    seStart: { src: "/sprites/belt/se_start.png", frames: 4, frameW: 64, frameH: 64, scale: 1, frameMs: 150 },
+    seMid: { src: "/sprites/belt/se_mid.png", frames: 4, frameW: 64, frameH: 64, scale: 1, frameMs: 150 },
+    seEnd: { src: "/sprites/belt/se_end.png", frames: 4, frameW: 64, frameH: 64, scale: 1, frameMs: 150 },
+    seSingle: { src: "/sprites/belt/se_single.png", frames: 4, frameW: 64, frameH: 64, scale: 1, frameMs: 150 },
+    swStart: { src: "/sprites/belt/sw_start.png", frames: 4, frameW: 64, frameH: 64, scale: 1, frameMs: 150 },
+    swMid: { src: "/sprites/belt/sw_mid.png", frames: 4, frameW: 64, frameH: 64, scale: 1, frameMs: 150 },
+    swEnd: { src: "/sprites/belt/sw_end.png", frames: 4, frameW: 64, frameH: 64, scale: 1, frameMs: 150 },
+    swSingle: { src: "/sprites/belt/sw_single.png", frames: 4, frameW: 64, frameH: 64, scale: 1, frameMs: 150 },
+    curve1: { src: "/sprites/belt/curve_1.png", frames: 4, frameW: 172, frameH: 171, scale: 1, frameMs: 150 },
+    curve2: { src: "/sprites/belt/curve_2.png", frames: 4, frameW: 172, frameH: 171, scale: 1, frameMs: 150 },
+    curve3: { src: "/sprites/belt/curve_3.png", frames: 4, frameW: 172, frameH: 171, scale: 1, frameMs: 150 },
+    curve4: { src: "/sprites/belt/curve_4.png", frames: 4, frameW: 172, frameH: 171, scale: 1, frameMs: 150 },
+    splitterMerger: { src: "/sprites/belt/splitter_merger.png", w: 172, h: 171 },
+  },
+
+  /** Turbine (user-uploaded, source kept outside the repo): seven separate
+   *  animations on a shared 149x108 cell, plus a one-frame `base`. The
+   *  source names them only by index and the frames don't make their states
+   *  unambiguous, so they keep index names here rather than inventing
+   *  meanings for them. Frame counts differ per animation (8/8/6/2/4/7/4) —
+   *  each was already a single-row strip, copied as-is. Registered only. */
+  turbine: {
+    anim1: { src: "/sprites/turbine/anim_1.png", frames: 8, frameW: 149, frameH: 108, scale: 1, frameMs: 120 },
+    anim2: { src: "/sprites/turbine/anim_2.png", frames: 8, frameW: 149, frameH: 108, scale: 1, frameMs: 120 },
+    anim3: { src: "/sprites/turbine/anim_3.png", frames: 6, frameW: 149, frameH: 108, scale: 1, frameMs: 120 },
+    anim4: { src: "/sprites/turbine/anim_4.png", frames: 2, frameW: 149, frameH: 108, scale: 1, frameMs: 120 },
+    anim5: { src: "/sprites/turbine/anim_5.png", frames: 4, frameW: 149, frameH: 108, scale: 1, frameMs: 120 },
+    anim6: { src: "/sprites/turbine/anim_6.png", frames: 7, frameW: 149, frameH: 108, scale: 1, frameMs: 120 },
+    anim7: { src: "/sprites/turbine/anim_7.png", frames: 4, frameW: 149, frameH: 108, scale: 1, frameMs: 120 },
+    base: { src: "/sprites/turbine/base.png", w: 149, h: 108 },
+  },
+
+  /** Steam generator (user-uploaded, source kept outside the repo): two
+   *  7-frame states on a 151x133 cell — `running` and `turnOff`. Both were
+   *  already single-row strips, copied as-is. A running -> turnOff cycle
+   *  would be a natural fit for SpriteCycle (see furnace-cycle.tsx) if this
+   *  ever goes into a scene. Registered only. */
+  steamGenerator: {
+    running: { src: "/sprites/steam-generator/running.png", frames: 7, frameW: 151, frameH: 133, scale: 1, frameMs: 130 },
+    turnOff: { src: "/sprites/steam-generator/turn_off.png", frames: 7, frameW: 151, frameH: 133, scale: 1, frameMs: 130 },
+  },
+
+  /** Assembler (user-uploaded, source kept outside the repo): one 10-frame
+   *  128x128 working loop, already a single-row strip. Registered only. */
+  assembler: {
+    // "fac 2" in the Capability Network line — as with fac1, the PNG keeps
+    // its provenance name and the key carries the scene's naming.
+    fac2: { src: "/sprites/assembler/working.png", frames: 10, frameW: 128, frameH: 128, scale: 1, frameMs: 120 },
   },
 
 } as const;

@@ -12,7 +12,7 @@ import type { Project } from "@/types";
 export type ProjectDraft = Partial<Project> & Pick<Project, "id" | "name">;
 
 const KNOWN_CATEGORIES: Project["category"][] = ["web3", "platform", "enterprise", "data"];
-const KNOWN_STATUSES: Project["status"][] = ["shipped", "finalist", "internal", "live"];
+const KNOWN_STATUSES: Project["status"][] = ["shipped", "finalist", "internal", "live", "in-progress"];
 
 const slugify = (s: string) =>
   s
@@ -132,7 +132,7 @@ interface Project {
   name: string;
   tagline: string;
   category: "web3" | "platform" | "enterprise" | "data";
-  status: "shipped" | "finalist" | "internal" | "live";
+  status: "shipped" | "finalist" | "internal" | "live" | "in-progress";
   year: string;
   overview: string;      // 1–3 sentences
   highlights: string[];  // 3–4 bullets

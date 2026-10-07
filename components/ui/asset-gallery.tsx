@@ -7,6 +7,8 @@ import { DungeonFrame } from "@/components/ui/dungeon-frame";
 import { Icon } from "@/components/ui/icon";
 import { ReactorCycle } from "@/components/ui/reactor-cycle";
 import { BasicFurnaceCycle, AdvancedFurnaceCycle } from "@/components/ui/furnace-cycle";
+import { RamboCycle } from "@/components/ui/rambo-cycle";
+import { Turbine1Cycle, Turbine2Cycle } from "@/components/ui/turbine-cycle";
 import { TankColorPicker } from "@/components/ui/tank-color-picker";
 import { TransporterBelt } from "@/components/ui/transporter-belt";
 import { LightningBolt } from "@/components/ui/lightning-bolt";
@@ -96,6 +98,8 @@ function fromSprite(
 /** Build a directional fighter group (feed/s2|s3|s4): walk + bow + spear in all
  *  four directions + death, all 64px @ 0.75 scale. Frame counts are [down, up,
  *  left, right] per action (see the strips built by feed/build_strips.sh). */
+const { belt: BELT } = SPRITE_CONTROL;
+
 const DIRS = ["down", "up", "left", "right"] as const;
 const ARROW = { down: "↓", up: "↑", left: "←", right: "→" } as const;
 const ACTION_MS = { walk: 140, bow: 110, spear: 120 } as const;
@@ -270,9 +274,7 @@ const GROUPS: Group[] = [
     label: "Factory",
     large: true,
     assets: [
-      fromSprite("building 1 (idle)", SPRITE_CONTROL.factory.building1Idle),
-      { kind: "image", name: "building 2", src: SPRITE_CONTROL.factory.building2.src, w: SPRITE_CONTROL.factory.building2.w },
-      { kind: "image", name: "building 3", src: SPRITE_CONTROL.factory.building3.src, w: SPRITE_CONTROL.factory.building3.w },
+      fromSprite("fac 1", SPRITE_CONTROL.factory.fac1),
       // tank.png bakes in a 10-colour legend + a "current colour" gauge dot
       // — TankColorPicker makes clicking a swatch actually set the gauge.
       { kind: "node", name: "liquid tank", node: <TankColorPicker /> },
@@ -407,6 +409,95 @@ const GROUPS: Group[] = [
       { kind: "image", name: "close", src: "/sprites/book/close_book.png", w: 96 },
       { kind: "image", name: "turn left", src: "/sprites/book/turning_pages_left.png", w: 96 },
       { kind: "image", name: "turn right", src: "/sprites/book/turning_pages_right.png", w: 96 },
+    ],
+  },
+  {
+    // "Rambo" character pack (see SPRITE_CONTROL.rambo) — one combined cycle
+    // instead of five separate thumbnails: idle → run → run (mirrored, i.e.
+    // "moving left") → jump → fall → repeat. RamboCycle is the single place
+    // that sequences them; each phase still comes straight from
+    // SPRITE_CONTROL.rambo, so a live scene can trigger idle/run/jump/fall
+    // independently later without touching this preview.
+    label: "Rambo",
+    large: true,
+    assets: [{ kind: "node", name: "idle → run → left → jump → fall", node: <RamboCycle /> }],
+  },
+  {
+    // Modular isometric conveyor kit (see SPRITE_CONTROL.belt) — four
+    // directions x start/mid/end/single, plus the larger corner and
+    // junction pieces. Catalogued only; the live scene still uses the
+    // older two-roller Transporter above.
+    label: "Belt",
+    large: true,
+    assets: [
+      fromSprite("ne start", BELT.neStart),
+      fromSprite("ne mid", BELT.neMid),
+      fromSprite("ne end", BELT.neEnd),
+      fromSprite("ne single", BELT.neSingle),
+      fromSprite("nw start", BELT.nwStart),
+      fromSprite("nw mid", BELT.nwMid),
+      fromSprite("nw end", BELT.nwEnd),
+      fromSprite("nw single", BELT.nwSingle),
+      fromSprite("se start", BELT.seStart),
+      fromSprite("se mid", BELT.seMid),
+      fromSprite("se end", BELT.seEnd),
+      fromSprite("se single", BELT.seSingle),
+      fromSprite("sw start", BELT.swStart),
+      fromSprite("sw mid", BELT.swMid),
+      fromSprite("sw end", BELT.swEnd),
+      fromSprite("sw single", BELT.swSingle),
+      fromSprite("curve 1", BELT.curve1, { scale: 0.55 }),
+      fromSprite("curve 2", BELT.curve2, { scale: 0.55 }),
+      fromSprite("curve 3", BELT.curve3, { scale: 0.55 }),
+      fromSprite("curve 4", BELT.curve4, { scale: 0.55 }),
+      { kind: "image", name: "splitter / merger", src: BELT.splitterMerger.src, w: 96 },
+    ],
+  },
+  {
+    // Turbine (see SPRITE_CONTROL.turbine) — the pack's eight loose pieces
+    // shown as the two machines they compose into rather than eight
+    // unlabelled index rows: turbine 1 runs base -> anim 1-4, turbine 2
+    // runs anim 5-7, 2s a phase (components/ui/turbine-cycle.tsx).
+    label: "Turbine",
+    large: true,
+    assets: [
+      { kind: "node", name: "turbine 1", node: <Turbine1Cycle /> },
+      { kind: "node", name: "turbine 2", node: <Turbine2Cycle /> },
+    ],
+  },
+  {
+    // Steam generator (see SPRITE_CONTROL.steamGenerator) — running and
+    // shutting-down states.
+    label: "Steam Generator",
+    large: true,
+    assets: [
+      fromSprite("running", SPRITE_CONTROL.steamGenerator.running, { scale: 0.7 }),
+      fromSprite("turn off", SPRITE_CONTROL.steamGenerator.turnOff, { scale: 0.7 }),
+    ],
+  },
+  {
+    // Assembler (see SPRITE_CONTROL.assembler) — one 10-frame working loop.
+    label: "Assembler",
+    large: true,
+    assets: [fromSprite("fac 2", SPRITE_CONTROL.assembler.fac2, { scale: 0.8 })],
+  },
+  {
+    // "Starry Night" parallax pack (Falling_Star + Layers_*, source kept
+    // outside the repo). Eight static layers, farthest to nearest, plus an
+    // animated falling-star overlay (a real GIF — animates natively, no
+    // PixelSprite needed). Shown at the smallest (640-wide) resolution set;
+    // 1920/2560 variants also live under /sprites/starry-night for
+    // whichever component ends up rendering this at full size. Catalogue-only
+    // — not wired into any live scene yet.
+    label: "Starry Night",
+    assets: [
+      ...[1, 2, 3, 4, 5, 6, 7, 8].map((i) => ({
+        kind: "image" as const,
+        name: `layer ${i}`,
+        src: `/sprites/starry-night/layer-${i}-640.png`,
+        w: 96,
+      })),
+      { kind: "image", name: "falling star", src: "/sprites/starry-night/falling-star-640.gif", w: 62 },
     ],
   },
 ];

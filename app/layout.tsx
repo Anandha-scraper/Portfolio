@@ -24,6 +24,7 @@ import "@/components/navigation/scroll-progress.css";
 import "@/components/mission-control/mission-control.css";
 import "@/components/mission-control/name-patrol-sprite.css";
 import "@/components/capability-network/capability-network.css";
+import "@/components/capability-network/scene-stage.css";
 import "@/components/contact/contact-studio.css";
 import "@/components/contact/terminal.css";
 import "@/components/blueprint/background-environment.css";
@@ -40,6 +41,7 @@ import "./loading.css";
 import "./not-found.css";
 import "./page.css";
 import "./master/master-console.css";
+import "./master/scene/scene-editor.css";
 const pixelify = Pixelify_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
@@ -55,14 +57,16 @@ export const metadata: Metadata = {
     template: "%s · Anandha Kumaran M S",
   },
   description:
-    "The Living Blueprint — an interactive portfolio by Anandha Kumaran M S. Full Stack Developer building scalable web apps, CRM systems, and Web3 experiences from Salem, Tamil Nadu.",
+    "The Living Blueprint — an interactive portfolio by Anandha Kumaran M S. Full Stack Developer building dependable web products, data systems, and AI-assisted tools from Salem, Tamil Nadu.",
   keywords: [
     "Anandha Kumaran",
     "Full Stack Developer",
     "MERN",
     "Next.js",
     "React",
-    "Web3",
+    "FastAPI",
+    "PostgreSQL",
+    "Agentic AI",
     "Portfolio",
     "Salem",
   ],
@@ -74,14 +78,14 @@ export const metadata: Metadata = {
     url: SITE_URL,
     title: "Anandha Kumaran M S — Full Stack Developer",
     description:
-      "The Living Blueprint — an interactive developer portfolio. Scalable web apps, CRM systems, and Web3 experiences.",
+      "The Living Blueprint — an interactive developer portfolio. Full-stack products, data systems, and AI-assisted engineering.",
     siteName: "Anandha Kumaran M S",
   },
   twitter: {
     card: "summary_large_image",
     title: "Anandha Kumaran M S — Full Stack Developer",
     description:
-      "The Living Blueprint — an interactive developer portfolio.",
+      "The Living Blueprint — an interactive portfolio of full-stack products, data systems, and AI-assisted engineering.",
   },
   robots: { index: true, follow: true },
 };
