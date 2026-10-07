@@ -3,6 +3,7 @@ import { Pixelify_Sans } from "next/font/google";
 import Script from "next/script";
 import { BackgroundEnvironment } from "@/components/blueprint/background-environment";
 import { SkeletonCompanion } from "@/components/companion/skeleton-companion";
+import { AssetGallery } from "@/components/ui/asset-gallery";
 import { BootLoader } from "@/components/ui/boot-loader";
 import { GA_MEASUREMENT_ID, SITE_URL } from "@/lib/constants";
 import "./globals.css";
@@ -29,6 +30,7 @@ import "@/components/blueprint/background-environment.css";
 import "@/components/blueprint/section-heading.css";
 import "@/components/blueprint/section-shell.css";
 import "@/components/companion/skeleton-companion.css";
+import "@/components/ui/asset-gallery.css";
 import "@/components/ui/boot-loader.css";
 import "@/components/ui/dungeon-frame.css";
 import "@/components/ui/image-lightbox.css";
@@ -112,6 +114,9 @@ export default function RootLayout({
         {/* Cursor companion. mode: "chase" | "rest" | "wander";
             idleDelayMs: 1000 | 2000 | 3000; set debug to tune live. */}
         <SkeletonCompanion mode="chase" idleDelayMs={3000} debug={false} />
+        {/* Top-right asset catalogue. It is an optional reference panel and
+            does not alter the portfolio's project or capability content. */}
+        <AssetGallery />
         <div className="root-content">{children}</div>
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}

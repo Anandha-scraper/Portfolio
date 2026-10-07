@@ -413,6 +413,10 @@ export const SPRITE_CONTROL = {
     // widens as this grows; past ~1.2 the sprite starts visibly overlapping
     // walls it can walk through.
     scale: 1.05,
+    // The actor sprite's visible feet sit a little below its 64px frame
+    // centre. Lift its rendered box by this amount so feet meet the floor
+    // edge without changing the collision grid.
+    groundOffsetY: 12,
     walkSpeed: 170,
     runSpeed: 290, // hold Shift
     interactRadius: 110,

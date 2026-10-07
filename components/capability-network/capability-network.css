@@ -1,4 +1,5 @@
-/* Public placeholder for the next authored capability scene. */
+/* capability-network.tsx — the intentionally empty framed stage. Imported
+   once from app/layout.tsx. */
 .capability-network__section {
   position: relative;
   width: 100%;
@@ -11,4 +12,23 @@
   height: max(260px, 42vh);
   overflow: hidden;
   padding: clamp(1rem, 3vw, 1.75rem) clamp(0.75rem, 3vw, 1.5rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1), width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (min-width: 40rem) {
+  .capability-network__stage {
+    height: max(520px, calc(100vh - 120px));
+  }
+}
+
+@media (min-width: 64rem) {
+  .capability-network__stage--sidebar-open {
+    /* The drawer overlays 290px on desktop. Move the stage into the remaining
+       space so its frame never sits below the open navigation. */
+    margin-left: 290px;
+    width: calc(100% - 290px);
+  }
 }

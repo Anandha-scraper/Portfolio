@@ -11,7 +11,7 @@ import { DungeonSlideshowControls } from "@/components/project-ecosystem/dungeon
 import { ProjectDungeonPanel } from "@/components/project-ecosystem/project-dungeon-panel";
 import { SPRITE_CONTROL } from "@/lib/sprite-control";
 import { MAP_W, MAP_H } from "@/lib/dungeon-layout";
-import { moveWithCollision, heroSpawn, HERO_HALF_H } from "@/lib/dungeon-walk";
+import { moveWithCollision, heroSpawn } from "@/lib/dungeon-walk";
 import { nearestTreasure } from "@/lib/dungeon-treasure-points";
 import { SECTOR_PROJECT_MAP, SECTOR_ORDER } from "@/lib/dungeon-sectors";
 import { projects } from "@/data/projects";
@@ -110,8 +110,10 @@ export function DungeonMap() {
       const hero = heroRef.current;
       if (!hero) return;
       const p = heroPos.current;
-      // feet anchor: sprite bottom sits a hair under the hitbox bottom
-      hero.style.transform = `translate3d(${p.x - HERO_PX / 2}px, ${p.y + HERO_HALF_H - HERO_PX + 2}px, 0)`;
+      // The collision point is the centre of the floor hitbox. Centre the
+      // sprite on it, then apply the shared visual ground offset so the
+      // source artwork's feet meet the floor edge without changing collision.
+      hero.style.transform = `translate3d(${p.x - HERO_PX / 2}px, ${p.y - HERO_PX / 2 - HERO_CTRL.groundOffsetY}px, 0)`;
     };
     const camTarget = () => ({
       x: clamp(heroPos.current.x * zoom - view.clientWidth / 2, 0, Math.max(0, mapW() - view.clientWidth)),
