@@ -40,10 +40,10 @@ const MagicBook = dynamic(() => import("@/components/book/magic-book"), { ssr: f
  */
 
 // ── Canvas resolution clamp — the book's drawn pixel size, not its layout ──
-// The floor sits at 280px so the canvas never exceeds the panel's content
-// box on a 320px viewport (panel padding + section padding eat ~40px), which
-// would otherwise clip the page-turn art at the edges.
-const BOOK_MIN_PX = 280;
+// A book can safely become smaller than the old 280px floor on narrow panels.
+// Its actual cap is calculated from both its own column and the screenshot
+// column below, so no project can force the canvas outside the available room.
+const BOOK_MIN_PX = 180;
 const BOOK_MAX_PX = 1100;
 /** Fraction of the book canvas that is transparent headroom above the drawn
  *  art (the cover swings into it while opening). master.css cancels it with a
@@ -159,6 +159,7 @@ export function Master({
   onFinished?: () => void;
 }) {
   const bookContainerRef = useRef<HTMLDivElement>(null);
+  const bookColumnRef = useRef<HTMLDivElement>(null);
   const previewColRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
@@ -175,14 +176,23 @@ export function Master({
   const pageCount = Math.max(pages.length, 1);
 
   useEffect(() => {
-    const el = previewColRef.current;
-    if (!el) return;
-    const observer = new ResizeObserver((entries) => {
-      const rect = entries[0]?.contentRect;
-      const limiting = rect ? Math.min(rect.width, rect.height / BOOK_ASPECT) : BOOK_MIN_PX;
+    const preview = previewColRef.current;
+    const bookColumn = bookColumnRef.current;
+    if (!preview || !bookColumn) return;
+
+    const resize = () => {
+      const previewRect = preview.getBoundingClientRect();
+      const bookColumnRect = bookColumn.getBoundingClientRect();
+      const previewLimit = Math.min(previewRect.width, previewRect.height / BOOK_ASPECT);
+      const limiting = Math.min(previewLimit, bookColumnRect.width);
+
       setBookSize(Math.min(BOOK_MAX_PX, Math.max(BOOK_MIN_PX, Math.round(limiting))));
-    });
-    observer.observe(el);
+    };
+
+    const observer = new ResizeObserver(resize);
+    observer.observe(preview);
+    observer.observe(bookColumn);
+    resize();
     return () => observer.disconnect();
   }, []);
 
@@ -327,6 +337,7 @@ export function Master({
       </div>
 
       <div
+        ref={bookColumnRef}
         className="master__book-col"
         style={{ "--book-headroom": `${Math.round(bookHeight * BOOK_HEADROOM)}px` } as CSSProperties}
       >
@@ -358,6 +369,16 @@ export function Master({
           </div>
         </div>
 
+        {pageCount > 1 && (
+          <img
+            className="master__swipe-hint"
+            src="/projects/PixelSwipe.png"
+            alt="Swipe left or right to turn book pages"
+            width={2172}
+            height={724}
+          />
+        )}
+
         <PageNav variant="chevrons" {...pager} />
       </div>
 
@@ -376,7 +397,7 @@ export function Master({
  * them at the 64rem container step, where there is finally room for the big
  * sprite hands in the book's own headroom:
  *
- *   "hands"    — sprite-art hands overlaying the top of the book (>= 64rem)
+ *   "hands"    — sprite-art hands below the book (>= 64rem)
  *   "chevrons" — a small icon row beneath the book (38rem - 64rem)
  *
  * Below 38rem neither shows and paging is swipe-only (see handleTouchEnd).
@@ -428,4 +449,3 @@ function PageNav({
     </div>
   );
 }
-

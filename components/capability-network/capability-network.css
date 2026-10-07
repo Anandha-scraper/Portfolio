@@ -1,8 +1,5 @@
-/* capability-network.tsx — the framed stage only. Everything *inside* the
-   frame is positioned from data/scene-capabilities.ts and scaled by
-   scene-stage.css, so there are deliberately no per-sprite rules, overlap
-   margins or breakpoint scale steps left in this file. Imported once from
-   app/layout.tsx (see components/book/magic-book.css for why). */
+/* capability-network.tsx — the intentionally empty framed stage. Imported
+   once from app/layout.tsx. */
 
 .capability-network__section {
   position: relative;
@@ -33,6 +30,8 @@
 
 @media (min-width: 64rem) {
   .capability-network__stage--sidebar-open {
+    /* The drawer overlays 290px on desktop. Move the stage into the remaining
+       space so its frame never sits below the open navigation. */
     margin-left: 290px;
     width: calc(100% - 290px);
   }

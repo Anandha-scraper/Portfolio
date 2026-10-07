@@ -66,36 +66,28 @@
   margin-top: calc(-1 * var(--book-headroom, 0px));
 }
 
-/* Shrink-wraps the book canvas so every percentage below resolves against the
-   book's own box. Without it the cluster would anchor to .master__book-col,
-   which .master__book-wrap's negative margin has already shifted the book out
-   of — that mismatch is what used to drop the hands onto the page text. */
+/* Shrink-wraps the book canvas and its navigation so each control row follows
+   the exact rendered book width, not the wider column. */
 .master__book-stage {
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   width: max-content;
   max-width: 100%;
 }
 
-/* The page-turn hands sit in the book's own headroom: the drawn art starts
-   13.28% down its canvas (measured off the settled open frame — see BOOK_CROP
-   in magic-book.tsx) and the page text starts at 17.3%
-   (.magic-book__text-box). Ending the band at 14.5% seats the hands on the
-   book's top edge with a hair of overlap, clear of the text either way.
-   Re-derive these two numbers if the crop rect ever changes. */
+/* Large-screen hand controls sit below the rendered book. Keeping this row in
+   the shrink-wrapped stage means both buttons always align with the book's
+   left/right edges regardless of project copy, screenshot ratio, or panel
+   width. */
 .master__page-topbar {
   display: none;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 14.5%;
-  padding: 0 2%;
-  /* Only the buttons should catch the pointer — the span between them sits
-     over the book and would otherwise swallow the swipe handler on the wrap. */
-  pointer-events: none;
-  z-index: 2;
+  min-height: 3.5rem;
+  width: 100%;
+  margin-top: 0.875rem;
+  padding: 0 3%;
 }
 
 .master__page-topbar-count {
@@ -114,7 +106,7 @@
    pair reads as a matched set at the book's two top corners. */
 .master__flip-btn {
   flex: 0 0 auto;
-  height: 100%;
+  height: 3.5rem;
   width: auto;
   aspect-ratio: 404 / 335;
   border: none;
@@ -124,7 +116,6 @@
   background-size: 118.812% auto;
   padding: 0;
   cursor: pointer;
-  pointer-events: auto;
   transition-property: transform, opacity;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 0.15s;
@@ -161,6 +152,17 @@
   flex: 0 0 auto;
   width: 100%;
   min-width: 0;
+}
+
+/* The image itself carries the instruction in the portfolio's pixel language.
+   It is only visible in the phone tier where the book intentionally uses swipe
+   navigation instead of separate buttons. */
+.master__swipe-hint {
+  display: block;
+  width: min(15rem, 74vw);
+  height: auto;
+  margin-top: -0.125rem;
+  image-rendering: pixelated;
 }
 
 .master__page-nav {
@@ -238,12 +240,14 @@
   .master__page-nav {
     display: flex;
   }
+
+  .master__swipe-hint {
+    display: none;
+  }
 }
 
-/* Laptop and up: the big page-turn hands + count move into a bar above the
-   book, replacing the below-book chevron nav entirely. Its own tier because
-   there isn't room for the artwork above the book until well past the
-   38rem row-layout switch above. */
+/* Laptop and up: the larger page-turn hands replace the compact chevrons,
+   still below the book so they never cover text or artwork. */
 @container dungeon-panel (min-width: 64rem) {
   .master__page-topbar {
     display: flex;
