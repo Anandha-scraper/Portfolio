@@ -1,102 +1,14 @@
+/* Public placeholder for the next authored capability scene. */
 .capability-network__section {
   position: relative;
   width: 100%;
   overflow: hidden;
   scroll-margin-top: 6rem;
 }
-
 .capability-network__stage {
   width: 100%;
-  height: max(420px, calc(100vh - 120px));
+  min-height: 260px;
+  height: max(260px, 42vh);
   overflow: hidden;
   padding: clamp(1rem, 3vw, 1.75rem) clamp(0.75rem, 3vw, 1.5rem);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1), width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@media (min-width: 40rem) {
-  .capability-network__stage {
-    height: max(520px, calc(100vh - 120px));
-  }
-}
-@media (min-width: 64rem) {
-  .capability-network__stage--sidebar-open {
-    margin-left: 290px;
-    width: calc(100% - 290px);
-  }
-}
-.capability-network__scene {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.capability-network__forge {
-  display: flex;
-  align-items: flex-end;
-  flex-shrink: 0;
-  margin-right: auto;
-}
-
-.capability-network__smith-slot {
-  display: flex;
-}
-
-.capability-network__anvil-slot {
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  margin-left: -4.8rem;
-  margin-bottom: 1.3rem;
-}
-
-.capability-network__anvil {
-  transform: scaleX(-1);
-}
-
-.capability-network__sparks {
-  position: absolute;
-  top: -0.5rem;
-  left: 20%;
-  transform: translateX(-50%);
-  pointer-events: none;
-}
-.capability-network__belt {
-  flex: 0 0 5rem;
-  width: 3rem;
-  height: 5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  align-self: center;
-}
-
-.capability-network__belt > div {
-  transform: rotate(90deg) scale(0.55);
-}
-
-.capability-network__buildings {
-  display: flex;
-  flex-wrap: wrap;
-  flex-shrink: 0;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 0.5rem clamp(0.75rem, 4vw, 2rem);
-}
-
-@media (max-width: 48rem) {
-  .capability-network__belt {
-    flex-basis: 3.75rem;
-    width: 2.25rem;
-    height: 3.75rem;
-  }
-  .capability-network__belt > div {
-    transform: rotate(90deg) scale(0.4);
-  }
 }

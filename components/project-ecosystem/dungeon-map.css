@@ -20,7 +20,6 @@
   letter-spacing: 0.05em;
   color: var(--color-ops-sand-soft);
 }
-
 .dungeon-map__hud-highlight {
   color: var(--color-ops-sand-soft);
 }
@@ -35,11 +34,26 @@
   width: 100%;
   overflow: hidden;
   outline-style: none;
+  /* Starry Night pack, layer 8 (farthest: sky + stars + nebula/planet) — see
+     public/sprites/starry-night/. Shows through the canvas's transparent
+     cells (everything outside the dungeon's room/corridor footprint), so
+     the map reads as carved out of a night sky instead of empty black. */
+  background-image: url("/sprites/starry-night/layer-8-640.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 @media (min-width: 40rem) {
   .dungeon-map__viewport {
     height: clamp(520px, 82vh, 1000px);
+    background-image: url("/sprites/starry-night/layer-8-1920.png");
+  }
+}
+
+@media (min-width: 90rem) {
+  .dungeon-map__viewport {
+    background-image: url("/sprites/starry-night/layer-8-2560.png");
   }
 }
 

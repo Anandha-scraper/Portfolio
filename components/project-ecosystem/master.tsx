@@ -111,7 +111,7 @@ function buildLines(project: Project): { left: MagicBookLine[]; right: MagicBook
   const leftLines: MagicBookLine[] = [
     line(project.name, "title"),
     line(project.tagline, "meta"),
-    line(`${project.status} · ${project.year} · ${project.category}`, "meta"),
+    line(`${project.status.replace("-", " ")} · ${project.year} · ${project.category}`, "meta"),
     line(""),
     line("Overview", "label"),
     ...splitOverview(project.overview).map((s) => line(s, "body")),
