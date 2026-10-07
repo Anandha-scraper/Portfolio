@@ -39,6 +39,12 @@ import "@/components/ui/particles.css";
 import "./loading.css";
 import "./not-found.css";
 import "./page.css";
+
+/* Firebase Hosting path redirects cannot branch by hostname. These are the
+   legacy Firebase domains that should hand visitors to the canonical domain
+   while preserving the route, query string, and fragment. */
+const LEGACY_HOSTS = ["anandhadev.web.app", "anandhadev.firebaseapp.com", "anandha.firebaseapp.com"];
+
 const pixelify = Pixelify_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
@@ -99,6 +105,15 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning className={pixelify.variable}>
+      <Script id="legacy-domain-redirect" strategy="beforeInteractive">
+        {`
+          (() => {
+            const legacyHosts = new Set(${JSON.stringify(LEGACY_HOSTS)});
+            if (!legacyHosts.has(window.location.hostname.toLowerCase())) return;
+            window.location.replace(${JSON.stringify(SITE_URL)} + window.location.pathname + window.location.search + window.location.hash);
+          })();
+        `}
+      </Script>
       {/* `root-body--booting` ships in the static HTML so the blur is live at
           first paint, before any JS. BootLoader takes it off once the page has
           loaded — see components/ui/boot-loader.tsx. */}
