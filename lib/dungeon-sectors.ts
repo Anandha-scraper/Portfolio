@@ -4,8 +4,8 @@
 
 /** A named region of the Projects dungeon, hand-traced with the dev polygon
  *  tool (so the outline hugs real floor only — no bounding-box overreach
- *  into void/wall gaps). `ids` records which originally-numbered project
- *  rooms this region covers, for reference when adding further groups. */
+ *  into void/wall gaps). `ids` records which project rooms this region
+ *  covers, for reference when adding further groups. */
 export interface SectorGroup {
   label: string;
   ids: number[];
@@ -13,7 +13,7 @@ export interface SectorGroup {
 }
 
 // Traced with the dev polygon tool that used to live in dungeon-map.tsx
-// (removed once all eight sectors were final — see git history to revive it).
+// The outlines are kept as authored scene geometry for the four active rooms.
 export const PROJECT_SECTOR_GROUPS: SectorGroup[] = [
   {
     label: "A",
@@ -99,10 +99,7 @@ export const PROJECT_SECTOR_GROUPS: SectorGroup[] = [
   },
 ];
 
-/** Which project (data/projects.ts id) each sector's treasure opens.
- *  Sectors E–H used to point at placeholder "coming soon" projects; those
- *  entries (and their polygons above) were removed so the dungeon only
- *  surfaces finished, real projects. */
+/** Which project (data/projects.ts id) each sector's treasure opens. */
 export const SECTOR_PROJECT_MAP: Record<string, string> = {
   A: "spot",
   B: "magizh",
@@ -110,5 +107,5 @@ export const SECTOR_PROJECT_MAP: Record<string, string> = {
   D: "syntax",
 };
 
-/** Canonical A→H sector order — the slideshow steps through this list. */
+/** Canonical sector order — the slideshow steps through this list. */
 export const SECTOR_ORDER = Object.keys(SECTOR_PROJECT_MAP);
